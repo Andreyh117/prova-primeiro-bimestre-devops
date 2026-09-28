@@ -86,6 +86,11 @@ async function rowCount() {
 
 async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, { ...options, signal: AbortSignal.timeout(5000) });
+  if (response.status === 204) {
+    assert.equal(await response.text(), '', 'DELETE 204 deve ter corpo vazio.');
+    assert.equal(response.headers.get('content-type'), null);
+    return { status: response.status, body: null, headers: response.headers };
+  }
   const body = await response.json();
   assert.match(response.headers.get('content-type'), /^application\/json\b/);
   if (options.method === 'POST' && Number.isInteger(body.id)) createdIds.add(body.id);
@@ -276,4 +281,171 @@ test('texto contendo SQL é preservado como dado por POST e GET, sem executar co
   assert.equal(result.body.cliente, cliente);
   assert.deepEqual((await request(`/reservas/${result.body.id}`)).body, result.body);
   assert.equal(await rowCount(), 1);
+});
+
+
+function put(id, body, headers = { 'content-type': 'application/json' }) {
+  return request(`/reservas/${id}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+}
+
+test('PUT completo preserva ID, altera os três campos e mantém a outra reserva intacta', async (context) => {
+  const original = await post(valid);
+  const other = await post({ ...valid, cliente: 'Outra reserva T08' });
+  assert.equal(original.status, 201);
+  assert.equal(other.status, 201);
+  const body = { cliente: "  D'Ávila atualizado T08  ", data: '29-02-2024', status: 'confirmada' };
+  const expected = { id: original.body.id, ...body, cliente: "D'Ávila atualizado T08" };
+  const updated = await put(original.body.id, body);
+  assert.equal(updated.status, 200);
+  assert.deepEqual(updated.body, expected);
+  assert.deepEqual((await request(`/reservas/${original.body.id}`)).body, expected);
+  assert.deepEqual((await request(`/reservas/${other.body.id}`)).body, other.body);
+  const { rows } = await pool.query(`
+    SELECT id, cliente, to_char(data, 'YYYY-MM-DD') AS data, pg_typeof(data)::text AS tipo, status
+    FROM public.reservas WHERE id = $1
+  `, [original.body.id]);
+  assert.deepEqual(rows, [{ id: original.body.id, cliente: expected.cliente, data: '2024-02-29', tipo: 'date', status: 'confirmada' }]);
+  assert.equal(await rowCount(), 2);
+  context.diagnostic(`PUT -> 200, mesmo ID ${original.body.id}; JSON ${JSON.stringify(updated.body)}; SQL DATE 2024-02-29.`);
+});
+
+test('PUT repetido é idempotente e aceita datas extremas, bissextas e todos os status', async () => {
+  const created = await post(valid);
+  assert.equal(created.status, 201);
+  for (const [data, status] of [['01-01-0001', 'pendente'], ['29-02-2000', 'confirmada'], ['31-12-9999', 'cancelada']]) {
+    const body = { cliente: '🧪'.repeat(120), data, status };
+    const expected = { id: created.body.id, ...body };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const updated = await put(created.body.id, body);
+      assert.equal(updated.status, 200);
+      assert.deepEqual(updated.body, expected);
+      assert.deepEqual((await request(`/reservas/${created.body.id}`)).body, expected);
+      assert.equal(await rowCount(), 1);
+    }
+  }
+});
+
+test('PUT rejeita corpo parcial, campos extras e id sem alterar a linha', async () => {
+  const created = await post(valid);
+  assert.equal(created.status, 201);
+  const cases = [null, [], {}, { ...valid, id: created.body.id }, { ...valid, extra: 'x' }];
+  for (const field of ['cliente', 'data', 'status']) {
+    const partial = { ...valid };
+    delete partial[field];
+    cases.push(partial);
+  }
+  for (const body of cases) {
+    const result = await put(created.body.id, body);
+    assert.equal(result.status, 400, JSON.stringify(body));
+    assert.equal(result.body.erro.codigo, 'ENTRADA_INVALIDA');
+    assert.deepEqual((await request(`/reservas/${created.body.id}`)).body, created.body);
+    assert.equal(await rowCount(), 1);
+  }
+});
+
+test('PUT rejeita campos e datas inválidas sem mudar os dados persistidos', async () => {
+  const created = await post(valid);
+  assert.equal(created.status, 201);
+  const cases = [];
+  for (const data of ['29-02-1900', '29-02-2025', '31-04-2026', '01-01-0000', '2026-10-15', '1-2-2026', '15-10-2026\n', null, 20261015]) {
+    cases.push({ ...valid, data });
+  }
+  for (const cliente of ['', ' \t ', null, 42, '🧪'.repeat(121), 'a\0b', '\ud800']) cases.push({ ...valid, cliente });
+  for (const status of ['', 'CONFIRMADA', 'ativa', null, 0, [], {}]) cases.push({ ...valid, status });
+  for (const body of cases) {
+    const result = await put(created.body.id, body);
+    assert.equal(result.status, 400, JSON.stringify(body));
+    assert.equal(result.body.erro.codigo, 'ENTRADA_INVALIDA');
+    assert.deepEqual((await request(`/reservas/${created.body.id}`)).body, created.body);
+    assert.equal(await rowCount(), 1);
+  }
+});
+
+test('PUT de ID ausente retorna 404 sem criar linha; corpo inválido retorna 400', async () => {
+  const result = await put(2147483647, valid);
+  assert.equal(result.status, 404);
+  assert.deepEqual(result.body, { erro: { codigo: 'RESERVA_NAO_ENCONTRADA', mensagem: 'Reserva não encontrada.' } });
+  assert.equal((await put(2147483647, {})).status, 400);
+  assert.equal(await rowCount(), 0);
+});
+
+test('PUT e DELETE rejeitam IDs e URLs inválidos com 400', async () => {
+  for (const method of ['PUT', 'DELETE']) {
+    const options = { method };
+    if (method === 'PUT') {
+      options.headers = { 'content-type': 'application/json' };
+      options.body = JSON.stringify(valid);
+    }
+    for (const id of ['0', '-1', '1.5', '1e2', '+1', ' 1', '1\n', '2147483648', "1';DROP TABLE reservas;--"]) {
+      const result = await request(`/reservas/${encodeURIComponent(id)}`, options);
+      assert.equal(result.status, 400);
+      assert.equal(result.body.erro.codigo, 'ENTRADA_INVALIDA');
+    }
+    for (const path of ['/reservas/%', '/reservas/%ZZ']) {
+      const result = await request(path, options);
+      assert.equal(result.status, 400);
+      assert.equal(result.body.erro.codigo, 'ENTRADA_INVALIDA');
+    }
+  }
+  assert.equal(await rowCount(), 0);
+});
+
+test('PUT aplica os mesmos erros JSON 400, limite 413 e Content-Type 415 do POST', async () => {
+  const created = await post(valid);
+  assert.equal(created.status, 201);
+  const path = `/reservas/${created.body.id}`;
+  for (const body of ['{"cliente":', '']) {
+    const result = await request(path, { method: 'PUT', headers: { 'content-type': 'application/json' }, body });
+    assert.equal(result.status, 400);
+    assert.equal(result.body.erro.codigo, 'ENTRADA_INVALIDA');
+  }
+  for (const headers of [{ 'content-type': 'text/plain' }, {}]) {
+    const result = await put(created.body.id, valid, headers);
+    assert.equal(result.status, 415);
+    assert.equal(result.body.erro.codigo, 'TIPO_NAO_SUPORTADO');
+  }
+  const json = JSON.stringify(valid);
+  const body = json + ' '.repeat(16 * 1024 - Buffer.byteLength(json));
+  const options = { method: 'PUT', headers: { 'content-type': 'application/json' } };
+  assert.equal((await request(path, { ...options, body })).status, 200);
+  const result = await request(path, { ...options, body: body + ' ' });
+  assert.equal(result.status, 413);
+  assert.equal(result.body.erro.codigo, 'CORPO_EXCESSIVO');
+  assert.deepEqual((await request(path)).body, created.body);
+  assert.equal(await rowCount(), 1);
+});
+
+test('DELETE remove somente a reserva pedida, retorna 204 vazio e segundo DELETE retorna 404', async (context) => {
+  const created = await post(valid);
+  const other = await post({ ...valid, cliente: 'Reserva preservada T08' });
+  assert.equal(created.status, 201);
+  assert.equal(other.status, 201);
+  const path = `/reservas/${created.body.id}`;
+  const deleted = await request(path, { method: 'DELETE' });
+  assert.equal(deleted.status, 204);
+  assert.equal(deleted.body, null);
+  const { rows } = await pool.query('SELECT id FROM public.reservas WHERE id = $1', [created.body.id]);
+  assert.deepEqual(rows, []);
+  assert.deepEqual((await request(`/reservas/${other.body.id}`)).body, other.body);
+  assert.equal((await request(path)).status, 404);
+  const second = await request(path, { method: 'DELETE' });
+  assert.equal(second.status, 404);
+  assert.equal(second.body.erro.codigo, 'RESERVA_NAO_ENCONTRADA');
+  assert.equal(await rowCount(), 1);
+  context.diagnostic('DELETE -> 204, corpo vazio; SQL confirmou remoção; segundo DELETE -> 404; outra reserva preservada.');
+});
+
+test('DELETE de ID ausente retorna 404 com o mesmo erro das consultas', async () => {
+  const result = await request('/reservas/2147483647', { method: 'DELETE' });
+  assert.equal(result.status, 404);
+  assert.deepEqual(result.body, { erro: { codigo: 'RESERVA_NAO_ENCONTRADA', mensagem: 'Reserva não encontrada.' } });
+  assert.equal(await rowCount(), 0);
+});
+
+test('health com PostgreSQL disponível retorna 200 e somente status/database, sem cache', async (context) => {
+  const result = await request('/health');
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.body, { status: 'ok', database: 'ok' });
+  assert.equal(result.headers.get('cache-control'), 'no-store');
+  context.diagnostic('GET /health com conexão real -> 200 {"status":"ok","database":"ok"}.');
 });

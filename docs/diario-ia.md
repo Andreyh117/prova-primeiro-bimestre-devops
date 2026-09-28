@@ -296,3 +296,90 @@ byte a byte; git diff --cached --check retornou 0. Padrões sensíveis examinado
 sem ocorrência (scanner limitado); node_modules/.env/PEM ignorados. Lockfile
 compatível e guia original intacto por SHA-256; links locais conferidos. Marco
 preparado para Conventional Commit local na feature, sem push ou merge.
+
+## 28/09/2026 — auditoria Git e planejamento dos próximos commits
+
+Prompt: conferir histórico, quantidade, Conventional Commits, feature e merge;
+organizar próximos commits com mudanças reais, sem commits vazios ou histórico
+inventado. Este pedido é auditoria/planejamento; não executou T08.
+
+Estado inicial: worktree limpa, HEAD dbcd6a1 em feat/api-reservas. Git rev-list
+--count HEAD e --all retornaram 4; main tem 1; main..feat/api-reservas tem 3.
+Git log e rev-list --parents mostraram zero merges (nenhum commit com dois pais).
+Refs e merge-base confirmaram main 21cb5f0 como ancestral da feature. Mensagens
+docs/feat foram conferidas pela especificação oficial Conventional Commits e
+pelo conteúdo: documentação inicial, evidência Git, base PostgreSQL e POST/GET.
+Diff-tree --root mostrou alterações em 9, 6, 19 e 14 arquivos respectivamente;
+nenhum commit vazio. Saídas completas reais em evidencias/git-auditoria.txt,
+sem identidade/e-mail do autor ou valores de configuração.
+
+R02 permanece em andamento. Organizado em specs/tasks.md o próximo marco T08
+(funcionalidades CRUD/saúde) e T09 (script/restart/persistência), ambos com testes
+reais antes de commit. Se concluídos, adicionarão duas mudanças reais ao total
+atual de quatro. Docker/Compose e demais tarefas terão seus próprios marcos;
+merge --no-ff em T32, depois de T31, preservando a feature e verificando dois pais.
+Os tipos/mensagens são propostas futuras, não história já existente.
+
+Alterados apenas tasks, requirements, README e este diário, mais a evidência de
+auditoria. Registros ficam pendentes de versionamento junto ao próximo marco
+real autorizado, evitando commit só para aumentar a contagem. Sem commit, merge,
+rebase, amend, push ou execução de código/infra nesta auditoria. Ferramentas:
+Codex, Git/Python no terminal e documentação oficial Conventional Commits/Git.
+Verificação aplicável: histórico, pais, mensagens e diff documental; a suíte API
+não foi repetida porque a aplicação não mudou. Próxima tarefa continua T08.
+
+## 28/09/2026 — T08: PUT, DELETE e saúde do banco
+
+Prompt: manter a regra de commits reais, executar a próxima tarefa seguindo
+AGENTS, implementar/validar/corrigir e registrar evidências. T08 foi iniciada.
+HEAD dbcd6a1, quatro commits; registros da auditoria Git em cinco arquivos já
+presentes foram preservados (snapshot local em /tmp/devops-t08-auditoria-preservada.json).
+O aluno aprovou incluí-los no próximo marco real, conforme plano; não abrir
+commit documental separado só para a contagem. Mensagem prevista T08:
+feat(api): completa CRUD e verificacao de saude.
+
+Implementação preparada: PUT completo parametrizado preserva ID; DELETE usa
+RETURNING para decidir 204/404; health executa SELECT 1 com prazo total 2s e
+query_timeout 2s. Erros de conexão/timeouts conhecidos vão para 503 genérico;
+erros inesperados mantêm 500 sem SQL/stack/segredos. Testes de indisponibilidade
+usarão apenas o container de teste UUID/label conferidos; pausa/retomada e stop
+não afetam outros projetos. Estado neste ponto: em andamento, sem resultado
+de testes anunciado. Restart/persistência continuam em T09.
+
+Resultado T08: npm --prefix app test passou 48 testes, 0 falharam, exit 0.
+27 casos HTTP nativos, 3 de falha real por HTTP, 15 PostgreSQL e 3 configuração.
+PUT preservou ID/DATE e outra linha, rejeitou parcial/inválido sem alterações;
+DELETE 204 sem corpo foi confirmado por SQL e a repetição retornou 404.
+Health 200 com SELECT 1; Docker pause confirmado -> 503 em 2008 ms; unpause ->
+200; stop/remove do banco exclusivo -> 503 BANCO_INDISPONIVEL em todas as cinco
+rotas CRUD. Entradas inválidas ainda deram 400 pré-SQL. Erro SQL induzido por
+renomear a tabela exclusiva retornou 500 genérico e a tabela foi restaurada.
+Falhas 500/503 foram casos negativos planejados, não defeitos descobertos.
+
+Na revisão estática, um comando auxiliar esperava duas barras nos literais e
+abortou por âncora ausente; a shell seguiu para outros checks, então seu exit 0
+não foi tratado como validação desse comando. Conferência posterior de bytes
+mostrou um escape JS correto; checks rerodados via subprocess check=True.
+Não houve mudança de código por essa falsa suspeita nem falha da suíte a inventar.
+
+Saída integral acrescentada a api-local.txt sem apagar as execuções T07;
+health-local.txt contém os trechos exatos de saúde da mesma execução e docker ps
+posterior, zero containers de teste, exit 0. API nativa encerrou com SIGTERM/0.
+Auditoria Git anterior preservada byte a byte; seus registros aprovados serão
+incluídos no commit funcional T08. Guia intacto por SHA-256; dependências/schema
+não mudaram. T08 verificado, T09 pendente. Sem bloqueio restante.
+
+Ferramentas: Codex, terminal Git/Python/Node/npm/Docker e documentação oficial
+pg/PostgreSQL/Docker; fontes no design. Não houve agentes auxiliares. As consultas
+de saúde são somente leitura; pause/stop foram restritos ao banco efêmero UUID/
+labels/porta verificados. Nenhuma ação AWS, restart de persistência, Dockerfile,
+Compose, merge, push ou PR ocorreu. R07/CRUD/data local avançaram, mas a matriz
+continua parcial até os ambientes/verificações restantes; não declarar entrega
+ou seis commits completos. Próximo marco real: T09.
+
+Revisão final T08: 14 arquivos adicionados explicitamente ao index e conferidos
+byte a byte; git diff --cached --check retornou 0. Scanner delimitado sem
+ocorrência de padrões sensíveis; ignores/links/lockfile e guia conferidos. A
+auditoria Git aprovada entra no mesmo marco funcional, sem commit separado.
+Stage preparado para feat(api): completa CRUD e verificacao de saude; sem
+merge/push. O hash e a contagem final só serão anunciados após Git confirmar.

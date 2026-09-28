@@ -4,9 +4,9 @@ Este documento descreve como cumprir R01–R32 de [requirements.md](requirements
 As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas ao
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
 data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
-conexão; T07 implementou POST e GET com 35 testes locais aprovados. PUT, DELETE,
-health/503 e infraestrutura são futuros. Planos AWS e destruição continuam
-sujeitos a revisão/autorização.
+conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
+locais aprovados. Restart/persistência (T09) e infraestrutura são futuros.
+Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
 
@@ -49,7 +49,7 @@ Casos T07 executados por HTTP/SQL: aceitar `29-02-2024` e extremos 0001/9999;
 rejeitar `29-02-2025`, `29-02-1900`, `31-04-2026`, `2026-10-15`, `1-2-2026`,
 horário e whitespace adicional. POST, GET de lista e GET por ID devolveram a
 mesma data válida em `DD-MM-YYYY`; entradas rejeitadas não inseriram linhas.
-PUT será implementado e validado em T08.
+T08 validou o mesmo contrato no PUT completo, mantendo ID e dados intactos nas rejeições.
 
 D03: `cliente` é string com espaços externos removidos, entre 1 e 120 caracteres
 Unicode; rejeitar null, valores não string, texto vazio, NUL e sequências
@@ -124,6 +124,32 @@ no GET. A suíte completa tem 35 testes: 17 HTTP, 15 de banco e 3 de configuraç
 Evidências em `evidencias/api-local.txt` e `evidencias/t07-execucao.txt`.
 400/404/413/415 estão cobertos; PUT/DELETE/health/503 são T08; restart/persistência
 é T09. TLS/RDS permanecem sem execução.
+
+T08: PUT usa a mesma validação/corpo do POST e UPDATE parametrizado com
+RETURNING; DELETE usa DELETE ... RETURNING id para decidir 204/404 sem consulta
+prévia. Sem corpo em 204. /health executa SELECT 1 com query_timeout 2000 ms e
+prazo total 2000 ms incluindo fila/conexão; não guarda resultado em cache.
+A consulta de saúde é somente leitura e pode terminar em segundo plano quando
+o prazo total antecede a aquisição da conexão, limitada pelos timeouts do pool.
+Falhas conhecidas de rede, classe SQLSTATE 08, encerramento/capacidade do servidor
+e timeouts do driver viram 503 BANCO_INDISPONIVEL. Erros inesperados mantêm 500
+com mensagem genérica; SQL/stack/credenciais não são devolvidos. Os textos de
+timeout foram conferidos na versão pg fixa; revalidar ao atualizar dependências.
+
+A suíte tem 48 testes: 27 HTTP em servidor nativo, 3 HTTP de falha real do banco,
+15 de PostgreSQL e 3 de configuração. A última suíte inspeciona apenas labels/
+porta, confirma o UUID de propriedade e executa pause/unpause/stop no container
+exclusivo. Health ficou 503 em 2008 ms e recuperou 200; stop resultou em 503 nas
+cinco rotas CRUD. Renomear/restaurar a tabela exclusiva induziu erro SQL real
+para verificar o fallback 500. São falhas planejadas, não mocks/defeitos observados.
+Evidências: api-local.txt completo e health-local.txt com trechos da mesma execução.
+O runner retoma container próprio pausado antes de limpar, se necessário.
+
+Referências T08: [pg Pool](https://node-postgres.com/apis/pool),
+[pg Client/timeouts](https://node-postgres.com/apis/client),
+[SQLSTATE PostgreSQL 16](https://www.postgresql.org/docs/16/errcodes-appendix.html),
+[UPDATE/RETURNING](https://www.postgresql.org/docs/16/sql-update.html) e
+[Docker pause](https://docs.docker.com/reference/cli/docker/container/pause/).
 
 Referências T07: [Express 5](https://expressjs.com/en/5x/api/),
 [erros assíncronos Express](https://expressjs.com/en/guide/error-handling/) e

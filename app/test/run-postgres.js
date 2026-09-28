@@ -29,7 +29,12 @@ function cleanup() {
   if (!creationAttempted) return;
   const filter = ['--filter', `label=devops.test.run=${runId}`];
   const ids = docker(['ps', '-aq', ...filter]).stdout.trim().split(/\s+/).filter(Boolean);
-  for (const id of ids) docker(['stop', '--time', '5', id]);
+  for (const id of ids) {
+    if (docker(['inspect', '--format', '{{.State.Paused}}', id]).stdout.trim() === 'true') {
+      docker(['unpause', id]);
+    }
+    docker(['stop', '--time', '5', id]);
+  }
   if (docker(['ps', '-aq', ...filter]).stdout.trim()) {
     throw new Error('O container exclusivo de teste ainda existe após a limpeza.');
   }
@@ -76,6 +81,7 @@ try {
   const testEnv = {
     ...process.env, PGHOST: '127.0.0.1', PGPORT: binding.HostPort,
     PGDATABASE: 'reservas_test', PGUSER: 'reservas_test', PGPASSWORD: password, PGSSL: 'false',
+    DEVOPS_TEST_CONTAINER: container, DEVOPS_TEST_RUN_ID: runId,
   };
   const migration = spawnSync(process.execPath, ['src/migrate.js'], {
     cwd: appDirectory, env: testEnv, encoding: 'utf8', timeout: 15000,

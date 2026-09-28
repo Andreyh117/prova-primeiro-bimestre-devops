@@ -19,17 +19,19 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T07 foram concluídas. O commit inicial `21cb5f0` está em
-`main` e o desenvolvimento segue em `feat/api-reservas`. T07 implementou POST
-/reservas, GET /reservas e GET /reservas/:id sobre o schema/pool de T06.
-A suíte passou 35 testes com PostgreSQL 16.15 real: 17 HTTP em servidor nativo,
-15 de banco e 3 de configuração. As entradas rejeitadas não inseriram linhas.
-API encerrada com SIGTERM/código 0 e banco exclusivo removido ao finalizar.
+Em 28/09/2026, T01–T08 foram concluídas. O commit inicial `21cb5f0` está em
+`main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo e /health
+estão implementados sobre o schema/pool de T06. A suíte passou 48 testes com
+PostgreSQL 16.15 real: 27 HTTP em servidor nativo, 3 HTTP de indisponibilidade,
+15 de banco e 3 de configuração. PUT preservou o ID; entradas rejeitadas não
+alteraram dados; DELETE retornou 204 e depois 404. Health retornou 200/503
+conforme o banco, recuperou 200 após unpause; as cinco rotas CRUD retornaram 503
+após stop. API encerrada e banco exclusivo removido ao finalizar.
 
 Express 5.2.1 e pg 8.23.0 estão fixados no package.json/lockfile. A imagem oficial
 PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. Os seis commits
 e merge da prova, Dockerfile/Compose da API, infraestrutura AWS e relatório
-continuam pendentes. Próxima tarefa: T08, PUT completo, DELETE e /health.
+continuam pendentes. Próxima tarefa: T09, script de CRUD e persistência após restart da API.
 
 ## Contrato aprovado para implementação
 
@@ -37,23 +39,25 @@ Reserva: `id` gerado pelo PostgreSQL, `cliente`, `data` e `status`.
 `cliente`, `data` e `status` são obrigatórios em POST e PUT; PUT substitui todos
 os campos editáveis. Status aceitos: `pendente`, `confirmada`, `cancelada`.
 
-POST recebe `data` como **`DD-MM-YYYY`**, com dia/mês de dois dígitos e ano de
-quatro dígitos, sem horário. POST e GET devolvem a data nesse mesmo formato.
-O banco mantém `DATE`; POST converte por componentes para ISO interno e GET
-formata explicitamente por SQL. T07 confirmou datas válidas/bissextas e rejeição
-de datas impossíveis, ISO externo, tipos incorretos e espaços. PUT seguirá o
-mesmo contrato em T08. Cliente é texto Unicode válido, sem NUL, de 1 a 120
-caracteres após trim. O corpo deve conter exatamente cliente, data e status.
+POST e PUT recebem `data` como **`DD-MM-YYYY`**, com dia/mês de dois dígitos
+e ano de quatro dígitos, sem horário. POST, PUT e GET devolvem esse mesmo formato.
+O banco mantém `DATE`; a aplicação converte por componentes para ISO interno e
+formata explicitamente por SQL. Datas válidas/bissextas foram confirmadas;
+datas impossíveis, ISO externo, tipos incorretos e espaços foram rejeitados.
+Cliente é texto Unicode válido, sem NUL, de 1 a 120 caracteres após trim.
+O corpo deve conter exatamente cliente, data e status; PUT parcial retorna 400.
 
 ```json
 {"cliente":"Cliente de teste","data":"15-10-2026","status":"pendente"}
 ```
 
-Rotas disponíveis: POST/GET `/reservas` e GET `/reservas/:id`.
-POST retorna 201 e Location; GET retorna 200 (lista ordenada por ID) ou 404 se
-não encontrar o ID. Entrada inválida retorna 400, corpo acima de 16 KiB retorna
-413 e Content-Type inadequado retorna 415, com erro JSON. PUT, DELETE, /health
-e tratamento 503 de banco indisponível serão implementados em T08.
+Rotas disponíveis: POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id` e GET
+`/health`. POST retorna 201/Location; GET retorna 200 (lista ordenada por ID);
+PUT completo retorna 200 mantendo ID; DELETE retorna 204 sem corpo. ID ausente
+retorna 404. Entrada inválida retorna 400, corpo acima de 16 KiB retorna 413 e
+Content-Type inadequado retorna 415, com erro JSON. Falha de conexão retorna
+503 BANCO_INDISPONIVEL; erro inesperado retorna 500 genérico. /health consulta
+SELECT 1 com prazo de 2s e retorna 200 ou 503, somente com status/database.
 Contrato completo em [specs/design.md](specs/design.md).
 
 ## Documentação e acompanhamento
@@ -68,8 +72,10 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Dependências T06](evidencias/t06-dependencias.txt): instalação, npm ci e versões reais.
 - [PostgreSQL T06](evidencias/t06-postgres-local.txt): migração e 18 testes com banco real.
 - [Falha controlada T06](evidencias/t06-falha-controlada.txt): código não zero e limpeza confirmada.
-- [HTTP e PostgreSQL T07](evidencias/api-local.txt): duas execuções reais da suíte de 35 testes.
+- [HTTP e PostgreSQL local](evidencias/api-local.txt): duas execuções T07 com 35 testes e T08 com 48 testes, sem apagar histórico.
+- [Saúde T08](evidencias/health-local.txt): pause/unpause/stop reais do banco exclusivo, respostas HTTP e limpeza.
 - [Execução T07](evidencias/t07-execucao.txt): falhas esperadas de npm start e limpeza.
+- [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
 
@@ -83,14 +89,18 @@ npm --prefix app test
 O runner cria seu container PostgreSQL, publica porta dinâmica em 127.0.0.1,
 gera senha em memória, aplica o schema e roda `node:test`. A suíte HTTP inicia
 a API nativa em porta livre e verifica requisições/SQL; limpa somente seus IDs
-e encerra a API. Ao terminar, o runner remove seu container/dados tmpfs.
+e encerra a API. A última suíte confere UUID/labels/porta do banco e o pausa,
+retoma e encerra para verificar 503 real. Ao terminar, o runner confirma remoção
+do container/dados tmpfs; se ainda estiver pausado na falha, retoma antes da limpeza.
 A primeira execução pode baixar a imagem fixada por digest. Não é necessário
 criar .env ou informar senha para essa suíte. Falhas resultam em exit code não zero.
 
 O schema está em [app/sql/001-reservas.sql](app/sql/001-reservas.sql), o pool em
 [app/src/db.js](app/src/db.js), e os testes reais em
 [app/test/database.test.js](app/test/database.test.js) e
-[app/test/api.test.js](app/test/api.test.js). Rotas em [app/src/app.js](app/src/app.js),
+[app/test/api.test.js](app/test/api.test.js); indisponibilidade real em
+[app/test/z-unavailable.test.js](app/test/z-unavailable.test.js).
+Rotas em [app/src/app.js](app/src/app.js),
 validação em [app/src/validation.js](app/src/validation.js) e inicialização em
 [app/src/server.js](app/src/server.js). O SQL inicial pode ser reaplicado sem
 apagar linhas; mudanças de estrutura exigirão novas migrações.
@@ -113,6 +123,7 @@ código 1 e mensagem sem credenciais. Com API em execução, pode conferir a lis
 
 ```bash
 curl --fail --silent --show-error http://127.0.0.1:3000/reservas
+curl --fail --silent --show-error http://127.0.0.1:3000/health
 ```
 
 `git status --short --branch` permite conferir o trabalho local. `.gitignore`

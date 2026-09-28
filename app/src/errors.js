@@ -1,3 +1,20 @@
+const networkErrors = new Set([
+  'ECONNREFUSED', 'ECONNRESET', 'EPIPE', 'ETIMEDOUT', 'EHOSTUNREACH',
+  'ENETUNREACH', 'ENOTFOUND', 'EAI_AGAIN',
+]);
+const databaseErrors = new Set(['57P01', '57P02', '57P03', '53300', '57014']);
+const driverErrors = new Set([
+  'Query read timeout', 'timeout expired', 'timeout exceeded when trying to connect',
+  'Connection terminated', 'Connection terminated unexpectedly',
+  'Connection terminated due to connection timeout',
+]);
+
+function databaseUnavailable(error) {
+  return networkErrors.has(error.code) || databaseErrors.has(error.code)
+    || (typeof error.code === 'string' && error.code.startsWith('08'))
+    || driverErrors.has(error.message);
+}
+
 export class HttpError extends Error {
   constructor(status, code, message) {
     super(message);
@@ -16,6 +33,10 @@ export function errorHandler(error, req, res, next) {
     error = new HttpError(413, 'CORPO_EXCESSIVO', 'O corpo deve ter no máximo 16 KiB.');
   } else if (error.type === 'charset.unsupported' || error.type === 'encoding.unsupported') {
     error = new HttpError(415, 'TIPO_NAO_SUPORTADO', 'A codificação do corpo não é suportada.');
+  }
+
+  if (!(error instanceof HttpError) && databaseUnavailable(error)) {
+    error = new HttpError(503, 'BANCO_INDISPONIVEL', 'Banco de dados indisponível.');
   }
 
   if (error instanceof HttpError) {

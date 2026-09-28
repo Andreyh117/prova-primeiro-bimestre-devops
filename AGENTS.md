@@ -16,16 +16,21 @@ Fontes consultadas em 27/09/2026:
   decisões propostas e acompanhamento. Não transformar escolhas do design em
   critérios que o professor teria exigido.
 
-Em 28/09/2026, o aluno revisou T06 e autorizou T07. T01–T07 estão verificadas
-na `feat/api-reservas`. POST /reservas, GET /reservas e GET /reservas/:id estão
-implementados com validação DD-MM-YYYY, SQL parametrizado e erros 400/404/413/415.
-A suíte passou 35 testes: 17 HTTP com servidor nativo em subprocesso, 15 de banco
-e 3 de configuração, com PostgreSQL 16.15 real. Evidências T07:
-`evidencias/api-local.txt` e `evidencias/t07-execucao.txt`; API encerrada com
-SIGTERM/código 0 e banco de teste removido. T06 permanece registrado em t06-*.txt.
-Próxima tarefa pendente: T08, PUT completo, DELETE e /health, incluindo 503 por
-indisponibilidade do banco. Não avançar para outra tarefa no encerramento de T07;
-Compose, Terraform, AWS e publicação seguem futuros.
+Em 28/09/2026, o aluno aprovou a regra de commits por marcos reais, revisou T07
+e autorizou T08. T01–T08 estão verificadas em `feat/api-reservas`. CRUD completo
+e /health estão implementados, com validação DD-MM-YYYY, SQL parametrizado,
+204/404 de DELETE, erros JSON e 503 quando o banco fica indisponível.
+A suíte passou 48 testes com PostgreSQL 16.15 real: 27 HTTP em servidor nativo,
+3 HTTP de falha real do banco, 15 de banco e 3 de configuração. Health consultou
+SELECT 1, retornou 503 em 2008 ms com banco pausado, recuperou 200 após unpause;
+as cinco rotas CRUD retornaram 503 após stop do banco exclusivo.
+Evidências T08: `evidencias/api-local.txt` (histórico preservado) e
+`evidencias/health-local.txt`. API encerrada e zero containers de teste ao final.
+Registros da auditoria Git aprovados acompanham este marco, sem commit extra só
+para contagem. R02 ainda depende de seis commits reais e merge em T32.
+Próxima tarefa pendente: T09, script verify-api.py e persistência ao reiniciar API.
+Não avançar para outra tarefa no encerramento de T08; Dockerfile/Compose,
+Terraform, AWS e publicação seguem futuros.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
@@ -107,18 +112,18 @@ git ls-files
 rg --files --hidden -g '!.git/**' -g '!node_modules/**'
 ```
 
-A validação PostgreSQL/HTTP já está disponível em T07; os demais comandos dependem
+A validação PostgreSQL/HTTP já está disponível em T08; os demais comandos dependem
 das respectivas tarefas. Não anunciar sucesso quando arquivos/dependências não
 existirem. Scripts devem ter saída clara e exit code não zero na falha.
 
 | Verificação | Comando e pré-condição |
 |---|---|
-| PostgreSQL e HTTP (T07 disponível) | `npm --prefix app ci --ignore-scripts --no-fund`; `npm --prefix app test`. Node 24 e Docker local: banco exclusivo e API nativa em subprocesso; 35 testes, com limpeza. PUT/DELETE/health dependem de T08. |
+| PostgreSQL e HTTP (T08 disponível) | `npm --prefix app ci --ignore-scripts --no-fund`; `npm --prefix app test`. Node 24 e Docker local: 48 testes, incluindo pause/unpause/stop somente do banco UUID/labels verificados; limpeza confirmada. |
 | API nativa (T07 disponível) | Configurar PG* em banco próprio e aplicar `npm --prefix app run db:migrate`; executar `npm --prefix app start`. PORT padrão 3000; não usar dados de outros projetos. |
 | Build Docker | `docker build -t prova-reservas:local app`; daemon disponível e lockfile criado. |
 | Usuário da imagem | `docker run --rm --entrypoint id prova-reservas:local -u`; exigir UID diferente de 0. |
 | Compose | `docker compose config --quiet`; `docker compose up --build --wait`; `docker compose ps`; `.env` local válido e plugin Compose compatível. Não publicar `docker compose config` completo, que pode expandir senhas. |
-| Saúde local | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, depois de Compose saudável. |
+| Saúde local (T08 disponível) | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, com API nativa configurada em execução; Compose será futuro. |
 | CRUD local | `python3 scripts/verify-api.py --base-url http://127.0.0.1:3000`; script futuro cria dados próprios, confere HTTP/JSON e os limpa. |
 | Persistência Compose | `python3 scripts/verify-persistence.py`; script futuro recria containers preservando o volume e confere dados no banco real; nunca usa `down -v`. |
 | Formatação Terraform | `terraform fmt -check -recursive infra`. |

@@ -1,0 +1,183 @@
+Auditoria Git — R02
+Data: 2026-09-28T19:44:08-03:00
+Escopo: histórico local alcançável por HEAD e refs; sem fetch/push ou alteração do histórico.
+Captura anterior às mudanças documentais desta auditoria.
+
+$ git status --short --branch
+EXIT CODE: 0
+STDOUT:
+## feat/api-reservas
+
+$ git rev-parse HEAD
+EXIT CODE: 0
+STDOUT:
+dbcd6a109ec058aacf090d18816178d593305247
+
+$ git rev-list --count HEAD
+EXIT CODE: 0
+STDOUT:
+4
+
+$ git rev-list --count --all
+EXIT CODE: 0
+STDOUT:
+4
+
+$ git rev-list --count main
+EXIT CODE: 0
+STDOUT:
+1
+
+$ git rev-list --count main..feat/api-reservas
+EXIT CODE: 0
+STDOUT:
+3
+
+$ git rev-list --count --merges --all
+EXIT CODE: 0
+STDOUT:
+0
+
+$ git for-each-ref '--format=%(refname:short) %(objectname)' refs/heads refs/remotes
+EXIT CODE: 0
+STDOUT:
+feat/api-reservas dbcd6a109ec058aacf090d18816178d593305247
+main 21cb5f0c19f2973c61c67f79543f22063853a04e
+
+$ git log --all --graph --decorate '--format=%h %s'
+EXIT CODE: 0
+STDOUT:
+* dbcd6a1 feat: implementa criacao e consulta de reservas
+* 99ffedd feat: adiciona schema e conexao PostgreSQL com testes reais
+* bfa4241 docs: registra evidencias do inicio do workflow Git
+* 21cb5f0 docs: registra especificacao e preparacao da prova
+
+$ git rev-list --parents --all
+EXIT CODE: 0
+STDOUT:
+dbcd6a109ec058aacf090d18816178d593305247 99ffedd4f518454f400a85f9eb0a337abcd01e81
+99ffedd4f518454f400a85f9eb0a337abcd01e81 bfa4241ab06b397a2b36a2092387c2ea22cb64b9
+bfa4241ab06b397a2b36a2092387c2ea22cb64b9 21cb5f0c19f2973c61c67f79543f22063853a04e
+21cb5f0c19f2973c61c67f79543f22063853a04e
+
+$ git merge-base main feat/api-reservas
+EXIT CODE: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+
+$ git merge-base --is-ancestor main feat/api-reservas
+EXIT CODE: 0
+STDOUT:
+(vazio)
+
+$ git log --oneline main..feat/api-reservas
+EXIT CODE: 0
+STDOUT:
+dbcd6a1 feat: implementa criacao e consulta de reservas
+99ffedd feat: adiciona schema e conexao PostgreSQL com testes reais
+bfa4241 docs: registra evidencias do inicio do workflow Git
+
+$ git log --reverse --format=%H --all
+EXIT CODE: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+bfa4241ab06b397a2b36a2092387c2ea22cb64b9
+99ffedd4f518454f400a85f9eb0a337abcd01e81
+dbcd6a109ec058aacf090d18816178d593305247
+
+$ git show -s --format=%B 21cb5f0c19f2973c61c67f79543f22063853a04e
+EXIT CODE: 0
+STDOUT:
+docs: registra especificacao e preparacao da prova
+
+$ git diff-tree --root --no-commit-id --name-status -r 21cb5f0c19f2973c61c67f79543f22063853a04e
+EXIT CODE: 0
+STDOUT:
+A	.gitignore
+A	AGENTS.md
+A	GUIA-CODEX-PROVA-DEVOPS.md
+A	README.md
+A	docs/diario-ia.md
+A	evidencias/segredos-checklist.txt
+A	specs/design.md
+A	specs/requirements.md
+A	specs/tasks.md
+
+$ git show -s --format=%B bfa4241ab06b397a2b36a2092387c2ea22cb64b9
+EXIT CODE: 0
+STDOUT:
+docs: registra evidencias do inicio do workflow Git
+
+$ git diff-tree --root --no-commit-id --name-status -r bfa4241ab06b397a2b36a2092387c2ea22cb64b9
+EXIT CODE: 0
+STDOUT:
+M	AGENTS.md
+M	README.md
+M	docs/diario-ia.md
+A	evidencias/git-workflow-inicial.txt
+M	specs/requirements.md
+M	specs/tasks.md
+
+$ git show -s --format=%B 99ffedd4f518454f400a85f9eb0a337abcd01e81
+EXIT CODE: 0
+STDOUT:
+feat: adiciona schema e conexao PostgreSQL com testes reais
+
+$ git diff-tree --root --no-commit-id --name-status -r 99ffedd4f518454f400a85f9eb0a337abcd01e81
+EXIT CODE: 0
+STDOUT:
+M	AGENTS.md
+M	README.md
+A	app/package-lock.json
+A	app/package.json
+A	app/sql/001-reservas.sql
+A	app/src/db.js
+A	app/src/migrate.js
+A	app/src/schema.js
+A	app/test/config.test.js
+A	app/test/database.test.js
+A	app/test/postgres-image.txt
+A	app/test/run-postgres.js
+M	docs/diario-ia.md
+A	evidencias/t06-dependencias.txt
+A	evidencias/t06-falha-controlada.txt
+A	evidencias/t06-postgres-local.txt
+M	specs/design.md
+M	specs/requirements.md
+M	specs/tasks.md
+
+$ git show -s --format=%B dbcd6a109ec058aacf090d18816178d593305247
+EXIT CODE: 0
+STDOUT:
+feat: implementa criacao e consulta de reservas
+
+$ git diff-tree --root --no-commit-id --name-status -r dbcd6a109ec058aacf090d18816178d593305247
+EXIT CODE: 0
+STDOUT:
+M	AGENTS.md
+M	README.md
+M	app/package.json
+A	app/src/app.js
+A	app/src/errors.js
+A	app/src/server.js
+A	app/src/validation.js
+A	app/test/api.test.js
+M	docs/diario-ia.md
+A	evidencias/api-local.txt
+A	evidencias/t07-execucao.txt
+M	specs/design.md
+M	specs/requirements.md
+M	specs/tasks.md
+
+RESULTADO DA AUDITORIA:
+HEAD e --all: 4 commits únicos; main: 1; exclusivos da feature: 3.
+Mensagens: 4/4 compatíveis com Conventional Commits; tipos docs/feat coerentes com os arquivos alterados.
+Inspeção de conteúdo: documentação inicial; evidência Git; schema/pool/testes; POST/GET/validação/testes.
+Commits sem alterações de arquivos: 0.
+Feature branch comprovada por refs, ancestral comum e três commits exclusivos.
+Merges no histórico local alcançável: 0; nenhum commit com dois ou mais pais.
+Pendente: mínimo de seis exige pelo menos mais duas mudanças reais commitadas; merge previsto em T32.
+R02 permanece em andamento; esta auditoria não comprova publicação ou revisão do GitHub.
+Referência Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
+Referência merge: https://git-scm.com/docs/git-merge
+A auditoria foi executada; o requisito completo R02 ainda NÃO está satisfeito.

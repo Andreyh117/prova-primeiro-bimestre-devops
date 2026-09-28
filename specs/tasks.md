@@ -19,8 +19,10 @@ em main e feature branch `feat/api-reservas`. A verificação é somente Git loc
 R02 ainda depende dos demais commits e merge. O aluno revisou T05 e autorizou
 T06, agora verificada: dependências, schema/conexão e 18 testes com PostgreSQL
 16.15 real. O aluno revisou T06 e autorizou T07, agora verificada com 35 testes,
-POST/GET HTTP reais e SQL independente. Próxima tarefa pendente: T08, PUT
-completo, DELETE e /health com erros uniformes e banco indisponível 503.
+POST/GET HTTP reais e SQL independente. O aluno aprovou a regra de commits,
+revisou T07 e autorizou T08, agora verificada com CRUD completo, saúde/503 e
+48 testes reais. Próxima tarefa pendente: T09, script verify-api.py e
+persistência ao reiniciar a API nativa.
 
 ## Plano de tarefas pequenas
 
@@ -38,7 +40,7 @@ Cada tarefa recebe entrada no diário.
 | T05 | T04 | R02, R28 | Commit inicial coerente dos documentos revisados; criar feature branch. | Git local mostra commit real e branch; não publicar sem escopo autorizado. | Diário e `evidencias/git-workflow-inicial.txt`; commits reais posteriores por marco. | verificado |
 | T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e evidencias/t06-*.txt: instalação, 18 testes e falha controlada. | verificado |
 | T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | app/test/api.test.js, api-local.txt (35 testes) e t07-execucao.txt. | verificado |
-| T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | Testes completos e health-local.txt. | pendente |
+| T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | api.test.js, z-unavailable.test.js, api-local.txt e health-local.txt (48 testes). | verificado |
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt; commit real de API/testes. | pendente |
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt, docker-run.txt; commit real Docker. | pendente |
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt; commit real Compose. | pendente |
@@ -85,6 +87,49 @@ Cada tarefa recebe entrada no diário.
   desses commits pode acontecer após a abertura do PR em T34.
 - T34 é a submissão à disciplina. Push/publicação do projeto em T31–T33 depende
   da autorização da etapa e de autenticação real, não da mera existência do remote.
+
+## Planejamento Git após auditoria de 28/09/2026
+
+Pedido adicional do aluno: conferir quantidade, Conventional Commits, feature
+e merge; organizar próximos commits com mudanças reais, sem commits vazios ou
+histórico inventado. A auditoria local foi executada em HEAD `dbcd6a1`:
+4 commits únicos, todos convencionais e com alterações; main tem 1, feature tem
+3 exclusivos; merges encontrados: 0. Saídas reais em
+[git-auditoria.txt](../evidencias/git-auditoria.txt). R02 continua em andamento.
+
+As mensagens abaixo são propostas para tarefas futuras, não commits existentes.
+Executar uma tarefa autorizada por vez, incluir implementação, testes/evidências
+e documentação correspondente, revisar o diff e só então criar o commit.
+Não separar uma alteração trivial em vários commits para aumentar a contagem.
+
+| Tarefa | Mensagem proposta | Mudança real esperada | Aceite antes de commit |
+|---|---|---|---|
+| T08 | `feat(api): completa CRUD e verificacao de saude` | PUT completo, DELETE, /health, classificação de indisponibilidade 503 e testes; atualizar specs/diário. | Integração PostgreSQL: atualização, exclusão/404 e saúde/falha real do banco. |
+| T09 | `test(api): verifica persistencia apos reiniciar a API` | scripts/verify-api.py e teste reproduzível de restart/persistência; novas evidências e instruções. | CRUD completo, linha lida depois do restart e falha controlada do script com código não zero. |
+| T10 | `build(docker): adiciona imagem da API com usuario nao root` | app/Dockerfile e .dockerignore, configuração de build e evidências. | Build real, UID não zero e API em container consultando PostgreSQL real. |
+| T11 | `feat(compose): configura API e PostgreSQL com healthchecks` | Compose, .env.example, bridge, volume e dependência de saúde. | config --quiet; up --build --wait; serviços saudáveis e CRUD completo. |
+| T12 | `test(compose): verifica persistencia ao recriar containers` | verify-persistence.py, evidência real e README de reprodução. | Linha preservada após recriar containers sem apagar volume; falha controlada. |
+| T32 | `chore(merge): integra API e infraestrutura em main` | Integração da feature completa/revisada em main, preservando histórico e branch. | T31 concluída; worktree limpa; merge real --no-ff, dois pais, grafo e refs capturados. |
+
+Se T08 e T09 forem concluídas e commitadas como acima, a contagem passará de 4
+para 6 por mudanças reais, antes do merge. Isso é projeção, não resultado atual.
+Docker, Compose, Terraform, deploy, relatório e limpeza continuam gerando marcos
+conforme suas tarefas e evidências; não interromper o histórico só ao atingir 6.
+
+Em T32, depois do aceite T31, a integração prevista é
+`git merge --no-ff feat/api-reservas -m "chore(merge): integra API e infraestrutura em main"`
+na main. Este comando NÃO foi executado nesta auditoria. Preservar a ref da
+feature e conferir os dois pais; --no-ff documenta a integração mesmo quando um
+fast-forward seria possível. [Referência Git](https://git-scm.com/docs/git-merge).
+As mensagens propostas seguem
+[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+
+Naquela auditoria, os registros ficaram pendentes de versionamento para
+acompanhar T08, sem commit extra só para contar. Nenhum commit, merge, rebase,
+amend ou push foi realizado naquela conferência; T08–T34 estavam pendentes.
+Atualização: o aluno aprovou o plano e autorizou T08; o aceite passou com 48
+testes reais e os registros da auditoria serão versionados nesse marco funcional.
+T09 continua pendente; a mensagem de T08 será usada somente após revisão do stage.
 
 ## Registro real desta primeira etapa
 
@@ -243,3 +288,33 @@ teste (t07-execucao.txt). Sem bloqueio local.
 Arquivos: app/src/{app,validation,errors,server}.js, app/test/api.test.js,
 script start em app/package.json, duas evidências e AGENTS/README/specs/diário.
 Lockfile/dependências/schema de T06 preservados. Próximo passo: T08.
+
+### T08 — resultado verificado em 28/09/2026
+
+PUT completo validado com ID preservado, datas civis e os três campos; rejeições
+não alteraram a linha e ID ausente retornou 404. DELETE removeu apenas a linha
+pedida, devolveu 204 sem corpo, SQL confirmou remoção e segundo DELETE retornou
+404. /health executou SELECT 1 e respeitou prazo total 2s; 503 genérico para
+falhas de conexão conhecidas e 500 genérico para erro inesperado, sem SQL/stack.
+
+`npm --prefix app test` executado: 48 testes passaram, 0 falharam, exit 0;
+27 HTTP em API nativa subprocesso, 3 HTTP de falha real, 15 de banco e 3 de
+configuração. PostgreSQL 16.15, mesmo digest fixo; saída T07 preservada e T08
+acrescentada em api-local.txt. health-local.txt contém trechos exatos da mesma
+execução e conferência posterior de limpeza. UUID/labels/porta do container
+foram verificados antes de pause/unpause/stop. Pausa real -> health 503 em 2008
+ms; retomada -> 200; stop -> health/CRUD 503, enquanto entradas inválidas deram
+400 pré-SQL. Renomear/restaurar a tabela exclusiva verificou 500 genérico.
+
+Sem falha inesperada da suíte ou bloqueio restante. Uma checagem auxiliar de
+literais abortou porque esperava duas barras; os bytes mostraram um escape JS
+correto e a validação estática foi executada novamente com propagação de erros.
+O código/testes não precisavam daquela substituição; não simular correção da API.
+A limpeza confirmou zero containers e a API nativa encerrou com código 0.
+
+Arquivos: app/src/app.js, errors.js, app/test/api.test.js, run-postgres.js e novo
+z-unavailable.test.js; api-local/health-local, AGENTS/README/specs/diário.
+Registros aprovados da auditoria Git serão incluídos no mesmo marco funcional;
+a evidência da auditoria/guia permaneceram intactos. Mensagem prevista:
+feat(api): completa CRUD e verificacao de saude. Próximo: T09; sem restart,
+Dockerfile/Compose, Terraform, AWS, merge ou push nesta tarefa.

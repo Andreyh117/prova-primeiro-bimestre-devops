@@ -17,7 +17,8 @@ R28 foi verificado pela conferência documental e revisão humana T03; T04 passo
 na verificação Git/documental local. T06 passou com PostgreSQL 16.15 real:
 18 testes, migração, configuração negativa e limpeza. T07 passou 35 testes:
 POST/GET HTTP reais, validação e leitura SQL independente, com limpeza completa.
-PUT/DELETE/health, Dockerfile/Compose e Terraform/AWS continuam pendentes.
+T08 passou 48 testes com CRUD completo, health/503 e falhas reais do banco.
+Restart/persistência, Dockerfile/Compose e Terraform/AWS continuam pendentes.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. R02 permanece em andamento até seis commits e
 merge reais; a captura T05 é um snapshot histórico, não prova de R02 completo. Caminhos de evidência são
@@ -28,12 +29,12 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | ID / origem | Requisito e aceite observável | Verificação | Evidência esperada | Estado |
 |---|---|---|---|---|
 | R01 / P | Repositório próprio público `prova-primeiro-bimestre-devops`, README na raiz com nome completo, RA e descrição; estrutura `app/`, `infra/`, `evidencias/` e `relatorio.md` conforme enunciado. | Conferir arquivos e acesso público ao GitHub sem login; placeholders resolvidos antes da entrega. | README, URL pública e `evidencias/entrega-checklist.txt`. | em andamento |
-| R02 / P | Pelo menos seis commits reais usando Conventional Commits; feature branch e merge demonstráveis. | Contar commits, revisar mensagens e grafo; localizar commits exclusivos da feature e merge. | `evidencias/git-workflow-inicial.txt` (T05); `evidencias/git-log.txt` e `evidencias/git-branches.txt` (final). | em andamento |
+| R02 / P | Pelo menos seis commits reais usando Conventional Commits; feature branch e merge demonstráveis. | Contar commits, revisar mensagens e grafo; localizar commits exclusivos da feature e merge. | `evidencias/git-workflow-inicial.txt` (T05); `evidencias/git-auditoria.txt` (auditoria parcial); `evidencias/git-log.txt` e `evidencias/git-branches.txt` (final). | em andamento |
 | R03 / P+U | `.gitignore` protege node_modules, .env, .terraform, state/backups, PEM, planos binários e variáveis locais sensíveis; nenhum segredo rastreado. | `git check-ignore` em caminhos representativos e revisão de arquivos staged/rastreados, incluindo evidências. | `.gitignore` e `evidencias/segredos-checklist.txt`, sem segredos. | verificado |
 | R04 / P | API Node.js/Express com `id`, `cliente`, `data`, `status` e POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id`. | Criar, listar, buscar, atualizar e excluir a mesma reserva; verificar corpo e persistência. | `evidencias/api-local.txt`, `evidencias/api-aws.txt`. | em andamento |
 | R05 / P | POST valida campos obrigatórios; GET por ID inexistente retorna 404. | Omitir cada obrigatório, enviar vazio/inválido e buscar ID ausente; não gravar entradas rejeitadas. As demais regras são decisões D01–D04. | Testes de integração e logs de CRUD. | em andamento |
 | R06 / P | CRUD usa PostgreSQL real localmente e RDS na nuvem, lendo e gravando no banco; sem armazenamento em memória substituindo persistência. | Conferir a linha por SQL, reiniciar a API e consultá-la novamente nos dois ambientes. | `evidencias/postgres-local.txt`, `evidencias/rds-crud.txt`. | em andamento |
-| R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | pendente |
+| R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | em andamento |
 | R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt`. | pendente |
 | R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt`. | pendente |
 | R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | pendente |
@@ -58,7 +59,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | Scripts futuros e logs de execução por ambiente. | em andamento |
 | R30 / U | Diário registra prompts, decisões, correções e resultados reais; nunca inventar identidade, experiência, evidências ou histórico. | Confrontar diário/relatório com comandos, Git e relato do aluno; usar placeholders enquanto faltarem informações. | `docs/diario-ia.md`, specs e relatório. | em andamento |
 | R31 / U | Antes de provisionar/destruir, apresentar plano e obter autorização específica; sem auto-approve ou apagamento antecipado de state/dados. | Diário registra revisão, escopo e autorização antes de cada operação; scripts só verificam. | Diário, planos locais ignorados e evidências sanitizadas. | pendente |
-| R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | app/test/api.test.js e api-local.txt (POST/GET local); PUT e AWS futuros. | em andamento |
+| R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | app/test/api.test.js e api-local.txt (POST/GET/PUT local); AWS futuro. | em andamento |
 
 ## Informações confirmadas e pendências
 
@@ -109,3 +110,26 @@ retornaram código 1 esperado; servidor/banco de teste foram encerrados/removido
 R04/R05/R06/R22/R29/R32 permanecem parciais: PUT/DELETE/health/503, persistência
 após restart, Docker/Compose e AWS ainda não foram validados. R07 fica pendente.
 R03 revalidado no stage T07: 14 arquivos conferidos; diff --cached --check exit 0; nenhum padrão sensível examinado encontrado (scanner limitado). Não há bloqueio local remanescente.
+
+## Auditoria parcial R02 em 28/09/2026
+
+Git local em `dbcd6a1`: 4 commits únicos alcançáveis por HEAD/--all, todos com
+mensagens docs/feat convencionais e alterações reais de arquivos. main aponta
+para `21cb5f0`; feat/api-reservas tem 3 commits exclusivos. Há evidência de feature
+por refs, ancestral comum e histórico exclusivo, mas zero merges/dois pais.
+R02 em andamento: faltam pelo menos dois commits com mudanças reais e o merge
+preservando a feature em T32. Plano de commits T08/T09 e seguintes em tasks;
+nenhuma etapa futura marcada concluída. Auditoria/evidência não criaram commits.
+
+## Evidência parcial T08
+
+CRUD completo, obrigatórios, DELETE 204/404 e DD-MM-YYYY foram executados com
+HTTP/SQL reais. 48 testes passaram, exit 0, com health 200, pausa real -> 503
+em 2008 ms, retomada -> 200 e stop do banco exclusivo -> 503 uniforme nas
+cinco rotas CRUD. Erro SQL planejado retornou 500 genérico; validação continuou
+400 sem banco. Evidências em api-local.txt e health-local.txt; zero containers
+remanescentes. R07 avançou para em andamento: health nativo verificado, falta
+healthcheck Compose/AWS. R04/R05/R06/R22/R29/R32 têm aceite HTTP local, mantendo
+estado parcial até as verificações de persistência/ambientes previstos. R02
+continua parcial: auditoria preservada em dbcd6a1/4 commits, marco T08 preparado
+para commit real; merge só em T32. R03 revalidado no stage T08: 14 arquivos conferidos; diff --cached --check exit 0; scanner delimitado sem ocorrência de padrões sensíveis.
