@@ -15,8 +15,9 @@ Estados: `pendente`, `em andamento`, `verificado`, `bloqueado`. Em 28/09/2026,
 o aluno revisou as specs e pediu a próxima tarefa, definindo `DD-MM-YYYY` (R32).
 R28 foi verificado pela conferência documental e revisão humana T03; T04 passou
 na verificação Git/documental local. Ainda não há teste API/Docker/Terraform/AWS.
-Nome, RA e entrega foram informados pelo aluno; T05 está em andamento e R02
-permanece parcial até seis commits e merge reais. Caminhos de evidência são
+Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
+inicial e feature branch reais. R02 permanece em andamento até seis commits e
+merge reais; a captura T05 é um snapshot histórico, não prova de R02 completo. Caminhos de evidência são
 planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 
 ## Matriz requisito → verificação → evidência → estado

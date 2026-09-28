@@ -170,3 +170,29 @@ projeto nem foi um erro de aplicação. Nada foi provisionado/publicado.
 
 Estado: alterações documentais preparadas; validação e commit ainda pendentes
 neste ponto do registro. Os resultados serão acrescentados somente após execução.
+
+Resultado real T05: revisão antes do stage passou; os nove arquivos foram
+adicionados explicitamente ao index, conferidos byte a byte e validados com
+`git diff --cached --check` (exit 0). O guia permaneceu intacto. O README contém
+Andreyh Rodrigues de Souza, RA 6325231, entrega 01/10/2026; o contrato de data
+DD-MM-YYYY e o PostgreSQL DATE permaneceram aprovados.
+
+`git commit -m "docs: registra especificacao e preparacao da prova"` criou
+`21cb5f0c19f2973c61c67f79543f22063853a04e` em main (exit 0). Git confirmou root sem
+parents, contagem 1 e worktree limpa. `git switch -c feat/api-reservas` criou a
+feature (exit 0); main e feature apontavam para esse hash e o estado estava limpo.
+Snapshot e saídas reais em `evidencias/git-workflow-inicial.txt`, coletados em
+2026-09-28T12:54:35-03:00. T05 verificado; R02 continua parcial.
+
+As evidências e documentos foram atualizados depois da execução para registrar
+o resultado. Serão versionados em commit documental real na feature, preservando
+o primeiro commit e sem alterar datas ou autoria. Nenhum teste API/container,
+Terraform, AWS, push, PR ou merge foi executado. Próxima tarefa: T06. Ferramentas
+utilizadas nesta sessão: Codex, terminal Git/Python/rg e revisão somente leitura
+pelo agente review_t05. Não houve documentação web nova ou uso de Kiro.
+
+A revisão independente final confirmou o escopo, identidade, contagem histórica
+explicitada e ausência de afirmações de merge/deploy. Foi ajustada a representação
+de `git commit -m` na evidência: aspas em torno da mensagem permitem reproduzir
+no shell a chamada executada originalmente por argumentos separados. As saídas,
+exit codes e hash reais não foram alterados.

@@ -19,12 +19,13 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T04 foram concluídas com revisão e validação local. Os dados
-do aluno foram preenchidos e T05 está em andamento: commit inicial dos documentos
-revisados e criação da feature branch. A aplicação, Dockerfile, Compose,
-infraestrutura, scripts de validação e relatório ainda não foram implementados.
-Não há build, CRUD, deploy, apply ou destroy comprovado. Após T05, a próxima
-tarefa é T06: dependências, schema e conexão com PostgreSQL real de teste.
+Em 28/09/2026, T01–T05 foram concluídas com revisão e validação local. O commit
+inicial `21cb5f0` foi criado em `main`, e a branch de trabalho é `feat/api-reservas`.
+O histórico foi iniciado; seis commits e merge exigidos pela prova continuam
+pendentes. A aplicação, Dockerfile, Compose, infraestrutura, scripts e relatório
+ainda não foram implementados. Não há build, CRUD, deploy, apply ou destroy
+comprovado. Próxima tarefa: T06, dependências, schema e conexão com PostgreSQL
+real de teste.
 
 ## Contrato aprovado para implementação
 
@@ -53,6 +54,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Tarefas](specs/tasks.md): dependências, estado real e próximo passo.
 - [Diário de IA](docs/diario-ia.md): prompts, decisões, correções e resultados reais.
 - [Evidência T04](evidencias/segredos-checklist.txt): verificação local das proteções Git/documentação.
+- [Evidência T05](evidencias/git-workflow-inicial.txt): commit inicial e criação da feature branch, com saídas reais.
 
 ## Verificação possível nesta etapa
 

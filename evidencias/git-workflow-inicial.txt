@@ -1,0 +1,150 @@
+T05 — evidência real do início do histórico Git
+Capturado em: 2026-09-28T12:54:35-03:00
+Escopo: Git local, commit inicial em main e feature branch; sem publicação ou AWS.
+Ponto de captura: após criar a branch e ANTES do commit documental que versiona esta evidência.
+Commit inicial: 21cb5f0c19f2973c61c67f79543f22063853a04e
+Mensagem: docs: registra especificacao e preparacao da prova
+main e feat/api-reservas apontavam para esse mesmo commit nesta captura.
+Contagem neste ponto: 1 commit real; mínimo de 6 e merge ainda pendentes.
+Guia preexistente foi preservado byte a byte; identidade Git configurada não foi alterada.
+
+REVISÃO REAL ANTES DO STAGE
+T05 — revisão antes do stage/commit
+Data: 2026-09-28T12:53:14-03:00
+PASSOU: apenas os nove arquivos revisados compõem o conjunto inicial
+PASSOU: guia preservado byte a byte
+PASSOU: .gitignore: newline final
+PASSOU: .gitignore: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: AGENTS.md: newline final
+PASSOU: AGENTS.md: link local existente ou URL externa documental
+PASSOU: AGENTS.md: link local existente ou URL externa documental
+PASSOU: AGENTS.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: GUIA-CODEX-PROVA-DEVOPS.md: newline final
+PASSOU: GUIA-CODEX-PROVA-DEVOPS.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: README.md: newline final
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: link local existente ou URL externa documental
+PASSOU: README.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: docs/diario-ia.md: newline final
+PASSOU: docs/diario-ia.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: evidencias/segredos-checklist.txt: newline final
+PASSOU: evidencias/segredos-checklist.txt: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: specs/design.md: newline final
+PASSOU: specs/design.md: link local existente ou URL externa documental
+PASSOU: specs/design.md: link local existente ou URL externa documental
+PASSOU: specs/design.md: link local existente ou URL externa documental
+PASSOU: specs/design.md: link local existente ou URL externa documental
+PASSOU: specs/design.md: link local existente ou URL externa documental
+PASSOU: specs/design.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: specs/requirements.md: newline final
+PASSOU: specs/requirements.md: link local existente ou URL externa documental
+PASSOU: specs/requirements.md: link local existente ou URL externa documental
+PASSOU: specs/requirements.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: specs/tasks.md: newline final
+PASSOU: specs/tasks.md: scanner delimitado sem padrão sensível; valores não exibidos
+PASSOU: README contém nome completo exato, com h final em Andreyh
+PASSOU: README contém RA 6325231
+PASSOU: README contém data de entrega informada, sem inferir abertura de PR
+PASSOU: README sem placeholders de identidade/data
+PASSOU: contrato de data da API preservado
+PASSOU: tag proposta de proprietário sincronizada com RA
+PASSOU: caminho de entrega sincronizado
+PASSOU: index vazio antes do stage
+PASSOU: ainda sem commits reais antes de T05
+PASSOU: commit inicial será criado na main
+PASSOU: feature branch ainda não existe
+PASSOU: git check-ignore .env: exit 0, esperado 0
+PASSOU: git check-ignore infra/terraform.tfstate: exit 0, esperado 0
+PASSOU: git check-ignore chave.pem: exit 0, esperado 0
+PASSOU: git check-ignore infra/infra.tfplan: exit 0, esperado 0
+PASSOU: git check-ignore .env.example: exit 1, esperado 1
+PASSOU: git check-ignore app/package-lock.json: exit 1, esperado 1
+PASSOU: git check-ignore infra/.terraform.lock.hcl: exit 1, esperado 1
+PASSOU: git check-ignore evidencias/git-workflow-inicial.txt: exit 1, esperado 1
+Verificação local Git/documental; não comprova API, Docker ou AWS.
+Scanner limitado; revisão humana continua necessária.
+RESULTADO: PASSOU
+EXIT CODE: 0
+
+STAGE E CHECK
+git add -- .gitignore AGENTS.md GUIA-CODEX-PROVA-DEVOPS.md README.md docs/diario-ia.md evidencias/segredos-checklist.txt specs/design.md specs/requirements.md specs/tasks.md
+Exit code: 0
+git diff --cached --check
+Exit code: 0, sem erros
+Conjunto staged: 9 arquivos autorizados; conteúdo comparado aos arquivos revisados.
+
+COMANDOS GIT EXECUTADOS
+Invocados via subprocess com argumentos separados; abaixo representados com aspas para reprodução no shell.
+$ git branch --show-current
+Exit code: 0
+STDOUT:
+main
+$ git diff --cached --check
+Exit code: 0
+STDOUT: vazio
+$ git commit -m 'docs: registra especificacao e preparacao da prova'
+Exit code: 0
+STDOUT:
+[main (root-commit) 21cb5f0] docs: registra especificacao e preparacao da prova
+ 9 files changed, 1485 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 AGENTS.md
+ create mode 100644 GUIA-CODEX-PROVA-DEVOPS.md
+ create mode 100644 README.md
+ create mode 100644 docs/diario-ia.md
+ create mode 100644 evidencias/segredos-checklist.txt
+ create mode 100644 specs/design.md
+ create mode 100644 specs/requirements.md
+ create mode 100644 specs/tasks.md
+$ git rev-parse HEAD
+Exit code: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+$ git rev-list --parents -n 1 HEAD
+Exit code: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+$ git rev-list --count HEAD
+Exit code: 0
+STDOUT:
+1
+$ git status --porcelain
+Exit code: 0
+STDOUT: vazio
+$ git switch -c feat/api-reservas
+Exit code: 0
+STDOUT: vazio
+STDERR:
+Switched to a new branch 'feat/api-reservas'
+$ git branch --show-current
+Exit code: 0
+STDOUT:
+feat/api-reservas
+$ git rev-parse refs/heads/main
+Exit code: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+$ git rev-parse refs/heads/feat/api-reservas
+Exit code: 0
+STDOUT:
+21cb5f0c19f2973c61c67f79543f22063853a04e
+$ git status --porcelain
+Exit code: 0
+STDOUT: vazio
+$ git branch --show-current
+Exit code: 0
+STDOUT:
+feat/api-reservas
+$ git log --graph --decorate --oneline --all
+Exit code: 0
+STDOUT:
+* 21cb5f0 (HEAD -> feat/api-reservas, main) docs: registra especificacao e preparacao da prova
+
+RESULTADO T05: PASSOU — commit inicial real e feature branch comprovados.
+Limite: snapshot histórico anterior ao commit documental da evidência; não comprova 6 commits, merge, API, Docker ou AWS.
+Reprodução do estado atual: git log --graph --decorate --oneline --all; git branch --show-current; git status --short --branch.

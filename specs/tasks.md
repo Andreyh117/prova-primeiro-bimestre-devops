@@ -14,13 +14,14 @@ resultado real e atualizar esta tabela e a matriz de requirements.
 Em 28/09/2026, o aluno revisou as specs e definiu a data como `DD-MM-YYYY`.
 T03 e T04 estão verificados: revisão humana e proteção/documentação validadas
 localmente. T01–T04 não comprovam API, Docker, Terraform, AWS ou entrega.
-O aluno revisou T04 e autorizou T05, que está em andamento: commit inicial e
-feature branch. Depois de sua verificação, T06 será a próxima tarefa pendente.
+O aluno revisou T04 e autorizou T05, agora verificada: commit inicial `21cb5f0`
+em main e feature branch `feat/api-reservas`. A verificação é somente Git local;
+R02 ainda depende dos demais commits e merge. Próxima tarefa pendente: T06.
 
 ## Plano de tarefas pequenas
 
 Os arquivos em `evidencias/` abaixo são destinos previstos. T04 produziu
-`evidencias/segredos-checklist.txt`; T05 produzirá `evidencias/git-workflow-inicial.txt`
+`evidencias/segredos-checklist.txt`; T05 produziu `evidencias/git-workflow-inicial.txt`
 após executar Git. Não considerar os demais logs existentes sem conferi-los.
 Cada tarefa recebe entrada no diário.
 
@@ -30,7 +31,7 @@ Cada tarefa recebe entrada no diário.
 | T02 | T01 | R28 | Produzir AGENTS e requisitos/design/tarefas; conferir cobertura e referências. | Revisão estática: IDs, dependências, Markdown/links locais, escopo restrito aos quatro documentos e guia inalterado. | Estes quatro documentos; resultado da conferência abaixo. | verificado |
 | T03 | T02 | R28, R30, R32 | Aluno revisa pontos do design; registrar alterações e autorização para iniciar implementação. | Revisão humana explícita; esclarecer escolhas sem presumir resposta. | Resposta do aluno e decisão registrada. | verificado |
 | T04 | T03 | R01, R03, R24, R30 | Criar .gitignore, README com placeholders honestos e diário; preparar proteção antes de qualquer segredo. | `git check-ignore`, revisão de staged e consistência de variáveis; revisão documental local. | .gitignore, README, diário; checklist de segredos. | verificado |
-| T05 | T04 | R02, R28 | Commit inicial coerente dos documentos revisados; criar feature branch. | Git local mostra commit real e branch; não publicar sem escopo autorizado. | Diário e `evidencias/git-workflow-inicial.txt`; commits reais posteriores por marco. | em andamento |
+| T05 | T04 | R02, R28 | Commit inicial coerente dos documentos revisados; criar feature branch. | Git local mostra commit real e branch; não publicar sem escopo autorizado. | Diário e `evidencias/git-workflow-inicial.txt`; commits reais posteriores por marco. | verificado |
 | T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e teste de conexão local. | pendente |
 | T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | Testes e primeira parte de api-local.txt. | pendente |
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | Testes completos e health-local.txt. | pendente |
@@ -176,3 +177,19 @@ A identidade Git já está configurada; o pedido de nome no README não altera
 user.name/user.email. Não divulgar o e-mail nos logs. O commit inicial terá
 mensagem Conventional real; a branch `feat/api-reservas` será criada depois.
 A evidência será coletada somente após os comandos, sem antecipar aprovação.
+
+### T05 — resultado verificado
+
+Commit inicial real `21cb5f0c19f2973c61c67f79543f22063853a04e` em main, mensagem
+`docs: registra especificacao e preparacao da prova`. Branch `feat/api-reservas`
+criada depois, inicialmente apontando para esse commit. `git diff --cached --check`
+passou; staged conteve somente os nove arquivos revisados; guia preservado,
+identidade README correta e scanner delimitado sem achados. Git confirmou root
+sem parent, contagem 1 nesse ponto, main e feature com o mesmo hash e worktree
+limpa. A evidência real registra esse snapshot em
+`evidencias/git-workflow-inicial.txt`, incluindo saídas e exit codes.
+
+T05 foi marcada verificado somente após commit/branch reais. Um commit documental
+na feature versiona esta evidência posterior e o estado atualizado; não há merge
+nem seis commits completos. R02 permanece em andamento. Próxima tarefa: T06.
+Nenhum push/PR/provisionamento foi executado; entrega informada 01/10/2026.

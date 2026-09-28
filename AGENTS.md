@@ -19,8 +19,10 @@ Fontes consultadas em 27/09/2026:
 Em 28/09/2026, o aluno revisou T04, informou seus dados e autorizou preencher
 README e executar T05: revisar e fazer commit inicial local dos documentos,
 criar feature branch e registrar verificação Git real. T01–T04 estão verificadas;
-T05 está em andamento. Não criar API, Terraform, Compose, scripts ou relatório,
-nem fazer push/apply/PR nesta tarefa. T06 será a próxima etapa após concluir T05.
+T05 foi verificada: commit inicial `21cb5f0` em main e branch atual
+`feat/api-reservas`; resultado real em `evidencias/git-workflow-inicial.txt`.
+Próxima tarefa: T06. Não implementar API, Terraform, Compose, scripts ou relatório,
+nem fazer push/apply/PR no encerramento de T05.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
