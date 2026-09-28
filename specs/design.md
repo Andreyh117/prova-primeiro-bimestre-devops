@@ -3,9 +3,10 @@
 Este documento descreve como cumprir R01–R32 de [requirements.md](requirements.md).
 As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas ao
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
-data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema,
-conexão e testes locais; rotas HTTP e infraestrutura ainda são futuras. Planos
-AWS e destruição continuam sujeitos a revisão/autorização.
+data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
+conexão; T07 implementou POST e GET com 35 testes locais aprovados. PUT, DELETE,
+health/503 e infraestrutura são futuros. Planos AWS e destruição continuam
+sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
 
@@ -44,13 +45,17 @@ consultas/RETURNING, formatar a data para `DD-MM-YYYY`, por exemplo com
 esse formato nem depender de DateStyle/localidade/fuso. O ISO é apenas uma
 representação interna para a escrita SQL, nunca a resposta da API.
 
-Casos futuros de integração: aceitar `29-02-2024`; rejeitar `29-02-2025`,
-`31-04-2026`, `2026-10-15`, `1-2-2026` e data com horário. POST, GET de lista,
-GET por ID e PUT devem devolver a mesma data válida em `DD-MM-YYYY`; entrada
-rejeitada não pode alterar o banco. Estes testes ainda não foram executados.
+Casos T07 executados por HTTP/SQL: aceitar `29-02-2024` e extremos 0001/9999;
+rejeitar `29-02-2025`, `29-02-1900`, `31-04-2026`, `2026-10-15`, `1-2-2026`,
+horário e whitespace adicional. POST, GET de lista e GET por ID devolveram a
+mesma data válida em `DD-MM-YYYY`; entradas rejeitadas não inseriram linhas.
+PUT será implementado e validado em T08.
 
 D03: `cliente` é string com espaços externos removidos, entre 1 e 120 caracteres
-Unicode; rejeitar null, valores não string e texto vazio. `status` é obrigatório,
+Unicode; rejeitar null, valores não string, texto vazio, NUL e sequências
+Unicode malformadas (surrogates isolados). A restrição de texto foi explicitada
+em T07 para evitar erro de PostgreSQL ou substituição silenciosa na codificação.
+`status` é obrigatório,
 exatamente `pendente`, `confirmada` ou `cancelada`. Não há status padrão nem
 transições de estado especiais. São escolhas simples para validação previsível.
 
@@ -107,7 +112,22 @@ de certificado. O pool limita a cinco conexões e aplica timeouts. O runner
 `app/test/run-postgres.js` cria banco Docker exclusivo por UUID, em loopback,
 com senha só em memória e dados tmpfs. Executa migração e node:test; limpa apenas
 seu container por label. A suíte tem 3 testes de configuração e 15 de banco real.
-Isso não comprova CRUD HTTP nem TLS/RDS, que dependem de tarefas futuras.
+A evidência T06 isolada não comprova CRUD HTTP nem TLS/RDS.
+
+T07: `app/src/app.js` implementa POST e GET com parâmetros e RETURNING;
+`validation.js` valida dados antes do SQL; `errors.js` responde erros JSON;
+`server.js` inicia o servidor e fecha HTTP/pool ao receber SIGTERM/SIGINT.
+`npm start` usa PORT 3000 por padrão e exige PG*; schema é aplicado separadamente.
+`app/test/api.test.js` inicia o servidor nativo em subprocesso e confirma o
+estado do banco por um pool independente, incluindo alteração SQL refletida
+no GET. A suíte completa tem 35 testes: 17 HTTP, 15 de banco e 3 de configuração.
+Evidências em `evidencias/api-local.txt` e `evidencias/t07-execucao.txt`.
+400/404/413/415 estão cobertos; PUT/DELETE/health/503 são T08; restart/persistência
+é T09. TLS/RDS permanecem sem execução.
+
+Referências T07: [Express 5](https://expressjs.com/en/5x/api/),
+[erros assíncronos Express](https://expressjs.com/en/guide/error-handling/) e
+[parâmetros pg](https://node-postgres.com/features/queries).
 
 Referências consultadas para T06: [conexões pg](https://node-postgres.com/features/connecting),
 [parâmetros SQL](https://node-postgres.com/features/queries),

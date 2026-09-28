@@ -251,3 +251,48 @@ index e conferidos byte a byte contra os arquivos revisados;
 examinados (scanner limitado); node_modules e arquivos locais sensíveis ficaram
 fora do stage. Guia original preservado pelo SHA-256. O marco será registrado
 em Conventional Commit na feature, sem push ou merge nesta tarefa.
+
+## 28/09/2026 — T07: POST e GET de reservas
+
+Prompt: o aluno revisou T06 e pediu executar a próxima tarefa pendente seguindo
+AGENTS, implementar, validar, corrigir e registrar evidências reais. Git estava
+limpo em feat/api-reservas, HEAD 99ffedd. Escopo: POST /reservas, GET /reservas
+e GET /reservas/:id; validação DD-MM-YYYY, corpos/IDs e 404.
+
+Implementação preparada: Express 5, SQL parametrizado, RETURNING, validação
+explícita de calendário gregoriano sem Date e retorno to_char. A revisão antes
+da suíte tornou datas/IDs estritos contra newline final e rejeitou NUL/Unicode
+malformado em cliente para evitar erro ou mudança ao gravar. A restrição de
+texto será explicitada no design; é decisão técnica, não regra do professor.
+A suíte inicia src/server.js em subprocesso, faz HTTP real e verifica SQL por
+um pool independente; limpa somente IDs criados em banco efêmero exclusivo.
+Estado neste ponto: T07 em andamento, testes ainda não executados.
+
+Resultado real: `npm --prefix app test` passou 35 testes, exit 0 (17 HTTP,
+15 de banco e 3 de configuração), PostgreSQL 16.15 no digest de T06. HTTP
+confirmou POST 201/Location, GET 200/404, 400 para obrigatórios/tipos/calendário,
+413 acima de 16 KiB e 415 para Content-Type; SQL independente confirmou DATE
+2026-10-15 e retorno HTTP 15-10-2026, sem uso de mocks. Erros não inseriram linhas.
+A primeira execução não apresentou falhas. Na revisão posterior, URIError do
+Express para URL malformada iria para o fallback 500; ajustado para 400 e
+acrescentados três casos de URL no teste de ID. A revalidação passou 35/35,
+exit 0. Não foi simulado um teste falhando; a correção veio da leitura do código.
+
+As duas execuções completas estão em evidencias/api-local.txt. A API nativa
+encerrou com SIGTERM/código 0 e os containers próprios foram removidos. Testes
+separados de npm start com PORT inválida e PG* ausente retornaram 1 esperado;
+docker ps com labels de teste retornou zero containers, exit 0. Evidência em
+evidencias/t07-execucao.txt. .env não criado, senhas efêmeras não exibidas.
+
+Ferramentas usadas: Codex, terminal Git/Python/Node/npm/Docker e documentação
+oficial Express 5 (async errors/API) e pg (parâmetros); links no design. Não
+houve uso de agentes auxiliares nesta etapa. Mantidos nome/RA/entrega informados
+pelo aluno. T07 verificado somente após execução; R04/R05/R06/R22/R32 seguem
+parciais. Próximo: T08. PUT/DELETE/health/503, restart, Dockerfile/Compose,
+Terraform, AWS, push e PR não foram executados nesta tarefa.
+
+Revisão final T07: 14 arquivos adicionados explicitamente ao index e conferidos
+byte a byte; git diff --cached --check retornou 0. Padrões sensíveis examinados
+sem ocorrência (scanner limitado); node_modules/.env/PEM ignorados. Lockfile
+compatível e guia original intacto por SHA-256; links locais conferidos. Marco
+preparado para Conventional Commit local na feature, sem push ou merge.

@@ -19,16 +19,17 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T06 foram concluídas. O commit inicial `21cb5f0` está em
-`main` e o desenvolvimento segue em `feat/api-reservas`. T06 implementou schema,
-pool PostgreSQL, migração e testes. Os 18 testes passaram com PostgreSQL 16.15
-real em container exclusivo, removido ao encerrar; o teste de falha da migração
-retornou código 1 esperado. As rotas HTTP ainda não estão implementadas.
+Em 28/09/2026, T01–T07 foram concluídas. O commit inicial `21cb5f0` está em
+`main` e o desenvolvimento segue em `feat/api-reservas`. T07 implementou POST
+/reservas, GET /reservas e GET /reservas/:id sobre o schema/pool de T06.
+A suíte passou 35 testes com PostgreSQL 16.15 real: 17 HTTP em servidor nativo,
+15 de banco e 3 de configuração. As entradas rejeitadas não inseriram linhas.
+API encerrada com SIGTERM/código 0 e banco exclusivo removido ao finalizar.
 
 Express 5.2.1 e pg 8.23.0 estão fixados no package.json/lockfile. A imagem oficial
 PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. Os seis commits
 e merge da prova, Dockerfile/Compose da API, infraestrutura AWS e relatório
-continuam pendentes. Próxima tarefa: T07, POST e GET de reservas.
+continuam pendentes. Próxima tarefa: T08, PUT completo, DELETE e /health.
 
 ## Contrato aprovado para implementação
 
@@ -36,18 +37,23 @@ Reserva: `id` gerado pelo PostgreSQL, `cliente`, `data` e `status`.
 `cliente`, `data` e `status` são obrigatórios em POST e PUT; PUT substitui todos
 os campos editáveis. Status aceitos: `pendente`, `confirmada`, `cancelada`.
 
-A API receberá e devolverá `data` como **`DD-MM-YYYY`**, com dia/mês de dois dígitos e
-ano de quatro dígitos, sem horário. O banco mantém o tipo `DATE`, com conversão
-explícita e validação do calendário. A API rejeitará datas impossíveis e formato
-ISO externo; a validação HTTP ainda não foi implementada/testada. T06 comprovou
-no banco o tipo DATE e a leitura explícita por SQL no formato aprovado.
+POST recebe `data` como **`DD-MM-YYYY`**, com dia/mês de dois dígitos e ano de
+quatro dígitos, sem horário. POST e GET devolvem a data nesse mesmo formato.
+O banco mantém `DATE`; POST converte por componentes para ISO interno e GET
+formata explicitamente por SQL. T07 confirmou datas válidas/bissextas e rejeição
+de datas impossíveis, ISO externo, tipos incorretos e espaços. PUT seguirá o
+mesmo contrato em T08. Cliente é texto Unicode válido, sem NUL, de 1 a 120
+caracteres após trim. O corpo deve conter exatamente cliente, data e status.
 
 ```json
 {"cliente":"Cliente de teste","data":"15-10-2026","status":"pendente"}
 ```
 
-Rotas planejadas: POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id` e GET
-`/health`. O healthcheck verificará o banco real, retornando 503 se indisponível.
+Rotas disponíveis: POST/GET `/reservas` e GET `/reservas/:id`.
+POST retorna 201 e Location; GET retorna 200 (lista ordenada por ID) ou 404 se
+não encontrar o ID. Entrada inválida retorna 400, corpo acima de 16 KiB retorna
+413 e Content-Type inadequado retorna 415, com erro JSON. PUT, DELETE, /health
+e tratamento 503 de banco indisponível serão implementados em T08.
 Contrato completo em [specs/design.md](specs/design.md).
 
 ## Documentação e acompanhamento
@@ -62,6 +68,8 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Dependências T06](evidencias/t06-dependencias.txt): instalação, npm ci e versões reais.
 - [PostgreSQL T06](evidencias/t06-postgres-local.txt): migração e 18 testes com banco real.
 - [Falha controlada T06](evidencias/t06-falha-controlada.txt): código não zero e limpeza confirmada.
+- [HTTP e PostgreSQL T07](evidencias/api-local.txt): duas execuções reais da suíte de 35 testes.
+- [Execução T07](evidencias/t07-execucao.txt): falhas esperadas de npm start e limpeza.
 
 ## Executar os testes disponíveis
 
@@ -72,23 +80,40 @@ npm --prefix app ci --ignore-scripts --no-fund
 npm --prefix app test
 ```
 
-O teste cria somente seu container PostgreSQL, publica porta dinâmica em
-127.0.0.1, gera senha em memória, aplica o schema e roda `node:test`. Ao terminar,
-remove seu container e descarta seus dados em tmpfs; outros bancos não são
-alterados. A primeira execução pode baixar a imagem fixada por digest. Não é
-necessário criar .env ou informar senha para essa suíte. Falhas resultam em
-exit code não zero. Não há API HTTP para subir ainda.
+O runner cria seu container PostgreSQL, publica porta dinâmica em 127.0.0.1,
+gera senha em memória, aplica o schema e roda `node:test`. A suíte HTTP inicia
+a API nativa em porta livre e verifica requisições/SQL; limpa somente seus IDs
+e encerra a API. Ao terminar, o runner remove seu container/dados tmpfs.
+A primeira execução pode baixar a imagem fixada por digest. Não é necessário
+criar .env ou informar senha para essa suíte. Falhas resultam em exit code não zero.
 
 O schema está em [app/sql/001-reservas.sql](app/sql/001-reservas.sql), o pool em
 [app/src/db.js](app/src/db.js), e os testes reais em
-[app/test/database.test.js](app/test/database.test.js). O SQL inicial pode ser
-reaplicado sem apagar linhas; mudanças de estrutura exigirão novas migrações.
+[app/test/database.test.js](app/test/database.test.js) e
+[app/test/api.test.js](app/test/api.test.js). Rotas em [app/src/app.js](app/src/app.js),
+validação em [app/src/validation.js](app/src/validation.js) e inicialização em
+[app/src/server.js](app/src/server.js). O SQL inicial pode ser reaplicado sem
+apagar linhas; mudanças de estrutura exigirão novas migrações.
 
 Para aplicar o schema em um banco já configurado para a tarefa, com as variáveis
 PG* disponíveis no ambiente, execute `npm --prefix app run db:migrate`.
 PGHOST, PGDATABASE, PGUSER, PGPASSWORD e PGSSL são obrigatórios; PGPORT assume
 5432 se omitido. `PGSSL=true` exige PGSSLROOTCERT com a CA. A configuração TLS
 foi testada; handshake e conexão com RDS só serão validados na etapa AWS.
+
+Para executar a API nativa em banco próprio já configurado/migrado:
+
+```bash
+npm --prefix app start
+```
+
+O comando usa PG* do ambiente e PORT (padrão 3000), escutando em 0.0.0.0.
+Não carrega .env automaticamente. Com configuração incompleta, encerra com
+código 1 e mensagem sem credenciais. Com API em execução, pode conferir a lista:
+
+```bash
+curl --fail --silent --show-error http://127.0.0.1:3000/reservas
+```
 
 `git status --short --branch` permite conferir o trabalho local. `.gitignore`
 evita inclusão acidental de arquivos locais, mas não protege arquivos já

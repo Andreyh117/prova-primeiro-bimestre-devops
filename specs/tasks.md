@@ -18,7 +18,9 @@ O aluno revisou T04 e autorizou T05, agora verificada: commit inicial `21cb5f0`
 em main e feature branch `feat/api-reservas`. A verificação é somente Git local;
 R02 ainda depende dos demais commits e merge. O aluno revisou T05 e autorizou
 T06, agora verificada: dependências, schema/conexão e 18 testes com PostgreSQL
-16.15 real. Próxima tarefa pendente: T07, POST e GET de reservas.
+16.15 real. O aluno revisou T06 e autorizou T07, agora verificada com 35 testes,
+POST/GET HTTP reais e SQL independente. Próxima tarefa pendente: T08, PUT
+completo, DELETE e /health com erros uniformes e banco indisponível 503.
 
 ## Plano de tarefas pequenas
 
@@ -35,7 +37,7 @@ Cada tarefa recebe entrada no diário.
 | T04 | T03 | R01, R03, R24, R30 | Criar .gitignore, README com placeholders honestos e diário; preparar proteção antes de qualquer segredo. | `git check-ignore`, revisão de staged e consistência de variáveis; revisão documental local. | .gitignore, README, diário; checklist de segredos. | verificado |
 | T05 | T04 | R02, R28 | Commit inicial coerente dos documentos revisados; criar feature branch. | Git local mostra commit real e branch; não publicar sem escopo autorizado. | Diário e `evidencias/git-workflow-inicial.txt`; commits reais posteriores por marco. | verificado |
 | T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e evidencias/t06-*.txt: instalação, 18 testes e falha controlada. | verificado |
-| T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | Testes e primeira parte de api-local.txt. | pendente |
+| T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | app/test/api.test.js, api-local.txt (35 testes) e t07-execucao.txt. | verificado |
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | Testes completos e health-local.txt. | pendente |
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt; commit real de API/testes. | pendente |
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt, docker-run.txt; commit real Docker. | pendente |
@@ -218,3 +220,26 @@ Evidências: `evidencias/t06-dependencias.txt`, `evidencias/t06-postgres-local.t
 controlada era um teste negativo planejado. O bloqueio do sandbox nas leituras
 foi resolvido com execução autorizada fora do isolamento, sem bloqueio restante.
 Próxima tarefa: T07. Não houve HTTP/Compose/Terraform/AWS/push nesta etapa.
+
+### T07 — resultado verificado em 28/09/2026
+
+POST /reservas: 201, Location e quatro campos; GET lista: 200/array ordenado;
+GET por ID: 200 ou 404. Validação pré-SQL de corpo exato, obrigatórios, cliente
+Unicode/trim/120, status e data civil DD-MM-YYYY (0001–9999). SQL parametrizado,
+DATE interno e to_char nas respostas. 400 para JSON/IDs/URL inválidos, 413 para
+corpo acima de 16 KiB, 415 para Content-Type inadequado; erros JSON sem SQL/stack.
+
+Comando real `npm --prefix app test`: 35 testes passaram, 0 falharam, exit 0;
+17 HTTP em servidor nativo subprocesso, 15 de PostgreSQL e 3 de configuração.
+A primeira execução passou; a revisão posterior identificou o tratamento de
+URIError como 500 e o ajustou para 400. Nova execução com URLs malformadas
+passou os mesmos 35 testes. Ambas as saídas foram preservadas em api-local.txt.
+SQL independente confirmou a linha POST e alteração SQL refletida no GET;
+entradas rejeitadas não gravaram. API encerrou com SIGTERM/código 0; container
+exclusivo removido nas duas execuções. npm start com PORT inválida ou PG* ausente
+retornou código 1 esperado; verificação Docker encontrou zero containers de
+teste (t07-execucao.txt). Sem bloqueio local.
+
+Arquivos: app/src/{app,validation,errors,server}.js, app/test/api.test.js,
+script start em app/package.json, duas evidências e AGENTS/README/specs/diário.
+Lockfile/dependências/schema de T06 preservados. Próximo passo: T08.

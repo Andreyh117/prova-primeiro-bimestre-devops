@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "node test/run-postgres.js",
-    "db:migrate": "node src/migrate.js"
+    "db:migrate": "node src/migrate.js",
+    "start": "node src/server.js"
   },
   "dependencies": {
     "express": "5.2.1",
