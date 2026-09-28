@@ -1,0 +1,288 @@
+T04 — verificação local real de proteções Git/documentação
+Execução: 2026-09-28T12:31:22-03:00
+Consultas de caminhos não criam .env, state, planos ou chaves.
+PASSOU: git check-ignore -q --no-index -- node_modules/test/index.js; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/node_modules/test/index.js; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.local; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.test; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.production; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/.env; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/.env.local; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/.terraform/providers/cache; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/.terraform/providers/cache; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate.backup; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate.123.backup; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/infra.tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/backend.tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/infra.tfplan.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/plan.out; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfvars; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/secrets.auto.tfvars; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/secrets.auto.tfvars.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/backend.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/settings.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- chave.pem; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/chave.pem; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- id_ed25519; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .aws/credentials; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .terraformrc; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- credentials.tfrc.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- prova-reservas.tar; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- prova-reservas.tar.gz; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .gitignore; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- .env.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/.env.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- .env.test.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/package.json; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/package-lock.json; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/.terraform.lock.hcl; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/backend/.terraform.lock.hcl; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/main.tf; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/variables.tf; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfvars.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/backend.local.hcl.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/terraform-plan.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/docker-build.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/segredos-checklist.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- README.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- AGENTS.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- docs/diario-ia.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- specs/design.md; exit 1; esperado 1
+Caminhos consultados: 32 sensíveis/artefatos; 19 exemplos/fontes/evidências.
+PASSOU: git ls-files --cached: zero arquivos rastreados/staged nesta etapa
+PASSOU: git diff --cached --quiet --exit-code: nenhuma alteração no index
+PASSOU: HEAD sem commits; T05 não executada
+PASSOU: branch main preservada
+PASSOU: guia preexistente preservado byte a byte
+Guia SHA256: b34e948176d8a7c77ea8b5fb0be2b3e543c00f189055409799432869aaece785
+PASSOU: escopo: somente docs, gitignore, guia e evidência T04
+PASSOU: não criou aplicação, infra, scripts, ambiente secreto ou relatório
+PASSOU: AGENTS.md: newline final e sem espaço ao fim
+PASSOU: AGENTS.md: cercas Markdown pareadas
+PASSOU: AGENTS.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: AGENTS.md: padrões de access key/token GitHub/chave privada ausentes
+FALHOU: README.md: newline final e sem espaço ao fim
+PASSOU: README.md: cercas Markdown pareadas
+PASSOU: README.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: README.md: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: specs/requirements.md: newline final e sem espaço ao fim
+PASSOU: specs/requirements.md: cercas Markdown pareadas
+PASSOU: specs/requirements.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: specs/requirements.md: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: specs/design.md: newline final e sem espaço ao fim
+PASSOU: specs/design.md: cercas Markdown pareadas
+PASSOU: specs/design.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: specs/design.md: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: specs/tasks.md: newline final e sem espaço ao fim
+PASSOU: specs/tasks.md: cercas Markdown pareadas
+PASSOU: specs/tasks.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: specs/tasks.md: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: docs/diario-ia.md: newline final e sem espaço ao fim
+PASSOU: docs/diario-ia.md: cercas Markdown pareadas
+PASSOU: docs/diario-ia.md: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: docs/diario-ia.md: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: .gitignore: newline final e sem espaço ao fim
+PASSOU: .gitignore: cercas Markdown pareadas
+PASSOU: .gitignore: links locais resolvidos (evidência é criada nesta execução)
+PASSOU: .gitignore: padrões de access key/token GitHub/chave privada ausentes
+PASSOU: AGENTS.md: contrato revisado presente
+PASSOU: README.md: contrato revisado presente
+PASSOU: specs/requirements.md: contrato revisado presente
+PASSOU: specs/design.md: contrato revisado presente
+PASSOU: specs/tasks.md: contrato revisado presente
+PASSOU: README.md: mesmos 11 nomes de variáveis previstas, sem valores secretos
+PASSOU: specs/design.md: mesmos 11 nomes de variáveis previstas, sem valores secretos
+PASSOU: README mantém identidade/data da prova como placeholders
+PASSOU: R01–R32 únicos e ordenados
+FALHOU: todos os requisitos pertencem à mesma tabela Markdown contínua
+PASSOU: T01–T34 únicos e ordenados
+PASSOU: T01: dependências anteriores válidas
+PASSOU: T02: dependências anteriores válidas
+PASSOU: T03: dependências anteriores válidas
+PASSOU: T04: dependências anteriores válidas
+PASSOU: T05: dependências anteriores válidas
+PASSOU: T06: dependências anteriores válidas
+PASSOU: T07: dependências anteriores válidas
+PASSOU: T08: dependências anteriores válidas
+PASSOU: T09: dependências anteriores válidas
+PASSOU: T10: dependências anteriores válidas
+PASSOU: T11: dependências anteriores válidas
+PASSOU: T12: dependências anteriores válidas
+PASSOU: T13: dependências anteriores válidas
+PASSOU: T14: dependências anteriores válidas
+PASSOU: T15: dependências anteriores válidas
+PASSOU: T16: dependências anteriores válidas
+PASSOU: T17: dependências anteriores válidas
+PASSOU: T18: dependências anteriores válidas
+PASSOU: T19: dependências anteriores válidas
+PASSOU: T20: dependências anteriores válidas
+PASSOU: T21: dependências anteriores válidas
+PASSOU: T22: dependências anteriores válidas
+PASSOU: T23: dependências anteriores válidas
+PASSOU: T24: dependências anteriores válidas
+PASSOU: T25: dependências anteriores válidas
+PASSOU: T26: dependências anteriores válidas
+PASSOU: T27: dependências anteriores válidas
+PASSOU: T28: dependências anteriores válidas
+PASSOU: T29: dependências anteriores válidas
+PASSOU: T30: dependências anteriores válidas
+PASSOU: T31: dependências anteriores válidas
+PASSOU: T32: dependências anteriores válidas
+PASSOU: T33: dependências anteriores válidas
+PASSOU: T34: dependências anteriores válidas
+PASSOU: T05–T34 continuam pendentes
+PASSOU: design não mantém o formato externo anterior
+PASSOU: exemplo JSON de reserva usa 15-10-2026
+Limite: esta busca não garante ausência de todo tipo de segredo; revisão humana antes do Git permanece obrigatória.
+Ambiente: verificação Git e documental local; nenhum build, CRUD, Terraform ou AWS executado.
+RESULTADO FINAL: FALHOU
+EXIT CODE: 1
+
+T04 — reexecução após correções documentais
+Execução: 2026-09-28T12:33:16-03:00
+Comando: Python 3 consultando git check-ignore -q --no-index e Git somente leitura; consultas de caminhos não criam segredos.
+PASSOU: matriz de 51 caminhos reais reexecutada após correções
+PASSOU: git check-ignore -q --no-index -- node_modules/test/index.js; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/node_modules/test/index.js; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.local; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.test; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .env.production; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/.env; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- app/.env.local; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/.terraform/providers/cache; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/.terraform/providers/cache; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate.backup; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfstate.123.backup; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/infra.tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/backend.tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/infra.tfplan.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- tfplan; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/plan.out; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfvars; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/secrets.auto.tfvars; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/secrets.auto.tfvars.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/backend/backend.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/settings.local.hcl; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- chave.pem; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- infra/chave.pem; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- id_ed25519; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .aws/credentials; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .terraformrc; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- credentials.tfrc.json; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- prova-reservas.tar; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- prova-reservas.tar.gz; exit 0; esperado 0
+PASSOU: git check-ignore -q --no-index -- .gitignore; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- .env.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/.env.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- .env.test.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/package.json; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- app/package-lock.json; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/.terraform.lock.hcl; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/backend/.terraform.lock.hcl; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/main.tf; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/variables.tf; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/terraform.tfvars.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- infra/backend.local.hcl.example; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/terraform-plan.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/docker-build.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- evidencias/segredos-checklist.txt; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- README.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- AGENTS.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- docs/diario-ia.md; exit 1; esperado 1
+PASSOU: git check-ignore -q --no-index -- specs/design.md; exit 1; esperado 1
+PASSOU: Git não contém arquivos staged/rastreados
+PASSOU: index permanece sem alterações
+PASSOU: continua sem commits; T05 pendente
+PASSOU: branch main preservada
+PASSOU: guia preexistente byte a byte preservado
+PASSOU: escopo final contém somente os nove arquivos autorizados/preexistentes
+PASSOU: sem API, infraestrutura, scripts, Compose, relatório ou segredo criado
+PASSOU: AGENTS.md: newline/espaços finais corrigidos
+PASSOU: AGENTS.md: cercas Markdown pareadas
+PASSOU: AGENTS.md: links locais existentes
+PASSOU: AGENTS.md: padrões de credenciais/chaves ausentes
+PASSOU: README.md: newline/espaços finais corrigidos
+PASSOU: README.md: cercas Markdown pareadas
+PASSOU: README.md: links locais existentes
+PASSOU: README.md: padrões de credenciais/chaves ausentes
+PASSOU: specs/requirements.md: newline/espaços finais corrigidos
+PASSOU: specs/requirements.md: cercas Markdown pareadas
+PASSOU: specs/requirements.md: links locais existentes
+PASSOU: specs/requirements.md: padrões de credenciais/chaves ausentes
+PASSOU: specs/design.md: newline/espaços finais corrigidos
+PASSOU: specs/design.md: cercas Markdown pareadas
+PASSOU: specs/design.md: links locais existentes
+PASSOU: specs/design.md: padrões de credenciais/chaves ausentes
+PASSOU: specs/tasks.md: newline/espaços finais corrigidos
+PASSOU: specs/tasks.md: cercas Markdown pareadas
+PASSOU: specs/tasks.md: links locais existentes
+PASSOU: specs/tasks.md: padrões de credenciais/chaves ausentes
+PASSOU: docs/diario-ia.md: newline/espaços finais corrigidos
+PASSOU: docs/diario-ia.md: cercas Markdown pareadas
+PASSOU: docs/diario-ia.md: links locais existentes
+PASSOU: docs/diario-ia.md: padrões de credenciais/chaves ausentes
+PASSOU: .gitignore: newline/espaços finais corrigidos
+PASSOU: .gitignore: cercas Markdown pareadas
+PASSOU: .gitignore: links locais existentes
+PASSOU: .gitignore: padrões de credenciais/chaves ausentes
+PASSOU: AGENTS.md: contrato revisado presente
+PASSOU: README.md: contrato revisado presente
+PASSOU: specs/requirements.md: contrato revisado presente
+PASSOU: specs/design.md: contrato revisado presente
+PASSOU: specs/tasks.md: contrato revisado presente
+PASSOU: README.md: 11 variáveis de configuração consistentes
+PASSOU: specs/design.md: 11 variáveis de configuração consistentes
+PASSOU: identidade e data da prova continuam como placeholders
+PASSOU: R01–R32 únicos/ordenados
+PASSOU: R01–R32 na mesma tabela Markdown contínua
+PASSOU: T01–T34 únicos/ordenados
+PASSOU: T01: dependências anteriores válidas
+PASSOU: T02: dependências anteriores válidas
+PASSOU: T03: dependências anteriores válidas
+PASSOU: T04: dependências anteriores válidas
+PASSOU: T05: dependências anteriores válidas
+PASSOU: T06: dependências anteriores válidas
+PASSOU: T07: dependências anteriores válidas
+PASSOU: T08: dependências anteriores válidas
+PASSOU: T09: dependências anteriores válidas
+PASSOU: T10: dependências anteriores válidas
+PASSOU: T11: dependências anteriores válidas
+PASSOU: T12: dependências anteriores válidas
+PASSOU: T13: dependências anteriores válidas
+PASSOU: T14: dependências anteriores válidas
+PASSOU: T15: dependências anteriores válidas
+PASSOU: T16: dependências anteriores válidas
+PASSOU: T17: dependências anteriores válidas
+PASSOU: T18: dependências anteriores válidas
+PASSOU: T19: dependências anteriores válidas
+PASSOU: T20: dependências anteriores válidas
+PASSOU: T21: dependências anteriores válidas
+PASSOU: T22: dependências anteriores válidas
+PASSOU: T23: dependências anteriores válidas
+PASSOU: T24: dependências anteriores válidas
+PASSOU: T25: dependências anteriores válidas
+PASSOU: T26: dependências anteriores válidas
+PASSOU: T27: dependências anteriores válidas
+PASSOU: T28: dependências anteriores válidas
+PASSOU: T29: dependências anteriores válidas
+PASSOU: T30: dependências anteriores válidas
+PASSOU: T31: dependências anteriores válidas
+PASSOU: T32: dependências anteriores válidas
+PASSOU: T33: dependências anteriores válidas
+PASSOU: T34: dependências anteriores válidas
+PASSOU: T05–T34 pendentes, sem avanço fora da tarefa
+PASSOU: formato externo anterior removido do design
+PASSOU: exemplo JSON corrigido para DD-MM-YYYY
+PASSOU: mudança de data identificada como requisito do aluno
+PASSOU: casos de calendário inválido estão definidos como testes futuros
+Limite: busca por padrões não substitui revisão humana nem garante ausência de todo tipo de segredo.
+Somente validação Git/documental local; nenhum teste API, Docker, Terraform ou AWS realizado.
+RESULTADO FINAL: PASSOU
+EXIT CODE: 0
