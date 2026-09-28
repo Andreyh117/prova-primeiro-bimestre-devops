@@ -1,0 +1,18 @@
+{
+  "name": "prova-primeiro-bimestre-devops",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API de Reservas da prova individual de DevOps",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "node test/run-postgres.js",
+    "db:migrate": "node src/migrate.js"
+  },
+  "dependencies": {
+    "express": "5.2.1",
+    "pg": "8.23.0"
+  }
+}

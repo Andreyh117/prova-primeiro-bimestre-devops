@@ -16,7 +16,9 @@ T03 e T04 estão verificados: revisão humana e proteção/documentação valida
 localmente. T01–T04 não comprovam API, Docker, Terraform, AWS ou entrega.
 O aluno revisou T04 e autorizou T05, agora verificada: commit inicial `21cb5f0`
 em main e feature branch `feat/api-reservas`. A verificação é somente Git local;
-R02 ainda depende dos demais commits e merge. Próxima tarefa pendente: T06.
+R02 ainda depende dos demais commits e merge. O aluno revisou T05 e autorizou
+T06, agora verificada: dependências, schema/conexão e 18 testes com PostgreSQL
+16.15 real. Próxima tarefa pendente: T07, POST e GET de reservas.
 
 ## Plano de tarefas pequenas
 
@@ -32,7 +34,7 @@ Cada tarefa recebe entrada no diário.
 | T03 | T02 | R28, R30, R32 | Aluno revisa pontos do design; registrar alterações e autorização para iniciar implementação. | Revisão humana explícita; esclarecer escolhas sem presumir resposta. | Resposta do aluno e decisão registrada. | verificado |
 | T04 | T03 | R01, R03, R24, R30 | Criar .gitignore, README com placeholders honestos e diário; preparar proteção antes de qualquer segredo. | `git check-ignore`, revisão de staged e consistência de variáveis; revisão documental local. | .gitignore, README, diário; checklist de segredos. | verificado |
 | T05 | T04 | R02, R28 | Commit inicial coerente dos documentos revisados; criar feature branch. | Git local mostra commit real e branch; não publicar sem escopo autorizado. | Diário e `evidencias/git-workflow-inicial.txt`; commits reais posteriores por marco. | verificado |
-| T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e teste de conexão local. | pendente |
+| T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e evidencias/t06-*.txt: instalação, 18 testes e falha controlada. | verificado |
 | T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | Testes e primeira parte de api-local.txt. | pendente |
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | Testes completos e health-local.txt. | pendente |
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt; commit real de API/testes. | pendente |
@@ -193,3 +195,26 @@ T05 foi marcada verificado somente após commit/branch reais. Um commit document
 na feature versiona esta evidência posterior e o estado atualizado; não há merge
 nem seis commits completos. R02 permanece em andamento. Próxima tarefa: T06.
 Nenhum push/PR/provisionamento foi executado; entrega informada 01/10/2026.
+
+### T06 — resultado verificado em 28/09/2026
+
+O aluno revisou T05 e pediu executar a próxima tarefa. Foram fixados Express
+5.2.1 e pg 8.23.0, gerado lockfile e confirmado `npm ci` (ambos exit 0).
+Implementados schema de quatro colunas, pool, bootstrap SQL idempotente e CLI
+de migração. O teste auto-organizado usa Docker local, senha efêmera, loopback
+e tmpfs; não cria .env nem usa banco externo. A imagem PostgreSQL é oficial,
+fixada por digest, e executou versão 16.15.
+
+`npm --prefix app test`: 18 passaram, 0 falharam, exit 0, migração real concluída.
+Os 15 casos de banco confirmaram estrutura, SQL parametrizado, leitura por duas
+conexões reais, DATE/formatação, idempotência e constraints. Três casos de
+configuração confirmaram validação de variáveis/porta e configuração TLS com CA.
+TLS/RDS não foi executado; CRUD HTTP e validação externa DD-MM-YYYY são T07/T08.
+Migração sem PGHOST retornou exit 1 esperado, sem tentar usar uma conexão padrão.
+Limpeza confirmou zero containers de teste remanescentes.
+
+Evidências: `evidencias/t06-dependencias.txt`, `evidencias/t06-postgres-local.txt`,
+`evidencias/t06-falha-controlada.txt`. Não houve falha da suíte a corrigir; a falha
+controlada era um teste negativo planejado. O bloqueio do sandbox nas leituras
+foi resolvido com execução autorizada fora do isolamento, sem bloqueio restante.
+Próxima tarefa: T07. Não houve HTTP/Compose/Terraform/AWS/push nesta etapa.

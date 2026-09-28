@@ -3,8 +3,9 @@
 Este documento descreve como cumprir R01–R32 de [requirements.md](requirements.md).
 As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas ao
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
-data para `DD-MM-YYYY`; a decisão D02 foi atualizada. Ainda não há API/infra
-implementada. Planos AWS e destruição continuam sujeitos a revisão/autorização.
+data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema,
+conexão e testes locais; rotas HTTP e infraestrutura ainda são futuras. Planos
+AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
 
@@ -100,15 +101,29 @@ GET sempre consulta o banco. Script SQL inicial idempotente não apaga dados.
 Mudanças posteriores de schema terão migração explícita: não depender de
 `CREATE TABLE IF NOT EXISTS` para modificar uma tabela existente.
 
+T06: schema em `app/sql/001-reservas.sql`, pool em `app/src/db.js` e CLI em
+`app/src/migrate.js`. `PGSSL` é explícito; modo true exige CA e mantém verificação
+de certificado. O pool limita a cinco conexões e aplica timeouts. O runner
+`app/test/run-postgres.js` cria banco Docker exclusivo por UUID, em loopback,
+com senha só em memória e dados tmpfs. Executa migração e node:test; limpa apenas
+seu container por label. A suíte tem 3 testes de configuração e 15 de banco real.
+Isso não comprova CRUD HTTP nem TLS/RDS, que dependem de tarefas futuras.
+
+Referências consultadas para T06: [conexões pg](https://node-postgres.com/features/connecting),
+[parâmetros SQL](https://node-postgres.com/features/queries),
+[TLS pg](https://node-postgres.com/features/ssl) e
+[constraints PostgreSQL 16](https://www.postgresql.org/docs/16/ddl-constraints.html).
+
 ## Runtime, configuração e ambiente local
 
 D07: Node 24 LTS e Express 5, cliente `pg`, testes de integração com `node:test`
 e PostgreSQL real. Node 24.21.0 está instalado; a [lista oficial de releases](https://nodejs.org/en/about/previous-releases)
-identifica a linha 24 como LTS. Fixar versões exatas no lockfile npm após instalar
-e testar; selecionar tag/digest disponível da imagem Node 24 antes do build.
-PostgreSQL 16 é o major proposto nos dois ambientes; consultar engine minor
-disponível no RDS de us-east-1 e fixá-lo antes do plano. Não presumir que uma
-imagem ou engine específica já foi baixada/testada.
+identifica a linha 24 como LTS. T06 instalou Express 5.2.1 e pg 8.23.0 com versões
+exatas e lockfile; `npm ci` e a integração passaram. A imagem Node será fixada
+na tarefa Dockerfile. O teste local usou PostgreSQL 16.15, imagem oficial fixa
+por digest em `app/test/postgres-image.txt`; consultar separadamente a engine
+minor disponível no RDS de us-east-1 antes do plano. Não presumir disponibilidade
+no RDS somente porque uma versão Docker foi validada.
 
 | Configuração futura | Local | EC2/RDS |
 |---|---|---|

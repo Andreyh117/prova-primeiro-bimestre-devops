@@ -196,3 +196,58 @@ explicitada e ausência de afirmações de merge/deploy. Foi ajustada a represen
 de `git commit -m` na evidência: aspas em torno da mensagem permitem reproduzir
 no shell a chamada executada originalmente por argumentos separados. As saídas,
 exit codes e hash reais não foram alterados.
+
+## 28/09/2026 — T06: dependências, schema e conexão PostgreSQL
+
+Prompt: o aluno revisou T05 e pediu executar a próxima tarefa pendente, implementar,
+validar, corrigir e registrar evidências reais seguindo AGENTS. Foi executada T06;
+rotas HTTP permanecem nas tarefas T07/T08.
+
+Decisão: usar Node 24.21.0 já instalado, Express 5.2.1 e pg 8.23.0 verificados
+no registry npm; ambos compatíveis pelos engines publicados. As versões diretas
+foram fixadas no package.json e a árvore no lockfile. Instalação e reinstalação
+`npm ci --ignore-scripts --no-fund` passaram, assim como `npm ls --depth=0`.
+A documentação oficial pg de conexão/queries/TLS e PostgreSQL 16 de constraints
+fundamentou o uso de pool, parâmetros, CA e validações no banco; links no design.
+
+Schema: quatro campos aprovados, identity sempre gerada, obrigatórios e CHECKs
+cliente/status. SQL inicial é idempotente e não altera estruturas preexistentes;
+mudanças futuras exigem migração. Pool usa cinco conexões, timeouts e erros sem
+credenciais. PGSSL é explícito, com CA e verificação ativada quando true. A CLI
+aplica o SQL e fecha o pool, retornando código não zero se houver falha.
+
+Para verificar sem depender de configurações de outros projetos, npm test cria
+um PostgreSQL exclusivo em Docker local unix:///var/run/docker.sock, com nome/label
+UUID, senha gerada em memória, porta dinâmica só em 127.0.0.1 e dados em tmpfs.
+A imagem oficial postgres:16-alpine foi baixada e fixada no digest registrado em
+app/test/postgres-image.txt; o servidor real reportou PostgreSQL 16.15. Não foi
+criado .env ou segredo no repositório. O runner executa a CLI de migração antes
+da suíte e remove somente seu próprio container ao finalizar.
+
+Resultado: 18 testes passaram, 0 falharam, exit 0; 3 de configuração e 15 de
+banco real. Houve leitura por backends PostgreSQL distintos, texto com apóstrofo
+e SQL preservado por parâmetros, datas civis nos extremos/bissexta, schema
+reaplicado sem perda da linha e rejeição de valores que violam constraints.
+O teste TLS verifica objeto/CA; não houve handshake nem conexão RDS. HTTP e
+validação de entrada DD-MM-YYYY ainda não existem. A migração sem variáveis PG*
+foi executada separadamente e retornou código 1 com PGHOST obrigatório, como
+esperado, sem conexão padrão. Limpeza confirmou zero containers de teste.
+
+Evidências reais: t06-dependencias.txt, t06-postgres-local.txt e
+t06-falha-controlada.txt em evidencias/. Sem falha inesperada da suíte a corrigir;
+não relatar o caso negativo planejado como defeito. O sandbox de terminal voltou
+a falhar com mountinfo path is not absolute; a execução autorizada fora dele
+permitiu concluir. Não houve Dockerfile/Compose da API, Terraform, AWS ou push.
+
+Ferramentas: Codex, terminal Git/Python/Node/npm/Docker, documentação oficial via
+navegador e agente review_t06. O agente revisou requisitos, implementou somente
+a suíte de banco, verificou sintaxe e fez revisão final somente leitura; a
+integração foi executada pelo agente principal. O aluno não foi descrito como
+autor de experiências não relatadas. T06 verificado; próximo passo T07.
+
+Revisão final T06: os 19 arquivos do marco foram adicionados explicitamente ao
+index e conferidos byte a byte contra os arquivos revisados;
+`git diff --cached --check` retornou 0. Nenhuma ocorrência nos padrões sensíveis
+examinados (scanner limitado); node_modules e arquivos locais sensíveis ficaram
+fora do stage. Guia original preservado pelo SHA-256. O marco será registrado
+em Conventional Commit na feature, sem push ou merge nesta tarefa.

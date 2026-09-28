@@ -14,7 +14,9 @@ prova, individual; não inclui funcionalidades do contexto PULSAR.
 Estados: `pendente`, `em andamento`, `verificado`, `bloqueado`. Em 28/09/2026,
 o aluno revisou as specs e pediu a próxima tarefa, definindo `DD-MM-YYYY` (R32).
 R28 foi verificado pela conferência documental e revisão humana T03; T04 passou
-na verificação Git/documental local. Ainda não há teste API/Docker/Terraform/AWS.
+na verificação Git/documental local. T06 passou com PostgreSQL 16.15 real:
+18 testes, migração, configuração negativa e limpeza. Ainda não há CRUD HTTP,
+Dockerfile/Compose da API ou teste Terraform/AWS.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. R02 permanece em andamento até seis commits e
 merge reais; a captura T05 é um snapshot histórico, não prova de R02 completo. Caminhos de evidência são
@@ -27,9 +29,9 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R01 / P | Repositório próprio público `prova-primeiro-bimestre-devops`, README na raiz com nome completo, RA e descrição; estrutura `app/`, `infra/`, `evidencias/` e `relatorio.md` conforme enunciado. | Conferir arquivos e acesso público ao GitHub sem login; placeholders resolvidos antes da entrega. | README, URL pública e `evidencias/entrega-checklist.txt`. | em andamento |
 | R02 / P | Pelo menos seis commits reais usando Conventional Commits; feature branch e merge demonstráveis. | Contar commits, revisar mensagens e grafo; localizar commits exclusivos da feature e merge. | `evidencias/git-workflow-inicial.txt` (T05); `evidencias/git-log.txt` e `evidencias/git-branches.txt` (final). | em andamento |
 | R03 / P+U | `.gitignore` protege node_modules, .env, .terraform, state/backups, PEM, planos binários e variáveis locais sensíveis; nenhum segredo rastreado. | `git check-ignore` em caminhos representativos e revisão de arquivos staged/rastreados, incluindo evidências. | `.gitignore` e `evidencias/segredos-checklist.txt`, sem segredos. | verificado |
-| R04 / P | API Node.js/Express com `id`, `cliente`, `data`, `status` e POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id`. | Criar, listar, buscar, atualizar e excluir a mesma reserva; verificar corpo e persistência. | `evidencias/api-local.txt`, `evidencias/api-aws.txt`. | pendente |
+| R04 / P | API Node.js/Express com `id`, `cliente`, `data`, `status` e POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id`. | Criar, listar, buscar, atualizar e excluir a mesma reserva; verificar corpo e persistência. | `evidencias/api-local.txt`, `evidencias/api-aws.txt`. | em andamento |
 | R05 / P | POST valida campos obrigatórios; GET por ID inexistente retorna 404. | Omitir cada obrigatório, enviar vazio/inválido e buscar ID ausente; não gravar entradas rejeitadas. As demais regras são decisões D01–D04. | Testes de integração e logs de CRUD. | pendente |
-| R06 / P | CRUD usa PostgreSQL real localmente e RDS na nuvem, lendo e gravando no banco; sem armazenamento em memória substituindo persistência. | Conferir a linha por SQL, reiniciar a API e consultá-la novamente nos dois ambientes. | `evidencias/postgres-local.txt`, `evidencias/rds-crud.txt`. | pendente |
+| R06 / P | CRUD usa PostgreSQL real localmente e RDS na nuvem, lendo e gravando no banco; sem armazenamento em memória substituindo persistência. | Conferir a linha por SQL, reiniciar a API e consultá-la novamente nos dois ambientes. | `evidencias/postgres-local.txt`, `evidencias/rds-crud.txt`. | em andamento |
 | R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | pendente |
 | R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt`. | pendente |
 | R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt`. | pendente |
@@ -52,10 +54,10 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R26 / P | No fork da disciplina, PR altera apenas `entregas/provaPrimeiroBi/6325231/entrega.md`, com link do projeto e evidências; modelo traz aluno, RA, data, IA e checklist. | Conferir diff contra base correta; links funcionais e somente o arquivo de entrega no PR. | Arquivo no fork separado e diff de submissão. | pendente |
 | R27 / P | Apenas um PR por aluno, aberto presencialmente no dia da prova; nenhum commit posterior no PR. | Confirmar data com aluno/professor antes da abertura e revisar submissão completa; registrar URL/base/head/commit final. | PR e `evidencias/entrega-checklist.txt`; abertura fora desta etapa. | pendente |
 | R28 / U | Primeiro inspecionar sem sobrescrever, produzir AGENTS e três specs, separar exigências/decisões e obter revisão antes de código; tarefas pequenas e matriz sincronizada. | Conferência documental T01/T02; aprovação do aluno T03. | Os quatro documentos e registro da etapa em tasks. | verificado |
-| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | Scripts futuros e logs de execução por ambiente. | pendente |
+| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | Scripts futuros e logs de execução por ambiente. | em andamento |
 | R30 / U | Diário registra prompts, decisões, correções e resultados reais; nunca inventar identidade, experiência, evidências ou histórico. | Confrontar diário/relatório com comandos, Git e relato do aluno; usar placeholders enquanto faltarem informações. | `docs/diario-ia.md`, specs e relatório. | em andamento |
 | R31 / U | Antes de provisionar/destruir, apresentar plano e obter autorização específica; sem auto-approve ou apagamento antecipado de state/dados. | Diário registra revisão, escopo e autorização antes de cada operação; scripts só verificam. | Diário, planos locais ignorados e evidências sanitizadas. | pendente |
-| R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | Testes futuros, api-local.txt, api-aws.txt e rds-crud.txt. | pendente |
+| R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | Testes futuros, api-local.txt, api-aws.txt e rds-crud.txt. | em andamento |
 
 ## Informações confirmadas e pendências
 
@@ -82,3 +84,14 @@ R04–R23 e R32 só podem ser marcados conforme seus testes reais. R28 foi concl
 com a revisão T03, sem comprovar implementação. A entrega completa exige resolver
 toda a matriz, inclusive destroy e submissão no momento correto; nenhuma operação
 AWS foi executada. Requisitos contínuos, como R03, devem ser revalidados antes do Git.
+
+## Evidência parcial T06
+
+Schema e conexão foram validados localmente com 18 testes reais/configuração,
+comandos e resultados em `evidencias/t06-dependencias.txt`,
+`evidencias/t06-postgres-local.txt` e `evidencias/t06-falha-controlada.txt`.
+R04/R06/R29/R32 estão em andamento: a base e os testes do banco existem, mas
+CRUD HTTP, scripts restantes e RDS continuam futuros. R12 continua pendente de
+`.env.example` no Compose; a suíte T06 gera suas credenciais apenas em memória.
+R03 revalidado no stage deste marco: 19 arquivos conferidos, sem ocorrência dos padrões sensíveis examinados. Imagem PostgreSQL em teste não comprova
+Dockerfile/Compose da API (R08–R11); configuração TLS não comprova conexão RDS.

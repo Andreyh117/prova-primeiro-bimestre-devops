@@ -16,13 +16,13 @@ Fontes consultadas em 27/09/2026:
   decisões propostas e acompanhamento. Não transformar escolhas do design em
   critérios que o professor teria exigido.
 
-Em 28/09/2026, o aluno revisou T04, informou seus dados e autorizou preencher
-README e executar T05: revisar e fazer commit inicial local dos documentos,
-criar feature branch e registrar verificação Git real. T01–T04 estão verificadas;
-T05 foi verificada: commit inicial `21cb5f0` em main e branch atual
-`feat/api-reservas`; resultado real em `evidencias/git-workflow-inicial.txt`.
-Próxima tarefa: T06. Não implementar API, Terraform, Compose, scripts ou relatório,
-nem fazer push/apply/PR no encerramento de T05.
+Em 28/09/2026, o aluno revisou T05 e autorizou T06. T01–T06 estão verificadas
+na `feat/api-reservas`. T06 implementou dependências fixas, schema e pool
+PostgreSQL; 18 testes passaram com PostgreSQL 16.15 real e migração executada.
+Evidências: `evidencias/t06-dependencias.txt`, `evidencias/t06-postgres-local.txt`
+e `evidencias/t06-falha-controlada.txt`. O banco de teste exclusivo foi removido.
+Próxima tarefa pendente: T07, POST e GET de reservas. Não avançar para outra
+tarefa no encerramento de T06; Compose, Terraform, AWS e publicação seguem futuros.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
@@ -91,7 +91,8 @@ diretórios ancestrais. Não há aplicação ou infraestrutura testável ainda.
 
 Foram consultadas versões, sem iniciar serviços: Git 2.43.0, Node 24.21.0,
 npm 11.19.0, Docker CLI 29.8.1, Terraform 1.16.2, AWS CLI 2.35.6 e Python 3.12.3.
-Isso não verifica o daemon Docker, o plugin Compose, credenciais AWS ou permissões.
+Naquela consulta apenas versões foram lidas. Em T06, o daemon Docker foi validado
+com banco real; plugin Compose, credenciais AWS e permissões de nuvem continuam futuros.
 O terminal isolado falhou com `mountinfo path is not absolute`; as leituras foram
 executadas fora desse isolamento. Essa falha é do ambiente, não da aplicação.
 
@@ -103,13 +104,13 @@ git ls-files
 rg --files --hidden -g '!.git/**' -g '!node_modules/**'
 ```
 
-Os comandos abaixo são o contrato de validação **para depois da implementação**.
-Não executá-los agora, nem anunciar sucesso enquanto seus arquivos/dependências
-não existirem. Scripts deverão ter saída clara e exit code não zero na falha.
+A validação PostgreSQL já está disponível em T06; os demais comandos dependem
+das respectivas tarefas. Não anunciar sucesso quando arquivos/dependências não
+existirem. Scripts devem ter saída clara e exit code não zero na falha.
 
 | Verificação futura | Comando e pré-condição |
 |---|---|
-| API com banco real | `npm --prefix app ci`; `npm --prefix app test`, com PostgreSQL de teste configurado e isolado; nenhuma simulação de banco no teste de integração. |
+| Camada PostgreSQL (T06 disponível) | `npm --prefix app ci --ignore-scripts --no-fund`; `npm --prefix app test`. Node 24 e Docker local: o runner cria PostgreSQL isolado em loopback, usa senha efêmera e o remove no finally; 18 testes reais/configuração. CRUD HTTP ainda depende de T07/T08. |
 | Build Docker | `docker build -t prova-reservas:local app`; daemon disponível e lockfile criado. |
 | Usuário da imagem | `docker run --rm --entrypoint id prova-reservas:local -u`; exigir UID diferente de 0. |
 | Compose | `docker compose config --quiet`; `docker compose up --build --wait`; `docker compose ps`; `.env` local válido e plugin Compose compatível. Não publicar `docker compose config` completo, que pode expandir senhas. |

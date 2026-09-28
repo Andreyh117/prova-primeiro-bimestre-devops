@@ -1,0 +1,14 @@
+T06 — falha controlada e limpeza
+Data: 2026-09-28T16:19:58-03:00
+Comando: npm --prefix app run db:migrate, com variáveis PG* removidas somente no subprocesso de teste.
+
+> prova-primeiro-bimestre-devops@0.1.0 db:migrate
+> node src/migrate.js
+PGHOST é obrigatório.
+EXIT CODE observado: 1
+Esperado: código 1 e PGHOST obrigatório; nenhuma conexão deve ser tentada.
+Comando: docker ps -a filtrado pelos labels do projeto e de teste
+Containers encontrados: 0
+EXIT CODE: 0
+RESULTADO: PASSOU
+Limite: TLS foi conferido na configuração/CA; nenhuma conexão TLS com RDS ou execução AWS foi realizada.
