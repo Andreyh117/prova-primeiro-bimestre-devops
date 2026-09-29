@@ -1,0 +1,67 @@
+services:
+  api:
+    image: prova-reservas:local
+    build:
+      context: ./app
+    environment:
+      PORT: "3000"
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB:?Defina POSTGRES_DB no .env}
+      PGUSER: ${POSTGRES_USER:?Defina POSTGRES_USER no .env}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      PGSSL: "false"
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"
+    networks:
+      - reservas-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/health', {signal: AbortSignal.timeout(2500)})
+          .then(async r => {const b = await r.json(); if (r.status !== 200 || b.status !== 'ok' || b.database !== 'ok') process.exit(1);})
+          .catch(() => process.exit(1))
+      interval: 3s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+      start_interval: 1s
+
+  db:
+    image: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB no .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - reservas-data:/var/lib/postgresql/data
+      - type: bind
+        source: ./app/sql/001-reservas.sql
+        target: /docker-entrypoint-initdb.d/001-reservas.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      - reservas-net
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h 127.0.0.1 -p 5432 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+      start_interval: 1s
+
+networks:
+  reservas-net:
+    driver: bridge
+
+volumes:
+  reservas-data:

@@ -19,7 +19,9 @@ na verificação Git/documental local. T06 passou com PostgreSQL 16.15 real:
 POST/GET HTTP reais, validação e leitura SQL independente, com limpeza completa.
 T08 passou 48 testes com CRUD completo, health/503 e falhas reais do banco.
 Restart da API nativa foi verificado em T09; Dockerfile/contexto/runtime em T10.
-Compose, persistência de volume e Terraform/AWS continuam pendentes.
+Compose/ambiente/healthchecks foram verificados em T11 com CRUD/SQL reais.
+Persistência após recriar containers mantendo o volume e Terraform/AWS continuam
+pendentes.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. Seis commits reais foram confirmados em T09;
 R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
@@ -37,10 +39,10 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R06 / P | CRUD usa PostgreSQL real localmente e RDS na nuvem, lendo e gravando no banco; sem armazenamento em memória substituindo persistência. | Conferir a linha por SQL, reiniciar a API e consultá-la novamente nos dois ambientes. | `evidencias/postgres-local.txt`, `evidencias/rds-crud.txt`. | em andamento |
 | R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | em andamento |
 | R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt` (T10 real, UID 1000 e HTTP/SQL). | verificado |
-| R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt`. | pendente |
+| R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt` (T11 real). | verificado |
 | R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | pendente |
-| R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt`. | pendente |
-| R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore`, checklist. | pendente |
+| R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt` (T11 real). | verificado |
+| R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore` e compose-rede-saude.txt (config/mapeamentos/ignores reais). | verificado |
 | R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-seguranca.txt`, plano sanitizado. | pendente |
 | R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | Módulo e `evidencias/aws-rede.txt`. | pendente |
 | R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | `evidencias/aws-seguranca.txt`. | pendente |
@@ -163,3 +165,18 @@ R22 permanece em andamento: evidências docker-build.txt/docker-run.txt existem,
 mas Compose/AWS/plan/deploy continuam futuros. R09–R11 pendentes; rede/tmpfs
 do teste não comprovam Compose/volume. R02 continua parcial pelo merge pendente;
 T09 foi o sexto commit real (93d313c), T10 prepara outro marco com alterações.
+
+## Evidência T11 — R09/R11/R12 e avanço R07/R22
+
+R09 verificado: config e up --build --wait exit 0, ps api/db healthy; CRUD/SQL
+reais no PostgreSQL 16.15, DD-MM-YYYY/DATE preservados. R11 verificado: bridge
+com ambos, healthchecks efetivos e API iniciada após db saudável, partindo de
+containers parados. R12 verificado: .env.example só placeholders, .env ignorado,
+config padrão/mapeamentos POSTGRES_* -> PG* coerentes e senha ausente exit 1.
+Evidências compose-ps.txt/compose-rede-saude.txt e trecho em api-local.txt.
+Zero linhas/recursos do fixture após limpeza; .env do usuário não alterado.
+R07 avançou com healthcheck Compose executado; segue parcial até health AWS.
+R22 continua parcial até Terraform/AWS. R10 permanece pendente da prova T12:
+volume nomeado declarado/montado em T11 não equivale a testar recriação.
+T10 commitada em 49dbd5e/sete commits; T11 prepara novo marco real; merge T32
+continua pendente, mantendo R02 parcial. Sem bloqueio local/AWS executada.

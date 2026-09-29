@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T10 foram concluídas. O commit inicial `21cb5f0` está em
+Em 28/09/2026, T01–T11 foram concluídas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -35,8 +35,12 @@ commit real (`93d313c`); merge preservando a feature continua em T32.
 T10 construiu a imagem da API com Node 24.21.0 fixado por digest, USER node/UID
 1000 e dependências instaladas via lockfile. Teste Docker passou duas vezes, com
 contexto filtrado, health/CRUD/SQL reais e encerramento/limpeza confirmados.
-Compose, infraestrutura AWS e relatório continuam pendentes.
-Próxima tarefa: T11, Compose, ambiente local e healthchecks.
+T11 validou Compose v5.5.1, API/db saudáveis, rede bridge, volume nomeado,
+bootstrap SQL, dependência de saúde e CRUD/SQL reais. .env.example está disponível;
+config sem senha retornou 1 esperado. Fixture/ambiente de teste foram limpos.
+T10 foi o sétimo commit real (49dbd5e); merge continua em T32. Infraestrutura AWS
+e relatório permanecem pendentes.
+Próxima tarefa: T12, comprovar persistência após recriar containers sem apagar volume.
 
 ## Contrato aprovado para implementação
 
@@ -77,12 +81,14 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Dependências T06](evidencias/t06-dependencias.txt): instalação, npm ci e versões reais.
 - [PostgreSQL T06](evidencias/t06-postgres-local.txt): migração e 18 testes com banco real.
 - [Falha controlada T06](evidencias/t06-falha-controlada.txt): código não zero e limpeza confirmada.
-- [HTTP e PostgreSQL local](evidencias/api-local.txt): duas execuções T07 com 35 testes, T08 com 48 e T09 com 51, sem apagar histórico.
+- [HTTP e PostgreSQL local](evidencias/api-local.txt): T07 com 35 testes, T08 com 48, T09 com 51 e trecho HTTP/SQL do Compose T11, sem apagar histórico.
 - [Persistência T09](evidencias/postgres-local.txt): script com exit 0/1, sentinela preservada e SQL/GET antes, durante e após reiniciar a API nativa.
 - [Saúde T08](evidencias/health-local.txt): pause/unpause/stop reais do banco exclusivo, respostas HTTP e limpeza.
 - [Execução T07](evidencias/t07-execucao.txt): falhas esperadas de npm start e limpeza.
 - [Build Docker T10](evidencias/docker-build.txt): duas execuções reais, contexto exportado, digest, instalação e UID 1000.
 - [Execução Docker T10](evidencias/docker-run.txt): PID 1 não-root, PostgreSQL real, health/CRUD/SQL, SIGTERM e limpeza.
+- [Compose ps T11](evidencias/compose-ps.txt): config, caso negativo sem senha, build/subida e serviços healthy.
+- [Compose rede/saúde T11](evidencias/compose-rede-saude.txt): ordem real, rede/volume/portas, CRUD/SQL, defaults do exemplo e limpeza.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -210,24 +216,84 @@ rede e marcadores. Falhas retornam código não zero. Não imprime Docker inspec
 completo nem variáveis contendo senhas. Logs anteriores ficam como evidências
 históricas; executar o runner não altera os logs versionados automaticamente.
 
-O teste Docker é separado dos 51 testes nativos de T09. Rede temporária e tmpfs
-não substituem Compose, healthchecks/dependência ou volume persistente: T11/T12
-farão essas verificações. RDS/TLS continuam futuros.
+O teste Docker é separado dos 51 testes nativos de T09 e do Compose T11 abaixo.
+A prova de persistência ao recriar containers/volume será T12. RDS/TLS continuam
+futuros.
 
-## Configuração prevista
+## Executar API e PostgreSQL com Compose
 
-As credenciais dos testes são efêmeras e ficam em memória/ambiente; nenhum .env
-foi criado. `.env.example` será preparado na tarefa Compose, com placeholders,
-e `.env` permanecerá ignorado. Nomes de
-variáveis previstos, em acordo com o design:
+Na raiz, prepare seu ambiente local:
 
-| Variável | Finalidade futura |
+```bash
+cp .env.example .env
+chmod 600 .env
+```
+
+Edite `.env` e substitua `SUBSTITUA_POR_SENHA_LOCAL` por uma senha própria.
+PORT publica a API em 127.0.0.1:3000 por padrão; POSTGRES_DB/USER/PASSWORD
+inicializam o banco. O Compose deriva PGDATABASE/PGUSER/PGPASSWORD desses mesmos
+valores e define PGHOST=db, PGPORT=5432 e PGSSL=false. A API usa PORT=3000 dentro
+do container. Não é necessário duplicar credenciais em PG* no .env do Compose.
+
+Inicie os dois serviços com um comando:
+
+```bash
+docker compose config --quiet
+docker compose up --build --wait
+docker compose ps
+python3 scripts/verify-api.py --base-url http://127.0.0.1:3000
+```
+
+Se mudar PORT no .env, use essa porta na URL de verificação. Depende de Docker,
+BuildKit e Compose com suporte a start_interval (>=2.20.2; validado v5.5.1).
+O Compose constrói a API e usa PostgreSQL 16.15 fixado por digest. O banco não
+publica 5432 no host. Ambos usam a rede bridge lógica `reservas-net`; nomes reais
+recebem prefixo do projeto. O healthcheck db usa pg_isready via TCP; a API aguarda
+service_healthy e seu healthcheck Node consulta /health/SELECT 1. Não requer curl
+na imagem. SQL de bootstrap é montado read-only no entrypoint do PostgreSQL;
+só roda ao inicializar um volume vazio.
+
+O volume nomeado lógico `reservas-data` está em /var/lib/postgresql/data. Para
+parar/remover containers e rede mantendo o volume do seu projeto:
+
+```bash
+docker compose down
+```
+
+A criação e o mount desse volume foram verificados em T11; a prova de retenção
+de uma reserva após recriar containers ainda será T12. Não usar down -v nesse
+teste. Em volume existente, mudança de schema exige migração explícita; alterar
+POSTGRES_* no .env não reinicializa nem troca a senha do banco já criado.
+
+Para repetir o teste isolado de T11, sem preparar/alterar seu .env:
+
+```bash
+npm --prefix app run test:compose
+```
+
+[app/test/run-compose.js](app/test/run-compose.js) requer Node 24/Python 3 e
+Docker/Compose. Usa projeto UUID e ambiente temporário 0600 em /tmp, senha
+aleatória não impressa e porta dinâmica de loopback. Confere config sem senha
+(exit 1 esperado), config válido em memória, create/build com containers parados,
+up --build --wait, ps, horários de health/início, rede/volume/portas/UID e
+CRUD/SQL. Após remover as linhas, encerra seu projeto sem down -v e remove
+separadamente somente o volume novo/exclusivo com labels conferidos. Limpa env
+privado; mantém .env e volumes de outros projetos. Falhas retornam não zero;
+o runner não atualiza evidências versionadas nem realiza AWS/recriação T12.
+
+## Configuração do ambiente
+
+[.env.example](.env.example) contém somente quatro variáveis e senha placeholder.
+.env e variantes locais continuam ignorados. PG* para API nativa/RDS são fornecidos
+no ambiente do processo; Node não carrega .env automaticamente.
+
+| Variável | Uso |
 |---|---|
-| `PORT` | Porta HTTP da API (3000). |
-| `PGHOST`, `PGPORT` | Host/porta do PostgreSQL local ou RDS. |
-| `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Banco e autenticação; senha só em ambiente local protegido. |
-| `PGSSL`, `PGSSLROOTCERT` | TLS e CA oficial ao conectar ao RDS. |
-| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Inicialização do PostgreSQL no Compose local. |
+| PORT | .env Compose: porta publicada no host (3000 padrão); API nativa: porta de escuta. No container Compose permanece 3000. |
+| POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD | Inicialização do PostgreSQL Compose; origem das variáveis equivalentes de conexão da API. |
+| PGHOST, PGPORT | No Compose: db/5432; API nativa/RDS: host/porta fornecidos pelo ambiente. |
+| PGDATABASE, PGUSER, PGPASSWORD | Derivados de POSTGRES_* no Compose; banco/autenticação explícitos na API nativa/RDS. |
+| PGSSL, PGSSLROOTCERT | Compose local: false, sem CA; RDS futuro: true com CA oficial. |
 
 Node 24.21.0, Express 5.2.1, pg 8.23.0 e PostgreSQL 16.15 foram validados
 localmente em T06. A versão minor disponível no RDS e a compatibilidade do

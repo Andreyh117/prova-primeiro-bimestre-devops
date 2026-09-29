@@ -1189,3 +1189,50 @@ Limpeza confirmada: container de teste removido; dados temporários descartados.
 stderr:
 (vazio)
 Exit code real: 0
+
+T11 — HTTP/SQL reais da execução Compose de 28/09/2026 22:41:48 -03:00
+Comando completo: npm --prefix app run test:compose
+Origem: captura integral /tmp/devops-t11-test.txt, SHA-256 7f2652d41787f8481d9fa93568de83d92f806d112d049c3ce0b7d24d0e453806.
+Trecho exato de stdout da mesma execução; limpeza completa em compose-rede-saude.txt.
+GET /health -> HTTP 200; corpo real: {"status":"ok","database":"ok"}
+Comando: python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-api.py' '--base-url' 'http://127.0.0.1:32775'
+stdout:
+Marcador exclusivo para conferência/limpeza: Verificacao API 74f8bd18-bc11-4600-b073-b088872d5abf
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/1 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/1 -> 200
+PASSOU: PUT /reservas/1 -> 400
+PASSOU: GET /reservas/1 -> 200
+PASSOU: DELETE /reservas/1 -> 204
+PASSOU: GET /reservas/1 -> 404
+PASSOU: DELETE /reservas/1 -> 404
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+PASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.
+
+stderr:
+(vazio)
+Exit code real: 0
+POST /reservas -> HTTP 201; corpo real: {"id":2,"cliente":"Compose T11 prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa","data":"01-10-2026","status":"pendente"}
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT json_build_object('"'"'id'"'"',id,'"'"'cliente'"'"',cliente,'"'"'data_iso'"'"',to_char(data,'"'"'YYYY-MM-DD'"'"'),'"'"'tipo'"'"',pg_typeof(data)::text,'"'"'status'"'"',status)::text FROM public.reservas WHERE id = 2'
+stdout:
+{"id" : 2, "cliente" : "Compose T11 prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa", "data_iso" : "2026-10-01", "tipo" : "date", "status" : "pendente"}
+
+stderr:
+(vazio)
+Exit code real: 0
+DELETE /reservas/2 -> HTTP 204; corpo real: (vazio)
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT count(*) FROM public.reservas'
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: bootstrap do volume novo, seis rotas, CRUD/SQL reais e zero linhas de teste. Persistência após recriar será T12.
+Exit code real da execução completa: 0

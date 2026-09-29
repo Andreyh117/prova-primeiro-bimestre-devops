@@ -506,3 +506,71 @@ Revalidação efetiva do stage inteiro contra HEAD^ passou: diff --cached --chec
 exit 0, 12 arquivos com bytes conferidos, scanner delimitado sem achados e
 links/sintaxe válidos. A correção de formatação foi comparada aos logs originais
 e limitou-se aos espaços finais declarados; fonte/artefato testado preservados.
+
+## 28/09/2026 — T11: Compose, ambiente e healthchecks
+
+Prompt: após revisar T10, executar a próxima tarefa seguindo AGENTS, implementar,
+validar, corrigir e registrar evidências reais. Estado inicial: HEAD 49dbd5e,
+sete commits reais em feat/api-reservas, worktree limpa, zero merges. Compose
+v5.5.1 confirmado; T11 iniciada, T12 pendente. Planejado: api/db, rede bridge,
+volume nomeado e SQL inicial read-only, health TCP PostgreSQL e health HTTP/Node
+da API; depends_on service_healthy. .env.example com placeholders e mapeamento
+POSTGRES_* -> PG* da API, sem duplicar senhas. Teste usa projeto UUID e env privado
+em /tmp, porta dinâmica de loopback, configurações expandidas só em memória.
+Partir de containers parados, conferir saúde/ordem/mounts/rede, CRUD/SQL reais e
+limpar somente os recursos e volume exclusivos/sem linhas do próprio teste.
+Não executar recriação/persistência T12 nem qualquer ação AWS/publicação.
+
+Implementação T11: docker-compose.yml sem version obsoleto, API build/USER node,
+PostgreSQL no digest existente, bridge/volume por projeto, init SQL read-only e
+healthchecks. db usa pg_isready TCP para aguardar servidor final pós-bootstrap;
+API usa Node/fetch/health SELECT 1. depends_on service_healthy controla início.
+.env.example quatro variáveis/placeholder; Compose deriva PG* para uma única
+origem de credenciais. Runner Node stdlib usa projeto UUID, env privado 0600
+fora do repo e sanitiza variáveis do shell que poderiam trocar o fixture.
+Config JSON expandido nunca foi impresso nem gravado; checks em memória.
+
+Resultado real em 22:41:48 -03:00: npm --prefix app run test:compose passou,
+exit 0. Config sem senha exit 1 esperado, config válido 0. Containers db/api
+criados e parados antes de up; db health exit 0 terminou 22:41:56.797 -03:00,
+API iniciou 22:41:57.175 -03:00, ambos healthy em ps. Bridge, volume nomeado,
+bootstrap bind read-only, banco sem porta e API loopback 32775 confirmados.
+PostgreSQL 16.15, UID API 1000. verify-api.py CRUD/obrigatórios/data inválida/PUT
+parcial/404/limpeza exit 0; SQL confirmou POST ID 2/01-10-2026 como DATE
+2026-10-01, DELETE 204 e count 0. Sem falha inesperada nem correção de código.
+Não inventar defeito: exit 1 da senha ausente foi caso negativo planejado.
+
+Cleanup: down sem -v, volume novo do fixture removido separadamente depois de
+conferir labels/identidade; zero recursos UUID nas consultas posteriores. Env
+privado removido; .env da raiz ausente, sem alterar arquivo/volume do usuário.
+Teste é exclusivo de T11 e não recriou containers para provar persistência T12.
+Conferência adicional .env.example: config --quiet exit 0, defaults/mapeamentos
+JSON só em memória, quatro keys/placeholder e ignores Git passaram.
+
+Logs reais em compose-ps.txt/compose-rede-saude.txt, com espaços finais
+normalizados explicitamente para diff --check; stdout integral preservado em
+/tmp/devops-t11-test.txt e hash na transcrição. Trecho HTTP/SQL exato anexado a
+api-local.txt mantendo T07–T09 intactos; registros anteriores T10 preservados.
+README/AGENTS/design/tasks/matriz sincronizados; R09/R11/R12 local verificados,
+R10/T12 e AWS continuam pendentes. Suíte nativa 51/T10 não repetidas porque API,
+schema/lockfile/Dockerfile não mudaram; novo teste integrou a configuração.
+Ferramentas: Codex, terminal Git/Python/Node/npm/Docker/Compose e navegador;
+documentação primária Docker Compose/health/interpolation/down e imagem oficial
+PostgreSQL. Fontes no design; sem agentes auxiliares, merge/push/PR/AWS. Próximo
+T12; marco feat(compose) preparado após revisão de stage, sem antecipar hash.
+
+A primeira checagem estática posterior ao teste abortou exit 1: scanner lexical
+interpretou POSTGRES_PASSWORD=${password} do fonte Node como senha literal.
+Revisão confirmou password gerado por randomBytes em memória; env privado fora
+do repo, sem valor real no fonte/logs. Tratar apenas essa interpolação conhecida
+e o placeholder explicitamente validado como exceções pontuais do scanner,
+mantendo os demais padrões e revisão. Não é falha de aplicação nem segredo
+descoberto. Corrigida expressão documental ambígua sobre recriar volume:
+T12 recria somente containers e mantém o volume. Revalidar antes do stage.
+
+Revalidação estática passou, exit 0: 13 arquivos conferidos, scanner delimitado
+sem achados após validar as exceções pontuais, links/cercas/sintaxe/manifest e
+ignores corretos. SHA-256 comprovou guia/Dockerfile/schema/lockfile/API e logs
+anteriores intactos; api-local manteve o prefixo integral. Matriz com 32
+requisitos/34 tarefas: T11/R09/R11/R12 verificados; T12/R10 continuam pendentes.
+Não repetir execução Docker por correções apenas documentais/lexicais.

@@ -11,7 +11,8 @@
     "test": "node test/run-postgres.js",
     "db:migrate": "node src/migrate.js",
     "start": "node src/server.js",
-    "test:docker": "node test/run-docker.js"
+    "test:docker": "node test/run-docker.js",
+    "test:compose": "node test/run-compose.js"
   },
   "dependencies": {
     "express": "5.2.1",

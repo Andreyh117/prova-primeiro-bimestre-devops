@@ -25,7 +25,10 @@ revisou T07 e autorizou T08, agora verificada com CRUD completo, saúde/503 e
 testes: script exit 0/1 e reserva mantida por SQL/GET ao reiniciar a API nativa.
 T09 foi commitada em 93d313c. Após revisão, o aluno autorizou T10, verificada
 com duas execuções Docker/UID/contexto/HTTP/SQL reais, exit 0 e limpeza confirmada.
-Próxima tarefa pendente: T11, Compose, ambiente local e healthchecks.
+T10 foi commitada em 49dbd5e. Após revisão, o aluno autorizou T11: Compose/API/db
+saudáveis, ordem de início, rede/volume/ambiente e CRUD/SQL reais verificados,
+exit 0 e limpeza confirmada; config sem senha retornou 1 esperado.
+Próxima tarefa pendente: T12, persistência ao recriar containers sem apagar volume.
 
 ## Plano de tarefas pequenas
 
@@ -46,7 +49,7 @@ Cada tarefa recebe entrada no diário.
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | api.test.js, z-unavailable.test.js, api-local.txt e health-local.txt (48 testes). | verificado |
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt (51 testes); script exit 0/1, SQL e restart nativo reais. | verificado |
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt e docker-run.txt: duas execuções reais, UID 1000, HTTP/SQL e limpeza. | verificado |
-| T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt; commit real Compose. | pendente |
+| T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt e trecho api-local.txt: config/up/ps/ordem/rede/CRUD/SQL reais. | verificado |
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt e README atualizado. | pendente |
 | T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | Decisões no diário e aws-preflight.txt; variáveis locais ignoradas. | pendente |
 | T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt e plano sanitizado; commit backend. | pendente |
@@ -102,7 +105,8 @@ histórico inventado. A auditoria local foi executada em HEAD `dbcd6a1`:
 
 A tabela abaixo preserva o plano da auditoria. T08 já foi commitada como
 cbf2410; T09 foi commitada em 93d313c, total seis commits reais. T10 passou o
-aceite Docker e prepara seu marco; T11 e seguintes permanecem propostas futuras.
+aceite Docker e foi commitada em 49dbd5e, total sete commits reais. T11 passou o
+aceite Compose e prepara o marco; T12 e seguintes permanecem propostas futuras.
 Executar uma tarefa autorizada por vez, incluir implementação, testes/evidências
 e documentação correspondente, revisar o diff e só então criar o commit.
 Não separar uma alteração trivial em vários commits para aumentar a contagem.
@@ -383,3 +387,38 @@ não repetida a suíte nativa T09 de 51 testes, pois a mudança foi de distribui
 R08 verificado local; R22 parcial até demais ambientes. Marco real proposto:
 `build(docker): adiciona imagem da API com usuario nao root`. Próximo T11;
 sem Compose, volume persistente, AWS, merge, publicação ou PR nesta tarefa.
+
+### T11 — resultado verificado em 28/09/2026
+
+Criados docker-compose.yml, .env.example e run-compose.js/test:compose. api/db,
+rede bridge por projeto, volume nomeado, bootstrap SQL read-only, healthchecks
+TCP/Node e depends_on service_healthy implementados. PORT=3000 no host por
+padrão/loopback; PG* da API derivados de POSTGRES_* com senha única.
+
+Execução real test:compose em 22:41:48 -03:00 com Compose v5.5.1: exit 0.
+Config sem POSTGRES_PASSWORD retornou 1 esperado; válido retornou 0 e JSON
+expandido foi conferido somente em memória. Create/build deixou api/db parados;
+up --build --wait e ps confirmaram ambos healthy. Primeiro health db terminou
+22:41:56.797 -03:00; API iniciou 22:41:57.175 -03:00. Banco sem porta publicada,
+bridge com os dois serviços, volume e SQL read-only confirmados; API UID 1000.
+Health, CRUD/404/inválidos via verify-api.py e SQL reais no PostgreSQL 16.15.
+JSON 01-10-2026/DATE 2026-10-01; DELETE 204, SQL count 0. Sem falha inesperada.
+
+Fixture UUID novo/exclusivo foi encerrado sem down -v. Volume do próprio teste
+removido separadamente com labels conferidos; consultas posteriores confirmaram
+zero containers/redes/volumes UUID. Env privado 0600 em /tmp removido, .env da
+raiz ausente/preservado. .env.example/defaults/mapeamentos passaram config --quiet;
+.env ignorado e exemplo versionável. Senha placeholder, nenhuma credencial em logs.
+
+Evidências compose-ps.txt/compose-rede-saude.txt contêm comandos/stdout/stderr/exit
+reais, com normalização explícita só de espaços finais (originais/hash em /tmp).
+Trecho HTTP/SQL exato anexado a api-local.txt sem apagar o histórico. Guia,
+app/src/schema/Dockerfile/lockfile e logs anteriores preservados. Não repetidas
+as suítes nativa/T10 porque o novo teste integrou o Compose com a mesma API.
+R09/R11/R12 verificados localmente; R07/R22 parciais até AWS. R10/T12 pendentes:
+volume declarado/montado não comprova reserva após recriação. Sem bloqueio local.
+
+Arquivos: docker-compose.yml, .env.example, app/test/run-compose.js e package.json;
+AGENTS/README/specs/diário/evidências. Commit real proposto:
+`feat(compose): configura API e PostgreSQL com healthchecks`. Próximo T12;
+sem teste de recriação, AWS, merge/push/PR nesta tarefa.

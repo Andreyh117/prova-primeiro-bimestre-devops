@@ -6,7 +6,8 @@ professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo d
 data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
 conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
 locais aprovados. T09 verificou script/restart nativo com 51 testes. T10 validou
-build/contexto/UID/CRUD/SQL em imagem Docker; Compose, persistência de volume e
+build/contexto/UID/CRUD/SQL em imagem Docker. T11 validou Compose, saúde/ordem,
+rede/volume/ambiente e CRUD/SQL. Persistência após recriar containers (T12) e
 infraestrutura continuam futuros.
 Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
@@ -177,9 +178,9 @@ no RDS somente porque uma versão Docker foi validada.
 
 | Configuração futura | Local | EC2/RDS |
 |---|---|---|
-| `PORT` | 3000. | 3000; processo escuta `0.0.0.0` no container. |
+| `PORT` | .env Compose controla publicação loopback no host (3000 padrão); dentro do container permanece 3000. API nativa usa PORT de escuta. | 3000; processo escuta `0.0.0.0` no container. |
 | `PGHOST`, `PGPORT` | Serviço `db`, 5432 no Compose; host/porta próprios ao testar app nativa. | Endpoint RDS, 5432. |
-| `PGDATABASE`, `PGUSER`, `PGPASSWORD` | `.env` local ignorado; `.env.example` só contém placeholders. | Arquivo protegido na EC2; valores nunca no repositório/user-data. |
+| `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Compose deriva de POSTGRES_DB/USER/PASSWORD do .env ignorado; exemplo contém somente placeholders. API nativa usa PG* do ambiente. | Arquivo protegido na EC2; valores nunca no repositório/user-data. |
 | `PGSSL` | `false`, no bridge local. | `true`; validar certificado e hostname do RDS. |
 | `PGSSLROOTCERT` | Não necessário. | Caminho do bundle CA oficial montado somente para leitura. |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Serviço PostgreSQL recebe os mesmos valores de conexão do app. | Não iniciar serviço PostgreSQL na EC2. |
@@ -218,7 +219,28 @@ explica a condição de saúde. A aplicação também trata reconexão/falha do 
 `depends_on` sozinho não resolve queda posterior. Documentar setup `.env` e
 comando único `docker compose up --build --wait`.
 
-O SQL inicial será montado em `docker-entrypoint-initdb.d` para volume novo.
+T11 implementou docker-compose.yml/.env.example e runner test:compose. Base db
+é o mesmo digest PostgreSQL 16.15 dos testes; API usa build app/USER node.
+Healthcheck db usa TCP -h 127.0.0.1, evitando tratar o servidor temporário de
+bootstrap Unix como pronto; API verifica HTTP 200/status/database via Node.
+Intervalos 3s, timeout 3s, start_period 5s/start_interval 1s; Compose >=2.20.2,
+validado v5.5.1. .env.example define PORT/POSTGRES_DB/USER/PASSWORD, senha
+placeholder. PG* da API são derivados/constantes, sem segunda senha para divergir.
+[Interpolação](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+usou obrigatórios :?; senha ausente deu exit 1 e config válido exit 0, sem dump.
+[Healthchecks](https://docs.docker.com/reference/compose-file/services/#healthcheck)
+e [entrypoint PostgreSQL](https://hub.docker.com/_/postgres) fundamentam readiness
+e bootstrap só em volume vazio. Volume/rede recebem prefixo do projeto para
+isolar stacks. down mantém volume; [referência CLI](https://docs.docker.com/reference/cli/docker/compose/down/).
+
+Teste real: criou api/db parados, up --build --wait e ps healthy; db health exit 0
+terminou às 22:41:56.797 -03:00 e API iniciou 22:41:57.175 -03:00. Bridge com ambos,
+banco sem publicação e API loopback, volume/mount read-only e UID 1000 conferidos.
+CRUD/SQL/DD-MM-YYYY/DATE passaram. Projeto UUID e env 0600 /tmp temporários;
+cleanup sem down -v e remoção separada do volume novo, só após conferir labels;
+zero linhas/recursos. Não há teste de recriação/persistência nessa tarefa.
+
+T11 montou o SQL inicial read-only em `docker-entrypoint-initdb.d` para volume novo.
 Volumes existentes não recebem novamente esses scripts: aplicar migração
 explicitamente quando necessário. Testes locais antes do Compose usarão uma
 instância PostgreSQL de teste com porta apenas no loopback e banco exclusivo.

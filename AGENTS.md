@@ -16,27 +16,33 @@ Fontes consultadas em 27/09/2026:
   decisões propostas e acompanhamento. Não transformar escolhas do design em
   critérios que o professor teria exigido.
 
-Em 28/09/2026, o aluno revisou T09 e autorizou T10. T01–T10 estão verificadas em
-`feat/api-reservas`. CRUD, /health, DD-MM-YYYY e script/restart nativo mantêm os
-51 testes passados em T09, com evidências api-local/health-local/postgres-local
-preservadas. Essa suíte nativa não foi repetida em T10: código da API e lockfile
-permaneceram intactos; T10 verificou a distribuição/execução em Docker.
+Em 28/09/2026, o aluno revisou T10 e autorizou T11. T01–T11 estão verificadas em
+`feat/api-reservas`. T10 foi commitada em 49dbd5e, sete commits reais; merge em T32
+continua pendente. Código da API/schema/Dockerfile/lockfile e evidências T06–T10
+preservados. Suíte nativa de 51 testes (T09) e test:docker (T10) não repetidos:
+T11 verificou o Compose com healthchecks e os mesmos códigos.
 
-Dockerfile multi-stage usa Node 24.21.0 bookworm-slim fixado por digest, npm ci
-com lockfile e USER node. `npm --prefix app run test:docker` passou duas vezes
-(exit 0): contexto real exportado com 10 arquivos permitidos e marcadores .env/
-PEM excluídos; UID 1000, PID 1 node src/server.js, migração/health/CRUD em API
-container e PostgreSQL 16.15 separado. SQL confirmou DATE 2026-10-01/JSON
-01-10-2026, zero linhas ao final e SIGTERM/exit 0 da API. Zero containers/redes
-temporários; imagem prova-reservas:local preservada. Evidências reais em
-docker-build.txt e docker-run.txt, mantendo a primeira saída com aviso --time,
-corrigido para --timeout no runner antes da segunda execução.
+`npm --prefix app run test:compose` passou com Compose v5.5.1, exit 0. Config
+sem senha retornou 1 esperado; config válido/JSON privado conferiu mapeamento
+POSTGRES_* -> PG*. Containers partiram parados: db saudável às 22:41:56.797
+-03:00, API iniciou às 22:41:57.175 -03:00; ps mostrou ambos healthy. Rede bridge
+reservas-net por projeto, banco sem porta publicada, API loopback 32775 no teste
+(padrão 3000), volume nomeado reservas-data e SQL bootstrap read-only confirmados.
+/health, seis rotas e SQL reais com PostgreSQL 16.15/UID API 1000. JSON 01-10-2026,
+SQL DATE 2026-10-01; zero linhas ao final. Fixture UUID foi encerrado, volume
+novo/exclusivo removido separadamente após conferir labels; zero recursos do teste.
+Ambiente temporário 0600 em /tmp removido; nenhum .env do usuário criado/alterado.
 
-T09 foi commitada em 93d313c, sexto commit real. T10 prepara o próximo marco
-real Docker; R02 continua parcial até o merge preservando a feature em T32.
-Próxima tarefa pendente: T11, Compose, ambiente e healthchecks. Não avançar para
-T11 no encerramento de T10. Rede/banco temporários não comprovam Compose/volume;
-Terraform, AWS, publicação e persistência Compose seguem futuros.
+Evidências reais em compose-ps.txt e compose-rede-saude.txt; trecho HTTP/SQL
+anexado a api-local.txt mantendo integralmente seu histórico. .env.example com
+quatro variáveis/placeholders conferido por config --quiet; valores padrão e variáveis derivadas
+conferidos só em memória. Espaços finais das novas transcrições normalizados de modo
+explícito, sem apagar avisos/resultados. Sem falha inesperada ou bloqueio local.
+R09/R11/R12 verificados; R10 permanece pendente da prova de persistência ao recriar containers.
+Próxima tarefa: T12, verify-persistence.py e persistência ao recriar containers.
+Não avançar para T12 no encerramento de T11. Terraform, AWS, merge e publicação
+seguem futuros. Nunca usar down -v para testar persistência ou descartar dados
+do usuário; a limpeza T11 remove somente volume novo do fixture UUID conferido.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
@@ -106,7 +112,8 @@ diretórios ancestrais. Não há aplicação ou infraestrutura testável ainda.
 Foram consultadas versões, sem iniciar serviços: Git 2.43.0, Node 24.21.0,
 npm 11.19.0, Docker CLI 29.8.1, Terraform 1.16.2, AWS CLI 2.35.6 e Python 3.12.3.
 Naquela consulta apenas versões foram lidas. Em T06, o daemon Docker foi validado
-com banco real; plugin Compose, credenciais AWS e permissões de nuvem continuam futuros.
+com banco real. Em T11 o plugin Compose v5.5.1 foi validado; credenciais AWS e
+permissões de nuvem continuam futuras.
 O terminal isolado falhou com `mountinfo path is not absolute`; as leituras foram
 executadas fora desse isolamento. Essa falha é do ambiente, não da aplicação.
 
@@ -118,7 +125,7 @@ git ls-files
 rg --files --hidden -g '!.git/**' -g '!node_modules/**'
 ```
 
-A validação PostgreSQL/HTTP/script/restart e Docker já está disponível até T10;
+A validação PostgreSQL/HTTP/script/restart/Docker e Compose está disponível até T11;
 os demais comandos dependem
 das respectivas tarefas. Não anunciar sucesso quando arquivos/dependências não
 existirem. Scripts devem ter saída clara e exit code não zero na falha.
@@ -130,8 +137,9 @@ existirem. Scripts devem ter saída clara e exit code não zero na falha.
 | Build Docker (T10 disponível) | `docker build -t prova-reservas:local app`; Docker/BuildKit, acesso às imagens/npm na primeira execução; digest/lockfile fixos. |
 | Usuário da imagem (T10 disponível) | `docker run --rm --entrypoint id prova-reservas:local -u`; UID 1000 validado. |
 | Docker com banco real (T10 disponível) | `npm --prefix app run test:docker`; Node 24, Python 3 e Docker/BuildKit. Exporta contexto, cria banco/rede UUID exclusivos, migra via imagem, testa PID 1/UID/health/CRUD/SQL/SIGTERM e limpa somente seus recursos; senha em memória. Imagem local fica disponível. |
-| Compose | `docker compose config --quiet`; `docker compose up --build --wait`; `docker compose ps`; `.env` local válido e plugin Compose compatível. Não publicar `docker compose config` completo, que pode expandir senhas. |
-| Saúde local (T08 disponível) | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, com API nativa configurada em execução; Compose será futuro. |
+| Compose (T11 disponível) | Copiar .env.example para .env ignorado/0600, trocar senha; `docker compose config --quiet`; `docker compose up --build --wait`; `docker compose ps`. Compose com start_interval (>=2.20.2), validado v5.5.1. Não publicar config completo, que expande senhas. |
+| Teste Compose isolado (T11 disponível) | `npm --prefix app run test:compose`; Node 24/Python 3/Docker/Compose. Usa env privado/projeto UUID, parte de containers parados e confere saúde/ordem/rede/volume/CRUD/SQL. Limpa só seus recursos e o volume novo exclusivo; não toca .env/volumes do usuário nem testa recriação T12. |
+| Saúde local (T08 disponível) | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, com API nativa ou Compose configurado em execução; PORT publicado pode variar. |
 | CRUD local (T09 disponível) | `python3 scripts/verify-api.py --base-url http://127.0.0.1:3000`; Python stdlib, API/banco já iniciados; cria marcador/IDs próprios, confere HTTP/JSON e limpa em finally. Código 1 na falha; configuração CLI inválida retorna 2. |
 | Persistência Compose | `python3 scripts/verify-persistence.py`; script futuro recria containers preservando o volume e confere dados no banco real; nunca usa `down -v`. |
 | Formatação Terraform | `terraform fmt -check -recursive infra`. |
