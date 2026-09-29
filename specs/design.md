@@ -294,7 +294,7 @@ NAT para o CRUD. Uma EC2 em uma pública basta; não propor ALB/NAT Gateway.
 |---|---|---|
 | `vpc` | Nome, CIDR, AZs, CIDRs de subnets, tags. | `vpc_id`, `public_subnet_ids`, `private_subnet_ids`; alimenta SG, EC2 e RDS. |
 | `security-group` | `name`, `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
-| `ec2` | Primeira pública, SG EC2, AMI, `t2.micro`, key pair existente, user-data sem segredos, profile existente opcional, tags. | ID e IP público; URL API composta no root. |
+| `ec2` | name, primeira pública, SG EC2 único, AMI AL2023 x86_64 explícita, instance_type=t2.micro, key_name existente, iam_instance_profile=null/LabInstanceProfile, tags; user-data fixo sem input de segredo. | instance_id e public_ip; URL API composta no root T21. |
 | `rds` | identifier, duas privadas, SG RDS único, engine_version, instance_class=db.t3.micro, db_name, username/password sensíveis, skip_final_snapshot explícito/final_snapshot_identifier, tags. | identifier, hostname (address sem porta) e port; alimentam deploy futuro, sem credenciais nos outputs. |
 
 D10: conforme decisão do aluno em T13, SG EC2 restringe SSH e API 3000 somente
@@ -405,9 +405,16 @@ adaptar somente com verificação oficial e sem reduzir exigências da prova.
 
 ## Deploy reproduzível da EC2 e inicialização do RDS
 
-D12: EC2 executa somente o container da API. User-data instala Docker e prepara
-diretórios/serviço sem senha, token GitHub ou credenciais AWS. Escolher AMI x86_64
-compatível com t2.micro e confirmar boot/instalação na execução real.
+D12: EC2 executará somente o container da API (deploy T24). Módulo T20 usa
+user-data.sh fixo para instalar Docker por dnf, habilitar/iniciar serviço Docker
+e preparar /opt/prova-reservas(root0755) e /etc/prova-reservas(root0700), sem
+senha/token GitHub/credenciais AWS. Não aceita user-data arbitrário como input.
+Root T21 selecionará AMI Amazon Linux2023 standard/x86_64/HVM/EBS/root<=8GiB
+em us-east-1 compatível com t2.micro; confirmar ID/OS/arquitetura antes do plan
+e boot/instalação efetivos em T23. Disco raiz gp3 8GiB/encriptado/excluído na
+terminação, tags no disco/instância. IMDSv2 obrigatório/hop1, metadata tags
+desabilitadas, CPUcredits standard. Mudança no user-data propõe recriação pelo
+provider, sempre sujeita à revisão do plano; não é autorização de apply/destroy.
 
 Proposta de deploy por SSH/SCP a partir da máquina do aluno, sem depender de
 registry privado ou nova role:
@@ -688,3 +695,20 @@ inclusive falha; não comprova AWS/SQL. Fontes:
 [VPC/RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html),
 [API RDS](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html).
 T19 local verificada, R17/R18/R19/R22 parciais; próxima T20 não implementada.
+
+## Implementação T20 — EC2/user-data validados localmente
+
+Em 29/09/2026, oito inputs/dois outputs, um aws_instance/nenhum IAM/EIP/KMS/key
+novo; profile null ou LabInstanceProfile existente. Tipo t2.micro obrigatório,
+AMI explícita AL2023 standard/x86_64/HVM/EBS/raiz<=8GiB a selecionar em T21.
+IMDSv2 required/hop1/tags disabled, root 8GiB/gp3/encrypted/delete_on_termination,
+tags no disco/instância, CPU standard/sem monitoramento detalhado. Source_dest_check
+true/tenancydefault. Root futuro conecta primeira pública/SG EC2 correto.
+User-data fixo file(), sem variável arbitrária/segredos; Docker via dnf/serviço,
+diretórios root 0755/root 0700. Deploy de imagem/SQL/CA/ambiente sensível T24,
+sem PostgreSQL local. Alteração propõe recriação, sempre revisão antes de apply.
+Dez testes mock/plan + três Bash/stubs locais aprovados; Bash-n/fmt/init/validate/
+grafo/schema0. Falha inicial profile unknown corrigida só no teste, vínculo
+source/grafo/schema; falso positivo de comentário na revisão auxiliar corrigido.
+Capturas ec2-validate.txt, nenhum boot/instância/deploy/AWS real. T20 local
+verificada, R13/R16/R19/R22 parciais; próxima T21 backend/root/plano/locking.

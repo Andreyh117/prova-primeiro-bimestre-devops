@@ -1,0 +1,329 @@
+T20 — módulo EC2: validação LOCAL, sem provisionamento AWS
+Registro documental: 2026-09-29T08:43:14-03:00
+HEAD inicial14c2079/15 commits reais, feat/api-reservas limpa, main preservada, zero merges.
+Terraform=1.16.2/providerAWS=6.65.0; init cache filesystem/lockfile readonly, unauthenticated, sem download assinado novo.
+Root /tmp/devops-t20-ec2-2h684nsb: cópia exata de código/user-data/testes e lockfile; nenhum state/tfvars privado.
+Ambiente remove AWS_*, TF_VAR_*, TF_CLI_ARGS*, TF_LOG*; configs AWS=/dev/null/IMDS desabilitado.
+Um recurso aws_instance, oito inputs/dois outputs instance_id/public_ip; nenhum IAM/key pair/EIP/KMS criado.
+AMI explícita será selecionada em T21: Amazon Linux2023 standard/x86_64/HVM/EBS/root<=8GiB, us-east-1/t2.micro.
+IDs das fixtures são fictícios: não são AMI/subnet/SG reais nem prova de OS/arquitetura/região/rotas/tipo disponíveis.
+Instância pública recebe único SG EC2, key pair existente e null/LabInstanceProfile existente; vínculo root T21/AWS T23 futuros.
+IMDSv2 required/hop1/tags metadata disabled; root gp3 8GiB encrypted/delete_on_termination com tags comuns e Name.
+CPUcredits standard/monitoring false/tenancy default/source_dest_check true; sem serviços adicionais.
+User-data fixo sem inputs secretos: dnf instala Docker, systemctl enable --now docker, diretórios root0755/0700.
+Sem API/imagem/credenciais/SQLRDS no user-data. Deploy real T24; mudança user-data_replace_on_change=true propõe recriação revisada.
+10 runs Terraform provider mock/command=plan e 3 testes Python/stdllib do fluxo com stubs dnf/systemctl/install.
+Stubs não instalam pacotes/não alteram serviços/diretórios reais. Falhas esperadas17 interrompem fluxo; runner retorna0 se aceites passam.
+Bash -n confere sintaxe apenas. Esses testes NÃO comprovam boot, pacote instalado, API, conectividade ou encriptação na AWS.
+Primeiro test1: ec2_contract passou, optional_profile_and_short_ids Unknown condition value; 1pass/1fail/8skip.
+Profile é optional/computed no schema; quando input null, atributo unknown no plan. Corrigida asserção para input null;
+vínculo do argumento conferido por source/grafo/schema; não usar apply/mock inventado para aparentar ausência de profile real.
+Retry10passed/0failed. Review auxiliar1: regex encontrou set -x no comentário que o proíbe; corrigida para comandos executáveis.
+Captura auxiliar falhada preservada, módulo/user-data não alterados por essa correção. Review final0/10 vínculos/grafo acíclico.
+Sem API AWS, plan principal, apply/destroy, SSH, escrita backend remoto ou alteração do host por user-data.
+Fontes primárias consultadas:
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/instance.html.markdown
+https://docs.aws.amazon.com/linux/al2023/ug/ec2.html
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-container-image.html
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html
+Duas URLs AL2023 AMI-names.html/ec2-ami.html deram Internal Error; página ec2.html consultada, sem presumir aquelas lidas.
+Shellcheck não encontrado; não instalado/não afirmar execução. Bash -n e testes de fluxo executados realmente.
+Saídas seguintes: ANSI removido/máscara de conta12dígitos/espaços finais normalizados na publicação, logs brutos/hash preservados.
+
+=== Captura real: fmt ===
+Início: 2026-09-29T08:35:59-03:00
+Fim: 2026-09-29T08:35:59-03:00
+Comando: terraform fmt -recursive infra/modules/ec2
+Exit code: 0
+SHA-256 bruto: 00963e757b27f3395527b203469c74450be5d5291fb641d19b2ada3249b5ad56
+infra/modules/ec2/tests/instance.tftest.hcl
+
+=== Captura real: init ===
+Início: 2026-09-29T08:35:59-03:00
+Fim: 2026-09-29T08:36:02-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb init -backend=false -input=false -no-color -lockfile=readonly
+Exit code: 0
+SHA-256 bruto: 6d30e26ea90ceadc491849d802cf9a78716019bf37c937140d62fe4d8b576017
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (unauthenticated)
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+=== Captura real: validate ===
+Início: 2026-09-29T08:36:02-03:00
+Fim: 2026-09-29T08:36:06-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb validate -no-color
+Exit code: 0
+SHA-256 bruto: f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1
+Success! The configuration is valid.
+
+
+=== Captura real: test ===
+Início: 2026-09-29T08:36:06-03:00
+Fim: 2026-09-29T08:36:10-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb test -no-color
+Exit code: 1
+SHA-256 bruto: f6f047b8162386ad78c52af9ef4df8eb01e3b431e973288074c4d38985480238
+tests/instance.tftest.hcl... in progress
+  run "ec2_contract"... pass
+  run "optional_profile_and_short_ids"... fail
+
+Error: Unknown condition value
+
+  on tests/instance.tftest.hcl line 68, in run "optional_profile_and_short_ids":
+  68:     condition = (
+  69:       aws_instance.this.iam_instance_profile == null && aws_instance.this.ami == var.ami_id &&
+  70:       aws_instance.this.subnet_id == var.public_subnet_id && aws_instance.this.key_name == var.key_name &&
+  71:       aws_instance.this.tags.Name == var.name
+  72:     )
+    ├────────────────
+    │ aws_instance.this.ami is "ami-0123abcd"
+    │ aws_instance.this.iam_instance_profile is a string
+    │ aws_instance.this.key_name is "fixture-existing-key"
+    │ aws_instance.this.subnet_id is "subnet-0123abcd"
+    │ aws_instance.this.tags.Name is "api-alternativa"
+    │ var.ami_id is "ami-0123abcd"
+    │ var.key_name is "fixture-existing-key"
+    │ var.name is "api-alternativa"
+    │ var.public_subnet_id is "subnet-0123abcd"
+
+Condition expression could not be evaluated at this time. This means you have
+executed a `run` block with `command = plan` and one of the values your
+condition depended on is not known until after the plan has been applied.
+Either remove this value from your condition, or execute an `apply` command
+from this `run` block. Alternatively, if there is an override for this value,
+you can make it available during the plan phase by setting `override_during =
+plan` in the `override_` block.
+  run "reject_bad_ami"... skip
+  run "reject_wrong_type"... skip
+  run "reject_bad_subnet"... skip
+  run "reject_bad_sg"... skip
+  run "reject_private_key_path"... skip
+  run "reject_new_profile"... skip
+  run "reject_empty_name"... skip
+  run "reject_missing_owner"... skip
+tests/instance.tftest.hcl... tearing down
+tests/instance.tftest.hcl... fail
+
+Failure! 1 passed, 1 failed, 8 skipped.
+
+=== Captura real: fmt-retry2 ===
+Início: 2026-09-29T08:36:58-03:00
+Fim: 2026-09-29T08:36:58-03:00
+Comando: terraform fmt -recursive infra/modules/ec2
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: test-retry2 ===
+Início: 2026-09-29T08:36:59-03:00
+Fim: 2026-09-29T08:37:02-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb test -no-color
+Exit code: 0
+SHA-256 bruto: d84bc02b1e1cca34b280880106c6d239ddd2b63a97e57c2acd0cc78e52cb068f
+tests/instance.tftest.hcl... in progress
+  run "ec2_contract"... pass
+  run "optional_profile_and_short_ids"... pass
+  run "reject_bad_ami"... pass
+  run "reject_wrong_type"... pass
+  run "reject_bad_subnet"... pass
+  run "reject_bad_sg"... pass
+  run "reject_private_key_path"... pass
+  run "reject_new_profile"... pass
+  run "reject_empty_name"... pass
+  run "reject_missing_owner"... pass
+tests/instance.tftest.hcl... tearing down
+tests/instance.tftest.hcl... pass
+
+Success! 10 passed, 0 failed.
+
+=== Captura real: fmt-check ===
+Início: 2026-09-29T08:36:22-03:00
+Fim: 2026-09-29T08:36:22-03:00
+Comando: terraform fmt -check -recursive infra
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: fmt-check-retry2 ===
+Início: 2026-09-29T08:37:02-03:00
+Fim: 2026-09-29T08:37:02-03:00
+Comando: terraform fmt -check -recursive infra
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: graph ===
+Início: 2026-09-29T08:36:24-03:00
+Fim: 2026-09-29T08:36:28-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb graph -type=plan
+Exit code: 0
+SHA-256 bruto: 0943dd6c14a13ef3bd173395adf5bd72c00cf20df77c743fe214ef8b26ca8217
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_instance.this (expand)" [label = "aws_instance.this", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"]" [label = "provider[\"registry.terraform.io/hashicorp/aws\"]", shape = "diamond"]
+		"[root] var.ami_id" [label = "var.ami_id", shape = "note"]
+		"[root] var.ec2_sg_id" [label = "var.ec2_sg_id", shape = "note"]
+		"[root] var.iam_instance_profile" [label = "var.iam_instance_profile", shape = "note"]
+		"[root] var.instance_type" [label = "var.instance_type", shape = "note"]
+		"[root] var.key_name" [label = "var.key_name", shape = "note"]
+		"[root] var.name" [label = "var.name", shape = "note"]
+		"[root] var.public_subnet_id" [label = "var.public_subnet_id", shape = "note"]
+		"[root] var.tags" [label = "var.tags", shape = "note"]
+		"[root] aws_instance.this (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_instance.this (expand)" -> "[root] var.ami_id (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.ec2_sg_id (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.iam_instance_profile (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.instance_type (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.key_name (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.name (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.public_subnet_id (validation)"
+		"[root] aws_instance.this (expand)" -> "[root] var.tags (validation)"
+		"[root] output.instance_id (expand)" -> "[root] aws_instance.this (expand)"
+		"[root] output.public_ip (expand)" -> "[root] aws_instance.this (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_instance.this (expand)"
+		"[root] root" -> "[root] output.instance_id (expand)"
+		"[root] root" -> "[root] output.public_ip (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)"
+		"[root] var.ami_id (validation)" -> "[root] var.ami_id"
+		"[root] var.ec2_sg_id (validation)" -> "[root] var.ec2_sg_id"
+		"[root] var.iam_instance_profile (validation)" -> "[root] var.iam_instance_profile"
+		"[root] var.instance_type (validation)" -> "[root] var.instance_type"
+		"[root] var.key_name (validation)" -> "[root] var.key_name"
+		"[root] var.name (validation)" -> "[root] var.name"
+		"[root] var.public_subnet_id (validation)" -> "[root] var.public_subnet_id"
+		"[root] var.tags (validation)" -> "[root] var.tags"
+	}
+}
+
+=== Captura real: bash-n ===
+Início: 2026-09-29T08:36:23-03:00
+Fim: 2026-09-29T08:36:23-03:00
+Comando: bash -n '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/infra/modules/ec2/user-data.sh'
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: bootstrap-test ===
+Início: 2026-09-29T08:38:03-03:00
+Fim: 2026-09-29T08:38:04-03:00
+Comando: python3 -B '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/infra/modules/ec2/tests/test_user_data.py'
+Exit code: 0
+SHA-256 bruto: f03ff3924eaaf3e426be8e16b95bfd435b68fac74fb38f2169c57402ab410adc
+test_package_failure_stops_before_service (__main__.UserDataFlowTests.test_package_failure_stops_before_service) ... ok
+test_service_failure_stops_before_directories (__main__.UserDataFlowTests.test_service_failure_stops_before_directories) ... ok
+test_success_order_and_private_directory (__main__.UserDataFlowTests.test_success_order_and_private_directory) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.354s
+
+OK
+
+=== Captura real: review-failed ===
+Registro após retorno: 2026-09-29T08:39:35-03:00
+Fim: não capturado nesta consulta auxiliar
+Comando: python3 /tmp/devops-t20-review.py
+Exit code: 1
+SHA-256 bruto: ee9fb8a4aebcc8735c526d52d31224d9dcae8b5a4b18420fa94e1c47b45bb4b4
+Traceback (most recent call last):
+  File "/tmp/devops-t20-review.py", line 24, in <module>
+    assert not re.search(r'\b(PGPASSWORD|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN)\b|BEGIN .*PRIVATE KEY|set -x|docker run|postgresql',user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+=== Schema real/resumo derivado (saída extensa não publicada) ===
+Início: 2026-09-29T08:36:24-03:00
+Fim: 2026-09-29T08:36:30-03:00
+Comando: terraform -chdir=/tmp/devops-t20-ec2-2h684nsb providers schema -json
+Exit code: 0
+SHA-256 bruto: e452930af65383de8dee2ebb74e1a8c82eb1ca16bddc420f012b897a4edde6fe
+{
+  "checked_at": "2026-09-29T08:39:36-03:00",
+  "exit_code": 0,
+  "graph_acyclic": true,
+  "direct_references_checked": 10,
+  "resources": "somente aws_instance.this; nenhum IAM/key pair/EIP/KMS criado",
+  "inputs_outputs": "8 inputs/2 outputs instance_id/public_ip",
+  "metadata_disk": "IMDSv2 required/hop1; root gp3 8GiB encrypted/delete_on_termination; tags instância/raiz",
+  "profile_schema": {
+    "optional": true,
+    "computed": true
+  },
+  "profile_case": "input null aceito; valor calculado unknown no plan não prova profile ausente. Vínculo var confirmado no source/grafo, AWS T23 futura.",
+  "user_data": "arquivo fixo sem interpolação/input de segredos; instala Docker/prepara diretórios, não deploy API",
+  "user_data_sha256": "2478c49ec871d21a74aac7b6ce7d38c021c8374267ca7eb14535c4f3741bb3f4",
+  "bootstrap_tests": "bash -n0 + 3 casos Python/stdllib com stubs, ordem/modos solicitados e falhas dnf/systemctl17 interrompem fluxo; não instala nada no host/não prova boot AWS",
+  "copies_lockfile": "bytes idênticos/readonly",
+  "terraform_tests": "10 passed/0 failed, mock/plan; primeira falha unknown condition preservada/corrigida no teste",
+  "limits": "AMI OS/x86_64/HVM/EBS/root<=8GiB/capacidade/tipo/região precisam preflight T21; pública/SG/key/profile/encriptação/IMDS/boot Docker efetivos T23, deploy T24"
+}
+
+=== SHA-256 de código/user-data/testes ===
+9fb8c3b36e6377d9da16ca961f071dbcc435f203c7160ed66d0595b6b60f8fcd  infra/modules/ec2/main.tf
+4201ee2dd00d7879e5099a5ee3d18fc1de436f1b0fab91818d6efacc68f2000e  infra/modules/ec2/outputs.tf
+ab4a61ded289590f8f2a848e49f7da14506c8b4fad918052cae15510ef5b5dd4  infra/modules/ec2/tests/instance.tftest.hcl
+fbf5c8af44cd9a363debf8024b3ae7a193951e149d5d9dd65fe08b18022ed70e  infra/modules/ec2/tests/test_user_data.py
+2478c49ec871d21a74aac7b6ce7d38c021c8374267ca7eb14535c4f3741bb3f4  infra/modules/ec2/user-data.sh
+5c54baf1f78d1cf9559da07d7678d1464a7ca85795412f8cb438bd757bea912e  infra/modules/ec2/variables.tf
+a3d3144293dec6f52bfb3073db2cbc3b0d80a88e0b4ff8bbaa6b9778649e0c08  infra/modules/ec2/versions.tf
+
+T20 local verificada, R13/R16/R19/R22 parciais; não comprova instância running/API/deploy AWS.
+Sem bloqueio T20. PróximaT21 composição root/backend efetivo/locking/plan; apply só T23 após revisãoT22.
+
+=== Conferência de escopo/Git/segredos/documentos (local) ===
+{
+  "checked_at": "2026-09-29T08:44:53-03:00",
+  "exit_code": 0,
+  "phase": "before",
+  "head": "14c207993141ab3df74d76218ab8c6aeacc83448",
+  "scope": [
+    "AGENTS.md",
+    "README.md",
+    "docs/diario-ia.md",
+    "specs/design.md",
+    "specs/requirements.md",
+    "specs/tasks.md",
+    "evidencias/ec2-validate.txt",
+    "infra/modules/ec2/main.tf",
+    "infra/modules/ec2/variables.tf",
+    "infra/modules/ec2/outputs.tf",
+    "infra/modules/ec2/versions.tf",
+    "infra/modules/ec2/tests/instance.tftest.hcl",
+    "infra/modules/ec2/user-data.sh",
+    "infra/modules/ec2/tests/test_user_data.py"
+  ],
+  "previous_files_preserved_sha256": 74,
+  "diary_agents_history": "prefixos preservados",
+  "tasks": "T01–T20 verificadas, T21–T34 pendentes/34 IDs únicos",
+  "requirements": "32 IDs únicos, R13/R16/R17/R18/R19/R22 parciais",
+  "secrets": "scanner delimitado sem achados, conta/IP privados ausentes; arquivos privados ignorados/0600",
+  "markdown_newlines_whitespace": "passou, inclusive arquivos novos",
+  "local_validation": "fmt/init/validate/grafo/schema0, 10 testes mock/plan0 + 3 testes de fluxo/stubs0/bash-n0; falhas preservadas",
+  "copies_lockfile": "idênticos antes da limpeza, provider versões preservadas",
+  "git": "15 commits reais Conventional Commits/0 merges, feature/main preservadas",
+  "aws": "nenhuma chamada/provisionamento; root principal ainda futuro T21"
+}
+
+=== Limpeza local real após conferência ===
+{
+  "checked_at": "2026-09-29T08:45:27-03:00",
+  "exit_code": 0,
+  "removed_only": "/tmp/devops-t20-ec2-2h684nsb",
+  "state_plan_before_cleanup": "nenhum (busca recursiva)",
+  "original_provider_cache": "inode/tamanho/mtime idênticos; rmtree não seguiu symlink",
+  "bootstrap_state_plan_tfvars": "não removidos",
+  "raw_logs_metadata": "preservados em /tmp"
+}

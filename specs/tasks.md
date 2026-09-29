@@ -48,7 +48,9 @@ separadas, fmt/init/validate/grafo 0 e 14 testes mock locais 0. Primeiro fmt 2
 corrigido, captura preservada. Após revisão, T19 local verificada: módulo RDS,
 fmt/init/validate/grafo/schema 0 e 17 testes mock locais 0 após corrigir conflito
 password/manage_master_user_password=false. Capturas preservadas, nenhuma AWS.
-Próxima pendente T20. State remoto/locking efetivo T21;
+Após revisão, T20 local verificada: EC2/user-data, fmt/init/validate/grafo/schema0,
+10 testes mock e 3 testes Bash/stubs aprovados, correções reais preservadas.
+Próxima pendente T21. State remoto/locking efetivo T21;
 principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
@@ -79,7 +81,7 @@ Cada tarefa recebe entrada no diário.
 | T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | vpc-validate.txt/diário: fmt/init/validate/grafo 0, duas falhas corrigidas e 9 testes locais mock aprovados; AWS futura. | verificado |
 | T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | security-group-validate.txt: fmt inicial 2 corrigido; fmt/init/validate/grafo 0, 14 testes locais mock 0, referências/outputs/schema conferidos; AWS futura. | verificado |
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | rds-validate.txt: fmt/init/validate/grafo/schema 0, conflito real corrigido e 17 testes locais mock aprovados; AWS/SQL futuros. | verificado |
-| T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | Diário/checklist EC2. | pendente |
+| T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | ec2-validate.txt: fmt/init/validate/grafo/schema/bash-n 0, 10 testes Terraform mock + 3 testes de fluxo/stubs aprovados, falhas/correções preservadas; AWS futura. | verificado |
 | T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init real/validate/plan; outputs alimentam inputs; confirmar state remoto/locking e tags. | terraform-validate.txt, terraform-plan.txt, backend-locking.txt; commit módulos. | pendente |
 | T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist humano do plano com conta/região, tipos, SG, subnet, state e IAM. | Diário da revisão/autorização; não marcar deploy verificado. | pendente |
 | T23 | T22 | R14–R18, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos. | aws-rede.txt, aws-rds.txt, aws-seguranca.txt, terraform-outputs.txt. | pendente |
@@ -637,3 +639,23 @@ T19 local verificada; R17/R18/R19/R22 parciais, próxima T20 não iniciada. Sem
 bloqueio; não repetir suites API/Docker/Compose/módulos anteriores/bootstrap
 inalterados. Um commit coerente real por marco, nunca por quantidade/tentativa;
 sem push/merge/PR. Plano principal T21/revisão T22/atributos AWS T23 futuros.
+
+### T20 — EC2 verificada localmente em 29/09/2026
+
+Após revisão, inícioHEAD 14c2079/15 commits reais/feature limpa/main preservada,
+zero merges. Quatro .tf/user-data.sh/tests(instance.tftest.hcl,test_user_data.py),
+oito inputs/dois outputs. EC2 t2.micro/public IP explícito/único SG/key existente/
+profile null ou LabInstanceProfile, sem novo IAM/EIP/KMS. AMI ID explícito,
+OS AL2023/x86_64/HVM/EBS/raiz<=8GiB a selecionar/verificar T21. IMDSv2 required/hop1,
+root 8GiB/gp3/encrypted/delete_on_termination/tags no disco/instância/CPU standard.
+User-data file fixo/sem inputs secretos instala Docker/prepara diretórios, API T24.
+Fmt/init/validate0; test1:1pass/1fail/8skip profile optional/computed unknown ao
+input null. Corrigida asserção do teste; source/grafo/schema conferem vínculo,
+sem apply ou valor calculado inventado. Retry 10 pass/0 fail. Fmt-check/grafo/schema/
+bash-n0, três casos de fluxo/stubs0 (falhas esperadas17 param execução). Revisão
+auxiliar1 confundiu comentário de proibição set-x com comando; corrigida sem
+alterar módulo, review0/dez referências sem ciclo. Capturas/hashes ec2-validate.txt,
+root/cópias/lockfile readonly idênticos, sem state/plano/credenciais/API AWS.
+T20 local verificada; R13/R16/R19/R22 parciais, próxima T21 não iniciada. Sem
+bloqueio; suites anteriores inalteradas não repetidas. Um commit real/coerente,
+sem quantidade/por tentativa/push/merge/PR. Boot/Docker/API/AWS efetivos futuros.

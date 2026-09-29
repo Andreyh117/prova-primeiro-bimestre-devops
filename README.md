@@ -58,7 +58,7 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T20, módulo EC2. T17 implementou VPC/quatro subnets/IGW/tabelas e
+pendente: T21, composição da infraestrutura e backend remoto. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usam provider mock, sem chamadas AWS: rede não implantada. State remoto/locking
 principal são T21. T18 implementou grupos EC2/RDS e regras separadas, com
@@ -67,6 +67,9 @@ e limpeza permanecem pendentes; os security groups ainda não foram aplicados.
 T19 implementou o módulo RDS privado/encriptado; 17 testes mock locais e
 fmt/init/validate/grafo/schema passaram após corrigir conflito do provider.
 O banco real, seus acessos e o CRUD na nuvem ainda não foram executados.
+T20 implementou módulo EC2/user-data: dez testes Terraform mock e três testes
+de fluxo Bash com stubs passaram, além de fmt/init/validate/grafo/schema/bash-n.
+Nenhuma instância criada; boot/Docker/API reais continuam pendentes.
 
 ## Contrato aprovado para implementação
 
@@ -124,6 +127,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Módulo VPC T17](evidencias/vpc-validate.txt): fmt/init/validate/grafo reais, duas falhas de testes corrigidas e nove casos locais aprovados; sem execução AWS.
 - [Security groups T18](evidencias/security-group-validate.txt): fmt inicial corrigido, fmt/init/validate/grafo e 14 testes locais aprovados; sem execução AWS.
 - [Módulo RDS T19](evidencias/rds-validate.txt): falha real do provider/correção, fmt/init/validate/grafo/schema e 17 testes mock aprovados; sem RDS real.
+- [Módulo EC2 T20](evidencias/ec2-validate.txt): sintaxe/contrato/grafo/schema, dez testes mock e três de fluxo/stubs; falhas/correções e limites, sem AWS.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -575,7 +579,7 @@ recuperação apresentada antes do apply: três configs S3, bucket preservado,
 tabela sem mudança, zero exclusões. Hash do plano de recuperação:
 8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2.
 [AGENTS, regra 10](AGENTS.md) mantém revisão/autorização para novos escopos,
-principal e teardown. Ao concluir T16 a próxima era T17; agora T20.
+principal e teardown. Ao concluir T16 a próxima era T17; agora T21.
 
 
 ### Módulo VPC — T17 verificada localmente
@@ -635,7 +639,7 @@ externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois
 reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
 comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
 cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
-Root composto/plan real T21, aplicação T23. T18/T19 locais concluídas abaixo; próxima T20.
+Root composto/plan real T21, aplicação T23. T18–T20 locais concluídas abaixo; próxima T21.
 
 ### Security groups — T18 verificada localmente
 
@@ -701,7 +705,7 @@ Schema confirmou tagging; grafo nativo conferiu 12 vínculos e ausência de cicl
 Init filesystem informa unauthenticated; lockfile readonly/hashes preservados.
 Após conferir, remover somente o root temporário mostrado; logs reais preservados.
 Não comprova conectividade, SGs efetivos, deploy ou state remoto. R15/R19/R22
-continuam em andamento; T19 local concluída abaixo, próxima T20, root/plano T21/AWS T23.
+continuam em andamento; T19/T20 locais concluídas abaixo, próxima T21 (root/plano), AWS T23.
 
 ### RDS — T19 verificada localmente
 
@@ -771,8 +775,81 @@ informa unauthenticated, não novo download assinado. Testes rejeitam subnets
 única/repetidas/malformadas, SG/classe/versão/identificador/nomes inválidos,
 senha curta/caracteres inválidos, tags ausentes e política snapshot incoerente.
 Não comprovam AZ/rotas privadas/permissões/KMS/endpoint disponível ou SQL/CRUD
-na AWS. R17/R18/R19/R22 em andamento; próxima tarefa T20, EC2. Root/plano T21,
+na AWS. R17/R18/R19/R22 em andamento; T20 local concluída abaixo, próxima T21. Root/plano T21,
 execução real T23 e deploy/CRUD T24/T25 continuam pendentes.
+
+### EC2 — T20 verificada localmente
+
+[infra/modules/ec2](infra/modules/ec2/main.tf) define uma aws_instance t2.micro,
+único SG EC2, pública explícita e key pair existente. Oito inputs: name, ami_id,
+instance_type, public_subnet_id, ec2_sg_id, key_name, iam_instance_profile e tags.
+Profile admite null ou LabInstanceProfile existente; nenhum IAM/key pair/EIP
+novo. Outputs instance_id/public_ip sem credenciais; URL composta em T21.
+
+IMDSv2 required/hop1 e tags metadata disabled; root gp3 8GiB encrypted e
+delete_on_termination, tags Project/Environment/Owner/Name na instância e disco.
+CPUcredits standard, monitoramento detalhado desabilitado. As configurações
+seguem o [provider fixado](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/instance.html.markdown)
+e [opções IMDS AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html).
+
+AMI sem default: root T21 deverá selecionar Amazon Linux2023 standard/x86_64/
+HVM/EBS em us-east-1, conferir raiz <=8GiB/compatibilidade t2.micro e preservar
+ID selecionado na revisão. [Seleção AL2023](https://docs.aws.amazon.com/linux/al2023/ug/ec2.html).
+Formato do ID não prova OS/arquitetura/disponibilidade. Subnet deve vir da
+primeira pública VPC e SG do output EC2, não do RDS; conferir no root/AWS depois.
+Existência/posse de vockey, acesso SSH/profile/permissões não testados aqui.
+
+[user-data.sh](infra/modules/ec2/user-data.sh) é fixo e não recebe segredos.
+Instala Docker, habilita serviço no boot e prepara /opt/prova-reservas root0755
+(artefatos) e /etc/prova-reservas root0700 (ambiente futuro). Não instala
+PostgreSQL local nem inicia API fictícia. Imagem, SQL, CA e ambiente RDS serão
+transferidos/configurados em T24. Mudança do user-data exige recriação
+(user_data_replace_on_change=true), cuja proposta sempre terá revisão/autorização.
+
+Reprodução LOCAL (cache/lockfile bootstrap existente, sem state/tfvars reais):
+
+```bash
+(
+  set -eu
+  umask 077
+  repo_dir=$(pwd)
+  ec2_validation_root=$(mktemp -d /tmp/prova-ec2-XXXXXX)
+  cp infra/modules/ec2/*.tf "$ec2_validation_root/"
+  cp infra/modules/ec2/user-data.sh "$ec2_validation_root/"
+  cp -R infra/modules/ec2/tests "$ec2_validation_root/"
+  cp infra/backend/.terraform.lock.hcl "$ec2_validation_root/.terraform.lock.hcl"
+  printf 'provider_installation {\n  filesystem_mirror {\n    path = "%s/infra/backend/.terraform/providers"\n    include = ["registry.terraform.io/hashicorp/aws"]\n  }\n}\n' "$repo_dir" > "$ec2_validation_root/provider-mirror.tfrc"
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
+  unset TF_CLI_ARGS TF_CLI_ARGS_init TF_CLI_ARGS_validate TF_CLI_ARGS_test TF_CLI_ARGS_graph TF_LOG TF_LOG_PATH
+  export TF_CLI_CONFIG_FILE="$ec2_validation_root/provider-mirror.tfrc"
+  export AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_EC2_METADATA_DISABLED=true
+  printf 'Root temporário: %s\n' "$ec2_validation_root"
+  bash -n infra/modules/ec2/user-data.sh
+  python3 -B infra/modules/ec2/tests/test_user_data.py
+  terraform fmt -check -recursive infra
+  terraform -chdir="$ec2_validation_root" init -backend=false -input=false -no-color -lockfile=readonly
+  terraform -chdir="$ec2_validation_root" validate -no-color
+  terraform -chdir="$ec2_validation_root" test -no-color
+  terraform -chdir="$ec2_validation_root" graph -type=plan > "$ec2_validation_root/dependencies.dot"
+)
+```
+
+[test_user_data.py](infra/modules/ec2/tests/test_user_data.py) usa somente stdlib:
+PATH isolado/stubs dnf, systemctl, install; não instala pacotes/serviços/diretórios
+reais. Três casos verificam sequência/modos solicitados e interrupção nas falhas
+de pacote/serviço. Bash -n só confere sintaxe; shellcheck não estava instalado.
+
+[Evidência real](evidencias/ec2-validate.txt): dez runs Terraform mock/command=plan
+passaram. Primeira falha Unknown condition para profile null: optional/computed
+é unknown no plano; teste passou a conferir input null, vínculo source/grafo/schema,
+sem alegar profile ausente na AWS. Falso positivo auxiliar set -x em comentário
+corrigido para examinar comandos executáveis; falhas preservadas. Grafo sem ciclo
+confere dez referências; fmt/init/validate/schema/bash-n/testes de fluxo passaram.
+Init filesystem unauthenticated/lockfile readonly, nenhum download assinado novo.
+Após conferir, remover somente root temporário mostrado, preservando logs/cache.
+Não comprova boot/Docker/encriptação/IMDS/SSH/API/CRUD efetivos. R13/R16/R19/R22
+em andamento; próxima T21 (composição/backend/locking/plano), aplicação somente
+T23 após revisão/autorização T22, deploy/API T24/T25.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega

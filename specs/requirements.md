@@ -48,10 +48,10 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-preflight.txt` (T13 leitura/Lab/profile); aws-seguranca/plano futuros. | em andamento |
 | R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | infra/modules/vpc e vpc-validate.txt (T17 local); plan composto T21 e aws-rede.txt efetivo T23 futuros. | em andamento |
 | R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | infra/modules/security-group e security-group-validate.txt (T18 local); plano composto T21 e aws-seguranca.txt efetivo T23 futuros. | em andamento |
-| R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | `evidencias/ec2-deploy.txt`, `evidencias/api-aws.txt`. | pendente |
+| R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | infra/modules/ec2 e ec2-validate.txt (T20 local); ec2-deploy.txt/api-aws.txt reais futuros. | em andamento |
 | R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | infra/modules/rds e rds-validate.txt (T19 local); rds-crud.txt/aws-rds.txt reais futuros. | em andamento |
 | R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | rds-validate.txt (T19 local); aws-rds.txt/aws-seguranca.txt efetivos futuros. | em andamento |
-| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulos vpc T17/vpc-validate.txt e security-group T18/security-group-validate.txt e rds T19/rds-validate.txt; ec2/root principal futuros e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
+| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulos vpc T17/vpc-validate.txt e security-group T18/security-group-validate.txt e rds T19/rds-validate.txt e ec2 T20/ec2-validate.txt; root principal futuro e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
 | R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16 S3/DynamoDB reais após SCP); backend-locking.txt futuro T21 (state remoto/lock efetivo). | em andamento |
 | R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local), backend.txt/diário (T16 apply/conferência reais, bucket externo); init principal futuro T21. | em andamento |
 | R22 / P+U | Evidências reais de build, execução, Compose, `terraform validate` e `plan` sem erros, CRUD local e nuvem; separar estática/local/AWS. | Cada aceite tem comando, ambiente, resultado e arquivo real; plano não serve como prova de CRUD/deploy. | Arquivos em `evidencias/` com índice no README. | em andamento |
@@ -291,3 +291,16 @@ R17/R18 agora em andamento, não verificados: RDS available/AZs/privadas/SG/KMS 
 CRUD/SQL exigem plano composto T21/AWS T23–T25. R19/R22 parciais, R16 pendente.
 Snapshot final exige política explícita nos inputs; fixtures não aprovam
 retenção/descarte. Sem API AWS/plan principal/apply/destroy. Próxima T20.
+
+## Evidência T20 — avanço local de R13/R16/R19/R22
+
+Módulo ec2/user-data implementado em 29/09/2026. Um aws_instance, sem IAM novo;
+profile somente existente/null, key existente, SG EC2 único, t2.micro, IMDSv2,
+disco encriptado/tagueado/8GiB gp3 e associação pública propostos. AMI explícita
+AL2023 x86_64 requer seleção/conferência em T21; formato IDs não comprova AWS.
+Fmt/init/validate/grafo/schema/bash-n0, dez testes Terraform mock/plan e três
+Python/stdllib/stubs aprovados. Falha profile unknown e falso positivo auxiliar
+corrigidos/preservados em ec2-validate.txt. User-data sem segredos/sem API/RDSlocal.
+R16 agora em andamento; running/subnet/profile/key/IMDS/volume/boot/Docker/API/SQL
+reais só T23–T25. R13/R19/R22 parciais, sem backend remoto/plano principal ainda.
+PróximaT21 composição/locking/plano; não executar apply sem revisão T22.

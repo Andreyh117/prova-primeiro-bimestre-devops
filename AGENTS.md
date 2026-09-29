@@ -318,3 +318,27 @@ T01–T19 verificadas nos respectivos ambientes, T20–T34 pendentes; R17/R18/R1
 parciais. Sem API AWS/plan principal/backend remoto/apply/destroy; sem bloqueio.
 Não repetir suites inalteradas nem tocar state/plan/tfvars/cache/evidências
 anteriores; commit único coerente, feature preservada/mergeT32/sem push/PR.
+
+## Estado atual — T20 local verificada em 29/09/2026
+
+Substitui próxima T20 dos registros históricos: agora T21. Módulo infra/modules/ec2
+com quatro .tf/user-data.sh/10 runs mock e teste Python3cases, oito inputs/dois
+outputs instance_id/public_ip. Um aws_instance/t2.micro, SG EC2 único/subnet pública/
+key existente, profile null ou LabInstanceProfile; sem IAM/EIP/key/KMS novos.
+AMI explícita AL2023 standard/x86_64/HVM/EBS/raiz<=8GiB deve ser selecionada T21
+com conta/us-east-1/compatibilidade, sem inferir por IDs fictícios de fixtures.
+IMDSv2 required/hop1, root 8GiB gp3 encriptada/excluída na terminação/tags, CPU standard.
+User-data fixo sem input secreto instala Docker/serviço/prepara diretórios
+root 0755/root 0700, sem API/Postgres local. Deploy/SQL/CA/ambiente protegido T24.
+User_data_replace_on_change=true exige revisar eventual recriação em plano.
+Fmt/init/validate/grafo/schema/bash-n0, dez testes mock/plan + três de fluxo/stubs0.
+Falha profile unknown corrigida no teste, vínculo source/grafo/schema; falso
+positivo auxiliar sobre comentário corrigido, capturas ec2-validate.txt intactas.
+Grafo dez vínculos sem ciclo, cópias/lockfile readonly idênticos, sem state/plan/
+credenciais. Testes não comprovam boot/Docker/SSH/IMDS/encriptação/API/CRUD AWS.
+T01–T20 verificadas nos seus ambientes, T21–T34 pendentes; R13/R16/R19/R22 parciais.
+Sem API AWS/backend remoto/plan principal/apply/destroy; sem bloqueio. PróximaT21
+compõe root/selecionaAMI/revalida opções/CIDRs/conta/backend/locking/plan real,
+sem apply antes T22/T23. Não repetir suites anteriores inalteradas, preservar
+state/plan/tfvars/cache/evidências; commit único coerente, feature/mergeT32 futuro,
+sem push/PR automático.

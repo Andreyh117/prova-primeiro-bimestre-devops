@@ -1183,3 +1183,65 @@ recursiva de state/plan, prefixo/tmp/sem symlink. Cache original por inode/taman
 /mtime intacto; logs/brutos/falha/metadados em /tmp preservados. Recursos AWS/
 state/plan/tfvars reais não removidos. Preparar commit após conferir stage exato;
 comandos dependentes param no erro para impedir commit após checagem falhada.
+
+## T20 — módulo EC2 e bootstrap sem segredos, 29/09/2026
+
+Prompt: “Revisei o que foi feito. Execute a próxima tarefa pendente de specs/tasks.md,
+seguindo AGENTS.md. Implemente, valide, corrija e registre evidências reais.
+Explique o conceito aplicado, os arquivos alterados, o teste executado e o próximo
+passo. Se houver bloqueio, registre-o sem simular sucesso.”
+HEAD 14c2079/15 commits reais/feature limpa/main preservada, próxima T20. Codex leu
+R13/R16/R19/D10/D11/D12 e regras, com terminal/Python/Git/Terraform/navegador/fontes
+primárias AWS/provider. Sem skill/subagentes/colegas/vivências pessoais inventadas.
+URLs AMI-names.html/ec2-ami.html deram Internal Error; ec2.html AWS consultada.
+Shellcheck não localizado/não instalado; Bash-n executado. Escalonamento local
+por limitação de isolamento previamente observada, não erro da aplicação.
+
+Conceito: IMDSv2 e encriptação em repouso, SG único/subnet correta, bootstrap
+separado do deploy de segredos/API. AMI explícita AL2023 standard/x86_64/HVM/EBS
+em us-east-1 compatível t2.micro/raiz<=8GiB será selecionada em T21. IDs válidos
+não comprovam origem/OS/AZ/rede/região; AWS efetiva T23. Profile opcional
+null/LabInstanceProfile existente e key_name existente, sem IAM/key novos.
+Raiz8GiB/gp3/encrypted/delete_on_termination/tags, CPU credits standard/hop1, metadata
+tags disabled. Mudança user-data propõe recriação revisada, não apply autorizado.
+User-data fixo file sem variáveis de senha/credenciais, dnfDocker/systemctlDocker/
+diretórios root 0755/root 0700, imagem/SQL/CA/ambiente privado e API só T24.
+
+Criados quatro .tf/user-data.sh/instance.tftest.hcl/test_user_data.py (8 inputs/
+2 outputs). Root /tmp/devops-t20-ec2-2h684nsb com cópia exata/lockfile bootstrap readonly/
+mirror cache. AWS_*/TF_VAR_*/CLIargs/logs retirados, config AWS=/dev/null/IMDS disabled.
+Init filesystem unauthenticated, não novo download assinado. Fmt08:35:59/0,
+init08:35:59–08:36:02/0,validate08:36:02–06/0,test08:36:06–10/1:
+1pass/1fail/8skip, Unknown condition value profile null. Schema optional/computed:
+atributo desconhecido no plan. Corrigida asserção para input null, vínculo conferido
+source/grafo/schema, sem aplicar/fingir perfil ausente na AWS. Retryfmt08:36:58/0,
+sync bytes idênticos,test08:36:59–08:37:02/0:10 pass/0 fail. Fmt-checkfinal08:37:02/0,
+grafo08:36:24–28/0, schema08:36:24–30/0,bash-n08:36:23/0.
+Três casos Python/stubs08:38:03–04/0: ordem e modos solicitados, falha dnf17 para
+antes de serviço e falha systemctl17 para antes de diretórios. PATH com stubs isolados,
+sem pacotes/serviços/diretórios do host alterados; não prova boot/Docker na AWS.
+Revisão auxiliar falhou ao procurar set-x em comentário que o proíbe; rechecagem
+1 capturada, scanner corrigido para comandos executáveis/credenciais continuam
+scantexto, sem mudança no módulo. Review08:39:36/0 confirma dez vínculos sem ciclo,
+profile optional/computed/tags disco e instância, user-data sem segredos/input arbitrário,
+cópias/lockfile idênticos/nenhum state/plan. Falhas/hashes em ec2-validate.txt.
+
+Documentos atualizados em 2026-09-29T08:43:14-03:00, README/reprodução/índice/specs/matriz/AGENTS/
+diário. T20 local verificada, R13/R16/R19/R22 em andamento. Sem API AWS/SSH/bootstrap
+real/API/plan principal/backend remoto/apply/destroy ou SQL RDS nesta etapa. PróximaT21,
+não iniciada. Sem bloqueio; suites API/Docker/Compose/bootstrap/módulos anteriores
+inalteradas não repetidas. Um commit necessário/coerente após revisar escopo/stage/
+segredos, comandos dependentes param em falha; sem vazio/quantidade/push/merge/PR.
+
+Conferência final 2026-09-29T08:44:53-03:00/0: quatorze arquivos no escopo; 74 anteriores
+preservados por SHA-256 e histórico do diário/AGENTS como prefixos. Guia/API/
+Docker/Compose/bootstrap/módulos anteriores/evidências/lockfile intactos. Links/
+fences/newlines/whitespace passaram incluindo arquivos novos. T01–T20 verificadas
+nos seus ambientes/T21–T34 pendentes, 34 IDs/32 requisitos únicos e parciais
+mantidos. Scanner delimitado sem achados/conta-IP privados ausentes; arquivos
+privados ignorados/0600, não é prova universal de ausência de segredos.
+Em 2026-09-29T08:45:27-03:00, removido somente root temporário próprio após conferir ausência
+recursiva de state/plan, prefixo/tmp/sem symlink. Cache original por inode/tamanho
+/mtime intacto; logs/brutos/falha/metadados em /tmp preservados. Recursos AWS/
+state/plan/tfvars reais não removidos. Preparar commit após conferir stage exato;
+comandos dependentes param no erro para impedir commit após checagem falhada.
