@@ -58,23 +58,24 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T22, revisão do plano principal, segurança/custo e autorização. T17 implementou VPC/quatro subnets/IGW/tabelas e
+pendente: T24, deploy repetível da API na EC2 e inicialização do RDS.
+T22 foi autorizada e T23 provisionou/conferiu a infraestrutura AWS real. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
-usam provider mock, sem chamadas AWS: rede não implantada. Backend S3/locking
+usaram provider mock, sem chamadas AWS em T17; a rede foi implantada/conferida em T23. Backend S3/locking
 principal foram conferidos em T21, conforme os limites abaixo. T18 implementou grupos EC2/RDS e regras separadas, com
-14 testes mock locais, fmt/init/validate/grafo aprovados. EC2/RDS/CRUD na nuvem
-e limpeza permanecem pendentes; os security groups ainda não foram aplicados.
+14 testes mock locais, fmt/init/validate/grafo aprovados. Os grupos foram
+aplicados/conferidos em T23; CRUD na nuvem e limpeza permanecem pendentes.
 T19 implementou o módulo RDS privado/encriptado; 17 testes mock locais e
 fmt/init/validate/grafo/schema passaram após corrigir conflito do provider.
-O banco real, seus acessos e o CRUD na nuvem ainda não foram executados.
+O banco real e seus atributos foram conferidos em T23; SQL/CRUD da API seguem pendentes.
 T20 implementou módulo EC2/user-data: dez testes Terraform mock e três testes
 de fluxo Bash com stubs passaram, além de fmt/init/validate/grafo/schema/bash-n.
-Nenhuma instância criada; boot/Docker/API reais continuam pendentes.
+T20 não criou instância; T23 a provisionou. Boot/Docker/API reais seguem pendentes de T24.
 T21 compôs o root e inicializou S3 real: fmt/init/validate/grafo 0, plano real
 2 com 23 criações/zero alterações/exclusões. Contenção DynamoDB comprovada:
 segundo plano falhou1 enquanto o primeiro mantinha lock; primeiro terminou2
-e liberou o lock. Sem apply, o objeto de state principal ainda não existe;
-R20 segue parcial até T23. IDs/IP/endpoint/URL efetivos também pendentes.
+e liberou o lock. No encerramento T21 não havia objeto principal sem apply;
+T23 agora comprovou sua gravação S3 e os outputs reais, completando R20.
 
 ## Contrato aprovado para implementação
 
@@ -136,6 +137,11 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Root e backend T21](evidencias/terraform-validate.txt): preflight AWS, instalação do cache fixo, fmt/init S3/validate/grafo reais.
 - [Plano principal T21](evidencias/terraform-plan.txt): 23 criações propostas, JSON real revisado e hash do plano privado; sem apply.
 - [Locking real T21](evidencias/backend-locking.txt): DynamoDB, contenção entre dois Terraform/release, correção do leitor e ausência do objeto principal sem apply.
+- [Revisão principal T22](evidencias/infra-revisao.txt): plano preservado, consultas/custos oficiais/falhas/correções e autorização explícita recebida em29/09/2026.
+- [Rede AWS T23](evidencias/aws-rede.txt): apply autorizado0/23 criações e consultas reais de VPC/subnets/rotas/IGW.
+- [RDS AWS T23](evidencias/aws-rds.txt): available/PostgreSQL16.15/db.t3.micro, privado/encriptado e grupo nas duas privadas; SQL pendente.
+- [Segurança AWS T23](evidencias/aws-seguranca.txt): EC2 running/ok/ok, IMDSv2/disco/profile e seis regras efetivas aprovadas.
+- [Outputs/state T23](evidencias/terraform-outputs.txt): outputs sem credenciais, objeto S3 real/versionado/AES256, lock liberado e plano posterior0/No changes.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -434,7 +440,7 @@ opções locais em 0600, ignorado; não deve ser publicado. Não contém credenc
 nem chave privada e não é arquivo Terraform de variáveis/state. O aluno confirmou
 no painel US$0 usados de US$50; esse saldo não foi medido pela API. Os CIDRs definidos para SSH/API
 são o IP atual /32 por decisão dele; as regras foram implementadas localmente
-em T18, ainda sem aplicação AWS. Revalidar IP/identidade antes do plano real.
+em T18, aplicadas/conferidas na AWS em T23. Revalidar IP/identidade antes de novas operações.
 Reconsultar IP, STS e opções
 antes de plan/apply: validade observada agora não garante token válido depois.
 
@@ -647,7 +653,7 @@ externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois
 reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
 comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
 cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
-Root/plano real T21 concluídos, aplicação T23 pendente após revisão T22.
+Root/plano T21 e aplicação/conferência T23 concluídos; deploy T24 pendente.
 
 ### Security groups — T18 verificada localmente
 
@@ -719,8 +725,7 @@ continuam em andamento; T19/T20 locais concluídas abaixo, próxima T21 (root/pl
 
 [infra/modules/rds](infra/modules/rds/main.tf) define DB subnet group e instância
 PostgreSQL 16.15/db.t3.micro/gp3 20GiB, Single-AZ, sem autoscale, encriptada e
-publicly_accessible=false. São configurações locais propostas; ainda sem banco
-provisionado. Versão/opções observadas em T13 foram revalidadas na AWS em T21.
+publicly_accessible=false. T23 provisionou/conferiu esses atributos reais. SQL/CRUD pendentes. Versão/opções observadas em T13 foram revalidadas na AWS em T21.
 
 Onze inputs: identifier, private_subnet_ids, rds_sg_id, engine_version,
 instance_class, db_name, username, password, skip_final_snapshot,
@@ -784,7 +789,7 @@ informa unauthenticated, não novo download assinado. Testes rejeitam subnets
 senha curta/caracteres inválidos, tags ausentes e política snapshot incoerente.
 Não comprovam AZ/rotas privadas/permissões/KMS/endpoint disponível ou SQL/CRUD
 na AWS. R17/R18/R19/R22 em andamento; root/plano real T21 concluídos,
-execução T23 e deploy/CRUD T24/T25 continuam pendentes após revisão T22.
+execução T23 conferida e deploy/CRUD T24/T25 continuam pendentes.
 
 ### EC2 — T20 verificada localmente
 
@@ -921,3 +926,59 @@ real: pausa curta no próprio plano com lock observado, segundo plano recusado,
 retomada em finally e liberação natural. Não editar locks manualmente nem usar
 -lock=false. DynamoDB permanece exigido na prova apesar do aviso de depreciação
 na [documentação oficial](https://developer.hashicorp.com/terraform/language/backend/s3).
+
+## Revisão principal T22 — autorizada após apresentação
+
+[Revisão completa](evidencias/infra-revisao.txt) apresenta o plano concreto
+23create/0update/0delete, conta terminada5811/default/voclabs/us-east-1, SSH/API
+somente seu IP atual/32 e PostgreSQL privado somente SGEC2. Hash plano T21
+preservado, S3/DynamoDB existentes conferidos, lock ausente. Na revisão T22
+ainda não havia apply; T23 foi autorizada/executada conforme registro abaixo.
+
+Estimativa USD, arredondada para cima, inclui EC2/RDS/discos/IPv4 e cenário
+pequeno backend:6hUS$0.24,24hUS$0.94,730hUS$28.21. Supõe RDS sem CPU excedente
+e tráfego interAZ/saídas extras não medidos; custos adicionais variam, sem
+franquia/crédito descontado. Detalhes/fontes/cálculo/falhas reais na evidência;
+saldo atual Lab não verificado. Código Terraform e plano privado preservados.
+
+T22 recebeu resposta explícita em29/09/2026 sobre o escopo apresentado e foi
+verificada. Provisionamento T23 conferido no registro abaixo.
+[AGENTS regra10](AGENTS.md) exige “obter autorização para aquele escopo”; o
+bootstrap foi seguido da aprovação principal recebida para T23. Plano, conta,
+IP e backend foram revalidados antes de aplicar. Deploy e teardown terão etapas
+próprias. Registro da revisão/decisão acompanha o marco T23 em um commit coerente.
+
+## Infraestrutura AWS T23 — provisionada e conferida
+
+Após a apresentação de plano, hash, acessos e custo, o aluno autorizou T23 em
+29/09/2026. O apply retornou **0: 23 criações, zero alterações e zero exclusões**.
+[Rede](evidencias/aws-rede.txt), [RDS](evidencias/aws-rds.txt),
+[segurança](evidencias/aws-seguranca.txt) e [outputs/state](evidencias/terraform-outputs.txt)
+registram comandos, horários, códigos, hashes e consultas reais sanitizadas.
+
+A EC2 `i-0f4b59a8181537b78` está running, com status checks ok/ok. É t2.micro na
+primeira subnet pública em us-east-1a, com IMDSv2, EBS gp3 de 8 GiB encriptado
+e LabInstanceProfile existente. O RDS PostgreSQL 16.15/db.t3.micro está available,
+privado e encriptado, com gp3 de 20 GiB e Single-AZ. Seu subnet group usa as duas
+privadas; o banco foi criado em us-east-1a. SSH22/API3000 aceitam somente seu
+IPv4 atual /32; PostgreSQL5432 aceita somente o SG da EC2. Grupos, rotas e tags
+correspondem ao aprovado. Saldo atual e duração restante do Lab não foram inferidos.
+
+Outputs reais: IP EC2 `13.220.113.41`, endpoint RDS
+`prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com`, porta5432 e URL
+proposta `http://13.220.113.41:3000`. **A API ainda não foi implantada.** HTTP,
+SQL, CRUD, SSH e bootstrap Docker efetivos dependem de T24/T25. Os outputs não
+comprovam o serviço.
+
+O objeto de state principal no S3 foi confirmado: versionado, AES256 e não vazio.
+head-object/list-object-versions e state pull privado passaram; há 23 recursos
+managed. O lock DynamoDB foi liberado após apply e plano, preservando o state
+bootstrap local separado. O plano posterior retornou 0/No changes e foi salvo
+em postapply.local.tfplan ignorado/0600; o plano aprovado original foi preservado.
+Não publicar plano, state, JSON, cache ou tfvars com dados sensíveis, nem remover
+o backend ou destruir recursos nesta etapa.
+
+Próxima tarefa: **T24**, deploy repetível por SSH/SCP, imagem, migração SQL no RDS,
+ambiente protegido e serviço da API, seguido da validação de /health e reboot.
+Os recursos continuam ativos e podem consumir créditos; a estimativa T22 não é
+um teto de custo nem uma fatura.

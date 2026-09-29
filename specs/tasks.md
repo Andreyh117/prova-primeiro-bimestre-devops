@@ -54,7 +54,10 @@ Após revisão, T21 verificada: root composto, fmt/init S3 real/validate/grafo 0
 plan principal 2 (23 criações/zero alterações/exclusões), JSON/vínculos/tags
 conferidos e locking DynamoDB real com contenção/release. Objeto principal S3
 ainda ausente sem apply: gravação/conferência pendentes T23, R20 parcial.
-Próxima pendente T22, revisão concreta de segurança/custo/autorização;
+T22 verificada: aluno autorizou explicitamente o plano principal revisado.
+T23 verificada na AWS: apply0/23add/0change/0destroy, EC2 running/ok/ok, RDS
+available/private/encrypted, state S3 real/versionado e lock liberado; plano
+posterior0/No changes. Próxima pendente T24, deploy repetível/SQL/serviço;
 principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
@@ -87,8 +90,8 @@ Cada tarefa recebe entrada no diário.
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | rds-validate.txt: fmt/init/validate/grafo/schema 0, conflito real corrigido e 17 testes locais mock aprovados; AWS/SQL futuros. | verificado |
 | T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | ec2-validate.txt: fmt/init/validate/grafo/schema/bash-n 0, 10 testes Terraform mock + 3 testes de fluxo/stubs aprovados, falhas/correções preservadas; AWS futura. | verificado |
 | T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init S3 real/validate/plan; vínculos/tags e locking real; objeto S3 confirmado ausente sem apply, gravação/conferência T23. | terraform-validate.txt/terraform-plan.txt/backend-locking.txt: init/validate 0, plan 2/23 create, contenção 1 esperada e release real; sem apply. | verificado |
-| T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist humano do plano com conta/região, tipos, SG, subnet, state e IAM. | Diário da revisão/autorização; não marcar deploy verificado. | pendente |
-| T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt, aws-rds.txt, aws-seguranca.txt, terraform-outputs.txt. | pendente |
+| T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist concreto executado; aluno autorizou explicitamente em29/09 após revisão. | infra-revisao.txt/diário: consultas/cálculo reais e decisão recebida; aprovação não comprova deploy. | verificado |
+| T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt/aws-rds.txt/aws-seguranca.txt/terraform-outputs.txt: apply0, consultas/assertivas reais, S3 state e plano posterior0/No changes; sem deploy/CRUD. | verificado |
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt, health-aws.txt; commit deploy. | pendente |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt, rds-crud.txt, aws-seguranca.txt. | pendente |
 | T26 | T25 | R24, R25, R30 | Redigir relatório com contribuição do aluno, a partir do diário/evidências. | Quatro respostas dissertativas de dez linhas cada; IA e ferramentas reais; aluno revisa sua experiência. | relatorio.md, diário; limitações honestas, sem inventar desafios. | pendente |
@@ -710,3 +713,101 @@ T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/cu
 autorização principal, nenhuma aprovação principal presumida do bootstrap.
 Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
 coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.
+
+## Registro T22 — revisão principal antes da decisão
+
+Em 29/09/2026, T22 revisou o plano principal T21 SEM apply. Identidade atual
+STS default/voclabs/us-east-1/mesma conta terminada5811 e IP atual /32 iguais ao
+plano. SHA-256 preservado2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7;
+23create/0update/0delete. Backend Enabled/AES256/BPA4true/DDB ACTIVE, lock ausente,
+objeto principal S3 ausente sem apply; nenhuma EC2 do projeto não terminada/RDS
+identifier previsto nas consultas. AMI available e key/profile existentes;
+posse da chave/SSH/saldo atual/duração token não inferidos.
+Show JSON0 e20 assertivas segurança0: vínculos EC2 pública/SGEC2 eRDS privadas/
+SGRDS, IMDSv2/discos encriptados/tipos/versão/tags/regras /32 e5432sem CIDR,
+nenhum novo IAM/EIP/NAT/KMS. Username/password permanecem privados no plano/state.
+RDSSingle-AZ20GiB/backup0/skip_final_snapshot=true/deletion_protection=false são
+propostas Lab para a revisão, sem consentimento de destruição/dados retidos.
+
+Preços regionais oficiais capturados com URLs/horários/hashes/versão/SKU/rateCode:
+EC2t2micro0.0116/h,RDSdbt3micro0.018/h,IPv4público0.005/h,EBSgp30.08/GB-mês,
+RDSgp30.115/GB-mês. Base730h28.198USD; cenário backend pequeno0.00749765625USD/mês.
+Cálculo Decimal comparado com soma Fraction independente, exit0. Arredondamento
+para cima:6hUS$0.24/24hUS$0.94/730hUS$28.21, principal+backend existente.
+Cenário:10MiB S3 versões cumulativas/1MiB DDB,1000requests ouunits porcategoria/
+10MiB saída porjanela; storage curto rateadohoras/730, não consumo medido.
+Sem franquias/FreeTier/créditos/impostos descontados; não é fatura/teto/saldo.
+Adicionais possíveis: RDS T3Unlimited0.075/vCPU-h acima baseline, tráfego interAZ/
+saídas extras/versões/retidos. Não prometer limite50$ para qualquer carga/tempo.
+
+Falhas reais preservadas: endpoint exploratório EC2HTTP404 descartado;
+pricing:GetProducts EBS exit254/AccessDenied Lab, sem alterar IAM/SCP. Alternativa
+pública do site EBS, endpoint derivado do próprio cliente. JSON direto falhou1/
+UnicodeDecodeError por gzip; corpo real descomprimido e JSON passou0, tarifa
+região/token/rateCode conferidos. Capturas/correções/cálculo em infra-revisao.txt;
+conta/IP/username/password/ARN sessão ocultados, brutos privados0600 preservados.
+Código/modules/bootstrap/lockfiles/planos/states e anteriores intactos.
+
+T22 em andamento: revisão pronta, autorização principal PENDENTE, T23 pendente.
+AGENTS regra10/T22 exigem escopo concreto e resposta explícita; aprovação anterior
+foi bootstrap, não presumir principal por revisão genérica/tempo. Próxima ação:
+apresentar23criações,conta/região/acessos/custo/hash e obter decisão do aluno.
+T23 só após aprovação e revalidar conta/IP/hash/backend; mudança de escopo/plano
+requer nova revisão. Deploy T24/T25/teardown T27/28/PR continuam separados.
+Não marcar requisitos AWS/CRUD/stategravado/deploy verificados por revisão.
+Sem bloqueio técnico após alternativa pública; decisão humana ainda necessária.
+Não repetir suítes inalteradas; nenhum apply/destroy/push/merge/PR/commit vazio.
+Sem commit extra nesta preparação; revisão/decisão no próximo marco coerente.
+
+## Registro T22/T23 — autorização e infraestrutura real
+
+Após revisão T22, aluno autorizou: “Autorizo que faça tudo que seja necessário
+para a conclusão das tarefas propostas, desde que esteja de acordo com o que foi
+solicitado”. Decisão registrada em infra-revisao.txt/diário; T22 verificada pela
+revisão concreta e autorização. T23 aplicou somente plano principal apresentado,
+SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+Conta terminada5811/default/voclabs/us-east-1/IP aluno /32/hash/backend revalidados.
+Plano de23create/0update/0delete; custo T22 permanece estimativa, saldo não atual.
+
+Apply real 2026-09-29T09:26:43-03:00–2026-09-29T09:33:10-03:00, exit0:23added/0changed/0destroyed.
+Arquivo de plano aprovado passado a apply, sem -auto-approve/target/refresh=false/
+lock=false. Aviso DynamoDB depreciado preservado, locking mantido. Nenhuma falha
+do apply/conferência observada; falhas preços T22 seguem registradas, não inventar
+falha T23. Código Terraform/versões/modules/lockfiles/planos aprovados preservados.
+
+Consultas AWS e assertions passaram0 em 2026-09-29T09:33:52-03:00: EC2 running/t2.micro,
+status system ok/instance ok, AMI fixada, primeira pública/SGEC2 único, keyvockey,
+Profile LabInstanceProfile-LabRole existentes, IMDSv2 required/hop1/tagsdisabled,
+EBSgp3 8GiB encrypted/delete-on-termination e CPUstandard. VPC disponível/DNStrue,
+4subnets disponíveis nas2AZs, IP público flag só públicas, IGW attached, rota0/0
+nas públicas e sólocal privadas,4associações explícitas. Nenhum novo recurso
+IAM/EIP/NAT/KMS/key pair declarado no plano. Tags em19recursos+rootEBS conferidas.
+RDS available/PostgreSQL16.15/db.t3.micro/20GiBgp3/encrypted/private/SingleAZ,
+2privadas no subnetgroup eSGRDS único ativo, backup0/deletion_protectionfalse,
+ExtendedSupportdisabled; EC2 eRDS efetivamente emus-east-1a (RDS escolheuAZ).
+Seis regras efetivas: EC2 ingress22/3000 exclusivamente aluno/32, RDS5432 somente
+referênciaSGEC2; EC2egress80/443 CIDR0/0 e5432 somenteSGRDS; RDSsem egressiniciada.
+
+State principal REAL S3: head-object0/nonempty/AES256/VersionId atual conferida
+em list-object-versions; state pull0 privado confirma23managed. Cache backend
+não foi usado como prova do objeto. State bootstrap local separado preservado.
+Lock liberado apósapply e apósplano. Plano posterior 2026-09-29T09:34:25-03:00/exit0/No changes,
+sem sobrescrever plano aprovado, postapply.local.tfplan ignorado0600 preservado.
+Outputs reais ID/IP EC2,hostname/portaRDS,URLAPI semsenha; URLnão prova serviço.
+State/plano/JSON bruto contêm senha, permanecer privados0600/ignorados, não publicar.
+
+T01–T23 verificadas nos respectivos ambientes. R13/R14/R15/R18/R19/R20/R21
+verificados; R16/R17/R22 seguem parciais até serviçoAPI/SQL/CRUD/evidências futuras.
+Validade das credenciais no instante das consultas comprovada, duração restante
+não inferida. Sem SSH/bootstrapDocker/HTTP/SQL/CRUD/reboot comprovados; próximas
+T24deploy/migração/serviço eT25CRUD EC2/RDS. Sem bloqueio T23. Recursos continuam
+ativos/faturáveis; custo varia comtempo/carga, estimativa T22 não é teto/saldo.
+Retomar escopo autorizado sem pedir mesma aprovação; mudança deescopo/plano e
+teardown têm revisão concreta própria. Não destruir agora nem removerbackend/state.
+Sem push/merge/PR; mergeT32 eentrega presencial01/10/2026 preservados.
+
+Quatro novas evidências reais: aws-rede.txt/aws-rds.txt/aws-seguranca.txt/
+terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um commit
+coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
+sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
+privados em /tmp preservados, nenhuma credencial oustate completo versionado.

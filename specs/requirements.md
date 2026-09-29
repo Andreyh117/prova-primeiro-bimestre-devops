@@ -45,14 +45,14 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | verificado |
 | R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt` (T11 real). | verificado |
 | R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore` e compose-rede-saude.txt (config/mapeamentos/ignores reais). | verificado |
-| R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-preflight.txt` (T13 leitura/Lab/profile); aws-seguranca/plano futuros. | em andamento |
-| R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | infra/modules/vpc e vpc-validate.txt (T17 local); plan composto T21 e aws-rede.txt efetivo T23 futuros. | em andamento |
-| R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | infra/modules/security-group e security-group-validate.txt (T18 local); plano composto T21 e aws-seguranca.txt efetivo T23 futuros. | em andamento |
-| R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | infra/modules/ec2 e ec2-validate.txt (T20 local); ec2-deploy.txt/api-aws.txt reais futuros. | em andamento |
-| R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | infra/modules/rds e rds-validate.txt (T19 local); rds-crud.txt/aws-rds.txt reais futuros. | em andamento |
-| R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | rds-validate.txt (T19 local); aws-rds.txt/aws-seguranca.txt efetivos futuros. | em andamento |
-| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulos vpc T17/vpc-validate.txt e security-group T18/security-group-validate.txt e rds T19/rds-validate.txt e ec2 T20/ec2-validate.txt; root T21 composto/validado/plano real em terraform-validate.txt/terraform-plan.txt; terraform-outputs.txt efetivo futuro T23. | em andamento |
-| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16 S3/DynamoDB reais após SCP); backend-locking.txt T21: init S3 real/locking nativo comprovados; objeto de state ausente antes/depois do plano, gravação/conferência T23 pendente. | em andamento |
+| R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | aws-preflight.txt (T13) e aws-seguranca.txt (T23): STS atual/default/voclabs/us-east-1 e LabInstanceProfile/LabRole efetivo, sem recursos IAM novos declarados; duração restante não inferida. | verificado |
+| R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | vpc-validate.txt (T17), terraform-plan.txt (T21), aws-rede.txt (T23): VPC/quatro subnets/duas AZs/IGW/rotas/associações reais. | verificado |
+| R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | security-group-validate.txt (T18), terraform-plan.txt (T21), aws-seguranca.txt (T23): seis regras reais, ingress22/3000 somente /32 aluno e5432 somente SGEC2. | verificado |
+| R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | ec2-validate.txt (T20) e aws-seguranca.txt (T23): EC2 t2.micro pública running/ok/ok/profile/disco/IMDS reais; ec2-deploy.txt/api-aws.txt T24/T25 futuros. | em andamento |
+| R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | rds-validate.txt (T19), aws-rds.txt (T23): RDS available/PG16.15/db.t3.micro real; SQL/CRUD/conexão API em rds-crud.txt T24/T25 pendentes. | em andamento |
+| R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | aws-rds.txt/aws-seguranca.txt (T23): publicly_accessible=false/storage_encrypted=true, duas privadas/SGRDS e5432 só SGEC2 efetivos. | verificado |
+| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | terraform-validate.txt/terraform-plan.txt (T21), aws-rede.txt/aws-rds.txt/aws-seguranca.txt/terraform-outputs.txt (T23): vínculos/tags/outputs reais sem credenciais. | verificado |
+| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16), backend-locking.txt (T21 contenção nativa), terraform-outputs.txt (T23): objeto S3 real/versionado/AES256/state pull0,23managed e lock liberado. | verificado |
 | R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local), backend.txt/diário (T16 apply/conferência reais, bucket externo); terraform-validate.txt T21/init S3 real após bootstrap, states separados preservados. | verificado |
 | R22 / P+U | Evidências reais de build, execução, Compose, `terraform validate` e `plan` sem erros, CRUD local e nuvem; separar estática/local/AWS. | Cada aceite tem comando, ambiente, resultado e arquivo real; plano não serve como prova de CRUD/deploy. | Arquivos em `evidencias/` com índice no README. | em andamento |
 | R23 / P+U | Executar `terraform destroy` após coletar evidências; preparar limpeza do backend separadamente, preservando state até encerrar. | Plano de destruição revisado/autorizado, destroy principal real e ausência de recursos confirmada; explicitar retenções/pendências do backend. | `evidencias/terraform-destroy.txt`, `evidencias/aws-pos-destroy.txt`, `evidencias/backend-teardown.txt`. | pendente |
@@ -351,3 +351,105 @@ T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/cu
 autorização principal, nenhuma aprovação principal presumida do bootstrap.
 Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
 coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.
+
+## Evidência T22 — revisão sem afirmar provisionamento
+
+Em 29/09/2026, T22 revisou o plano principal T21 SEM apply. Identidade atual
+STS default/voclabs/us-east-1/mesma conta terminada5811 e IP atual /32 iguais ao
+plano. SHA-256 preservado2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7;
+23create/0update/0delete. Backend Enabled/AES256/BPA4true/DDB ACTIVE, lock ausente,
+objeto principal S3 ausente sem apply; nenhuma EC2 do projeto não terminada/RDS
+identifier previsto nas consultas. AMI available e key/profile existentes;
+posse da chave/SSH/saldo atual/duração token não inferidos.
+Show JSON0 e20 assertivas segurança0: vínculos EC2 pública/SGEC2 eRDS privadas/
+SGRDS, IMDSv2/discos encriptados/tipos/versão/tags/regras /32 e5432sem CIDR,
+nenhum novo IAM/EIP/NAT/KMS. Username/password permanecem privados no plano/state.
+RDSSingle-AZ20GiB/backup0/skip_final_snapshot=true/deletion_protection=false são
+propostas Lab para a revisão, sem consentimento de destruição/dados retidos.
+
+Preços regionais oficiais capturados com URLs/horários/hashes/versão/SKU/rateCode:
+EC2t2micro0.0116/h,RDSdbt3micro0.018/h,IPv4público0.005/h,EBSgp30.08/GB-mês,
+RDSgp30.115/GB-mês. Base730h28.198USD; cenário backend pequeno0.00749765625USD/mês.
+Cálculo Decimal comparado com soma Fraction independente, exit0. Arredondamento
+para cima:6hUS$0.24/24hUS$0.94/730hUS$28.21, principal+backend existente.
+Cenário:10MiB S3 versões cumulativas/1MiB DDB,1000requests ouunits porcategoria/
+10MiB saída porjanela; storage curto rateadohoras/730, não consumo medido.
+Sem franquias/FreeTier/créditos/impostos descontados; não é fatura/teto/saldo.
+Adicionais possíveis: RDS T3Unlimited0.075/vCPU-h acima baseline, tráfego interAZ/
+saídas extras/versões/retidos. Não prometer limite50$ para qualquer carga/tempo.
+
+Falhas reais preservadas: endpoint exploratório EC2HTTP404 descartado;
+pricing:GetProducts EBS exit254/AccessDenied Lab, sem alterar IAM/SCP. Alternativa
+pública do site EBS, endpoint derivado do próprio cliente. JSON direto falhou1/
+UnicodeDecodeError por gzip; corpo real descomprimido e JSON passou0, tarifa
+região/token/rateCode conferidos. Capturas/correções/cálculo em infra-revisao.txt;
+conta/IP/username/password/ARN sessão ocultados, brutos privados0600 preservados.
+Código/modules/bootstrap/lockfiles/planos/states e anteriores intactos.
+
+T22 em andamento: revisão pronta, autorização principal PENDENTE, T23 pendente.
+AGENTS regra10/T22 exigem escopo concreto e resposta explícita; aprovação anterior
+foi bootstrap, não presumir principal por revisão genérica/tempo. Próxima ação:
+apresentar23criações,conta/região/acessos/custo/hash e obter decisão do aluno.
+T23 só após aprovação e revalidar conta/IP/hash/backend; mudança de escopo/plano
+requer nova revisão. Deploy T24/T25/teardown T27/28/PR continuam separados.
+Não marcar requisitos AWS/CRUD/stategravado/deploy verificados por revisão.
+Sem bloqueio técnico após alternativa pública; decisão humana ainda necessária.
+Não repetir suítes inalteradas; nenhum apply/destroy/push/merge/PR/commit vazio.
+Sem commit extra nesta preparação; revisão/decisão no próximo marco coerente.
+
+R13–R20/R22/R31 continuam nos estados prévios: R21 verificado pela sequência
+bootstrap/initT21. Autorizar/revisar não comprova recursos/CRUD AWS nem gravação
+do objeto state. Verificação efetiva permanece T23–T25 e encerramento.
+
+## Evidência T23 — recursos AWS e state real
+
+Após revisão T22, aluno autorizou: “Autorizo que faça tudo que seja necessário
+para a conclusão das tarefas propostas, desde que esteja de acordo com o que foi
+solicitado”. Decisão registrada em infra-revisao.txt/diário; T22 verificada pela
+revisão concreta e autorização. T23 aplicou somente plano principal apresentado,
+SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+Conta terminada5811/default/voclabs/us-east-1/IP aluno /32/hash/backend revalidados.
+Plano de23create/0update/0delete; custo T22 permanece estimativa, saldo não atual.
+
+Apply real 2026-09-29T09:26:43-03:00–2026-09-29T09:33:10-03:00, exit0:23added/0changed/0destroyed.
+Arquivo de plano aprovado passado a apply, sem -auto-approve/target/refresh=false/
+lock=false. Aviso DynamoDB depreciado preservado, locking mantido. Nenhuma falha
+do apply/conferência observada; falhas preços T22 seguem registradas, não inventar
+falha T23. Código Terraform/versões/modules/lockfiles/planos aprovados preservados.
+
+Consultas AWS e assertions passaram0 em 2026-09-29T09:33:52-03:00: EC2 running/t2.micro,
+status system ok/instance ok, AMI fixada, primeira pública/SGEC2 único, keyvockey,
+Profile LabInstanceProfile-LabRole existentes, IMDSv2 required/hop1/tagsdisabled,
+EBSgp3 8GiB encrypted/delete-on-termination e CPUstandard. VPC disponível/DNStrue,
+4subnets disponíveis nas2AZs, IP público flag só públicas, IGW attached, rota0/0
+nas públicas e sólocal privadas,4associações explícitas. Nenhum novo recurso
+IAM/EIP/NAT/KMS/key pair declarado no plano. Tags em19recursos+rootEBS conferidas.
+RDS available/PostgreSQL16.15/db.t3.micro/20GiBgp3/encrypted/private/SingleAZ,
+2privadas no subnetgroup eSGRDS único ativo, backup0/deletion_protectionfalse,
+ExtendedSupportdisabled; EC2 eRDS efetivamente emus-east-1a (RDS escolheuAZ).
+Seis regras efetivas: EC2 ingress22/3000 exclusivamente aluno/32, RDS5432 somente
+referênciaSGEC2; EC2egress80/443 CIDR0/0 e5432 somenteSGRDS; RDSsem egressiniciada.
+
+State principal REAL S3: head-object0/nonempty/AES256/VersionId atual conferida
+em list-object-versions; state pull0 privado confirma23managed. Cache backend
+não foi usado como prova do objeto. State bootstrap local separado preservado.
+Lock liberado apósapply e apósplano. Plano posterior 2026-09-29T09:34:25-03:00/exit0/No changes,
+sem sobrescrever plano aprovado, postapply.local.tfplan ignorado0600 preservado.
+Outputs reais ID/IP EC2,hostname/portaRDS,URLAPI semsenha; URLnão prova serviço.
+State/plano/JSON bruto contêm senha, permanecer privados0600/ignorados, não publicar.
+
+T01–T23 verificadas nos respectivos ambientes. R13/R14/R15/R18/R19/R20/R21
+verificados; R16/R17/R22 seguem parciais até serviçoAPI/SQL/CRUD/evidências futuras.
+Validade das credenciais no instante das consultas comprovada, duração restante
+não inferida. Sem SSH/bootstrapDocker/HTTP/SQL/CRUD/reboot comprovados; próximas
+T24deploy/migração/serviço eT25CRUD EC2/RDS. Sem bloqueio T23. Recursos continuam
+ativos/faturáveis; custo varia comtempo/carga, estimativa T22 não é teto/saldo.
+Retomar escopo autorizado sem pedir mesma aprovação; mudança deescopo/plano e
+teardown têm revisão concreta própria. Não destruir agora nem removerbackend/state.
+Sem push/merge/PR; mergeT32 eentrega presencial01/10/2026 preservados.
+
+Quatro novas evidências reais: aws-rede.txt/aws-rds.txt/aws-seguranca.txt/
+terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um commit
+coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
+sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
+privados em /tmp preservados, nenhuma credencial oustate completo versionado.

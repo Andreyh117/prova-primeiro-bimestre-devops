@@ -1,0 +1,107 @@
+T23 — apply principal AUTORIZADO e conferência AWS real,29/09/2026 (-03:00).
+Terraform1.16.2/hashicorp-aws6.65.0, default/voclabs/us-east-1/conta terminada5811.
+Aluno autorizou explicitamente após revisão concretaT22; decisão em infra-revisao.txt.
+Plano aprovado SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7,
+23create/0update/0delete, preservado. Identidade/IP/hash/backend revalidados antes.
+Native apply usou arquivo aprovado, sem -auto-approve/lock=false/refresh=false/target.
+Capturas REAIS com comando/horários/exit code/hash do bruto privado. Redação
+explícita: conta completa/CIDR-IP aluno/username/password/ARNsession ocultados,
+state pull privado não publicado; espaços finais normalizados. IP público EC2,
+endpoint RDS eIDs próprios são outputs reais sem credenciais, não provam API.
+Nenhum recurso IAM/EIP/NAT/KMS/key novo no plano; vockey/LabInstanceProfile-LabRole existentes.
+Não houve SSH/deploy/HTTP/SQL/CRUD nem destroy/push/merge/PR nesta tarefa.
+Suítes API/Docker/Compose/módulos inalterados não repetidas.
+
+CAPTURA rds
+{
+  "started": "2026-09-29T09:33:39-03:00",
+  "finished": "2026-09-29T09:33:42-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "describe-db-instances",
+    "--db-instance-identifier",
+    "prova-6325231-rds",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f95f106a26246c9ee8663b35f8b8d2a12546285a983942e8524f123b504b194c",
+  "sanitized_output": "{\n    \"DBInstances\": [\n        {\n            \"DBInstanceIdentifier\": \"prova-6325231-rds\",\n            \"DBInstanceClass\": \"db.t3.micro\",\n            \"Engine\": \"postgres\",\n            \"DBInstanceStatus\": \"available\",\n            \"MasterUsername\": \"[RDS_USERNAME_OCULTO]\",\n            \"DBName\": \"reservas\",\n            \"Endpoint\": {\n                \"Address\": \"prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com\",\n                \"Port\": 5432,\n                \"HostedZoneId\": \"Z2R2ITUGPM61AM\"\n            },\n            \"AllocatedStorage\": 20,\n            \"InstanceCreateTime\": \"2026-09-29T12:31:34.207000+00:00\",\n            \"PreferredBackupWindow\": \"05:05-05:35\",\n            \"BackupRetentionPeriod\": 0,\n            \"DBSecurityGroups\": [],\n            \"VpcSecurityGroups\": [\n                {\n                    \"VpcSecurityGroupId\": \"sg-0622ad42cefbb6b38\",\n                    \"Status\": \"active\"\n                }\n            ],\n            \"DBParameterGroups\": [\n                {\n                    \"DBParameterGroupName\": \"default.postgres16\",\n                    \"ParameterApplyStatus\": \"in-sync\"\n                }\n            ],\n            \"AvailabilityZone\": \"us-east-1a\",\n            \"DBSubnetGroup\": {\n                \"DBSubnetGroupName\": \"prova-6325231-rds-private\",\n                \"DBSubnetGroupDescription\": \"Private subnets in two availability zones for the exam RDS\",\n                \"VpcId\": \"vpc-02f929ba0204c6c07\",\n                \"SubnetGroupStatus\": \"Complete\",\n                \"Subnets\": [\n                    {\n                        \"SubnetIdentifier\": \"subnet-0493e2731c46fff3b\",\n                        \"SubnetAvailabilityZone\": {\n                            \"Name\": \"us-east-1a\"\n                        },\n                        \"SubnetOutpost\": {},\n                        \"SubnetStatus\": \"Active\"\n                    },\n                    {\n                        \"SubnetIdentifier\": \"subnet-0c20867ed9b442235\",\n                        \"SubnetAvailabilityZone\": {\n                            \"Name\": \"us-east-1b\"\n                        },\n                        \"SubnetOutpost\": {},\n                        \"SubnetStatus\": \"Active\"\n                    }\n                ]\n            },\n            \"PreferredMaintenanceWindow\": \"wed:03:51-wed:04:21\",\n            \"UpgradeRolloutOrder\": \"second\",\n            \"PendingModifiedValues\": {},\n            \"MultiAZ\": false,\n            \"EngineVersion\": \"16.15\",\n            \"AutoMinorVersionUpgrade\": false,\n            \"ReadReplicaDBInstanceIdentifiers\": [],\n            \"LicenseModel\": \"postgresql-license\",\n            \"Iops\": 3000,\n            \"StorageThroughput\": 125,\n            \"OptionGroupMemberships\": [\n                {\n                    \"OptionGroupName\": \"default:postgres-16\",\n                    \"Status\": \"in-sync\"\n                }\n            ],\n            \"PubliclyAccessible\": false,\n            \"StorageType\": \"gp3\",\n            \"DbInstancePort\": 0,\n            \"StorageEncrypted\": true,\n            \"KmsKeyId\": \"arn:aws:kms:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:key/3720ff43-7da6-4a06-be93-3f7f263dd008\",\n            \"DbiResourceId\": \"db-QTAZ223JJM6K7VAWI5MAR57ENA\",\n            \"CACertificateIdentifier\": \"rds-ca-rsa2048-g1\",\n            \"DomainMemberships\": [],\n            \"CopyTagsToSnapshot\": true,\n            \"MonitoringInterval\": 0,\n            \"DBInstanceArn\": \"arn:aws:rds:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:db:prova-6325231-rds\",\n            \"IAMDatabaseAuthenticationEnabled\": false,\n            \"DatabaseInsightsMode\": \"standard\",\n            \"PerformanceInsightsEnabled\": false,\n            \"DeletionProtection\": false,\n            \"AssociatedRoles\": [],\n            \"TagList\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-rds\"\n                }\n            ],\n            \"CustomerOwnedIpEnabled\": false,\n            \"NetworkType\": \"IPV4\",\n            \"ActivityStreamStatus\": \"stopped\",\n            \"BackupTarget\": \"region\",\n            \"CertificateDetails\": {\n                \"CAIdentifier\": \"rds-ca-rsa2048-g1\",\n                \"ValidTill\": \"2027-09-29T12:30:14+00:00\"\n            },\n            \"DedicatedLogVolume\": false,\n            \"IsStorageConfigUpgradeAvailable\": false,\n            \"EngineLifecycleSupport\": \"open-source-rds-extended-support-disabled\"\n        }\n    ]\n}\n"
+}
+
+CAPTURA rds-subnets
+{
+  "started": "2026-09-29T09:33:39-03:00",
+  "finished": "2026-09-29T09:33:42-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "describe-db-subnet-groups",
+    "--db-subnet-group-name",
+    "prova-6325231-rds-private",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "4545fd0a0cb3bcb9e3b501d1783e2a4f5e0b2cbf92e81f4623437147803afe59",
+  "sanitized_output": "{\n    \"DBSubnetGroups\": [\n        {\n            \"DBSubnetGroupName\": \"prova-6325231-rds-private\",\n            \"DBSubnetGroupDescription\": \"Private subnets in two availability zones for the exam RDS\",\n            \"VpcId\": \"vpc-02f929ba0204c6c07\",\n            \"SubnetGroupStatus\": \"Complete\",\n            \"Subnets\": [\n                {\n                    \"SubnetIdentifier\": \"subnet-0493e2731c46fff3b\",\n                    \"SubnetAvailabilityZone\": {\n                        \"Name\": \"us-east-1a\"\n                    },\n                    \"SubnetOutpost\": {},\n                    \"SubnetStatus\": \"Active\"\n                },\n                {\n                    \"SubnetIdentifier\": \"subnet-0c20867ed9b442235\",\n                    \"SubnetAvailabilityZone\": {\n                        \"Name\": \"us-east-1b\"\n                    },\n                    \"SubnetOutpost\": {},\n                    \"SubnetStatus\": \"Active\"\n                }\n            ],\n            \"DBSubnetGroupArn\": \"arn:aws:rds:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:subgrp:prova-6325231-rds-private\",\n            \"SupportedNetworkTypes\": [\n                \"IPV4\"\n            ]\n        }\n    ]\n}\n"
+}
+
+CAPTURA rds-tags
+{
+  "started": "2026-09-29T09:33:48-03:00",
+  "finished": "2026-09-29T09:33:50-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "list-tags-for-resource",
+    "--resource-name",
+    "arn:aws:rds:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:db:prova-6325231-rds",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "c78c812d4d73a637f7f96062342e79a15547577eae350855b50a4848419af435",
+  "sanitized_output": "{\n    \"TagList\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        },\n        {\n            \"Key\": \"Name\",\n            \"Value\": \"prova-6325231-rds\"\n        }\n    ]\n}\n"
+}
+
+CAPTURA rds-subnet-tags
+{
+  "started": "2026-09-29T09:33:50-03:00",
+  "finished": "2026-09-29T09:33:52-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "list-tags-for-resource",
+    "--resource-name",
+    "arn:aws:rds:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:subgrp:prova-6325231-rds-private",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "75251ad4e8b93c63d193feb770262172fc2690a20c47298bbd11dfd7cc6fa0c3",
+  "sanitized_output": "{\n    \"TagList\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        },\n        {\n            \"Key\": \"Name\",\n            \"Value\": \"prova-6325231-rds-private\"\n        }\n    ]\n}\n"
+}
+
+RDS disponível PostgreSQL16.15/db.t3.micro/20GiBgp3/encriptado/privado/SingleAZ,
+endpoint/porta5432 reais do output. Grupo com2privadas em2AZs eSGRDSúnico ativo.
+Backup0/deletion_protectionfalse, ExtendedSupportdisabled; skip_final_snapshot=true é
+política proposta no Terraform, não atributo retornado describe-db-instances.
+Não comprova SQL/migração/CRUD/conexãoAPI; T24/T25 pendentes.

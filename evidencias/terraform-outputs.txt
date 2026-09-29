@@ -1,0 +1,286 @@
+T23 — apply principal AUTORIZADO e conferência AWS real,29/09/2026 (-03:00).
+Terraform1.16.2/hashicorp-aws6.65.0, default/voclabs/us-east-1/conta terminada5811.
+Aluno autorizou explicitamente após revisão concretaT22; decisão em infra-revisao.txt.
+Plano aprovado SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7,
+23create/0update/0delete, preservado. Identidade/IP/hash/backend revalidados antes.
+Native apply usou arquivo aprovado, sem -auto-approve/lock=false/refresh=false/target.
+Capturas REAIS com comando/horários/exit code/hash do bruto privado. Redação
+explícita: conta completa/CIDR-IP aluno/username/password/ARNsession ocultados,
+state pull privado não publicado; espaços finais normalizados. IP público EC2,
+endpoint RDS eIDs próprios são outputs reais sem credenciais, não provam API.
+Nenhum recurso IAM/EIP/NAT/KMS/key novo no plano; vockey/LabInstanceProfile-LabRole existentes.
+Não houve SSH/deploy/HTTP/SQL/CRUD nem destroy/push/merge/PR nesta tarefa.
+Suítes API/Docker/Compose/módulos inalterados não repetidas.
+
+CAPTURA outputs
+{
+  "started": "2026-09-29T09:33:20-03:00",
+  "finished": "2026-09-29T09:33:25-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "output",
+    "-json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "dd424b797de8e9ea2af7b365ab7c7f70310946349acaf1767525ba6f3e9d73d0",
+  "sanitized_output": "{\n  \"api_url\": {\n    \"sensitive\": false,\n    \"type\": \"string\",\n    \"value\": \"http://13.220.113.41:3000\"\n  },\n  \"ec2_instance_id\": {\n    \"sensitive\": false,\n    \"type\": \"string\",\n    \"value\": \"i-0f4b59a8181537b78\"\n  },\n  \"ec2_public_ip\": {\n    \"sensitive\": false,\n    \"type\": \"string\",\n    \"value\": \"13.220.113.41\"\n  },\n  \"rds_endpoint\": {\n    \"sensitive\": false,\n    \"type\": \"string\",\n    \"value\": \"prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com\"\n  },\n  \"rds_port\": {\n    \"sensitive\": false,\n    \"type\": \"number\",\n    \"value\": 5432\n  }\n}\n"
+}
+
+CAPTURA state-pull
+{
+  "started": "2026-09-29T09:33:25-03:00",
+  "finished": "2026-09-29T09:33:29-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "state",
+    "pull"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "38723d3b9f6907355307e2138948c9af1203dd9a5b88e9c99fe1f827bc84a0ad",
+  "sanitized_output": "[State privado não publicado.]"
+}
+
+CAPTURA state-object
+{
+  "started": "2026-09-29T09:33:41-03:00",
+  "finished": "2026-09-29T09:33:44-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "head-object",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--key",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "39693afa54261f9d3de73108f7d15e20a66cffc0100d50d00ef992d0257859f3",
+  "sanitized_output": "{\n    \"AcceptRanges\": \"bytes\",\n    \"LastModified\": \"2026-09-29T12:33:10+00:00\",\n    \"ContentLength\": 62855,\n    \"ETag\": \"\\\"3f5d716ac61628b3cd6783e699734439\\\"\",\n    \"VersionId\": \"q3n1Kl7rA1wbvqJtyFL2Z8BI2yB16hTg\",\n    \"ContentType\": \"application/json\",\n    \"ServerSideEncryption\": \"AES256\",\n    \"Metadata\": {}\n}\n"
+}
+
+CAPTURA state-versions
+{
+  "started": "2026-09-29T09:33:41-03:00",
+  "finished": "2026-09-29T09:33:44-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "list-object-versions",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--prefix",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "7c80bd02f431af7964e7c4a80f9d40befbbce82d62729c659a2841e23b5ad605",
+  "sanitized_output": "{\n    \"Versions\": [\n        {\n            \"ETag\": \"\\\"3f5d716ac61628b3cd6783e699734439\\\"\",\n            \"ChecksumAlgorithm\": [\n                \"SHA256\"\n            ],\n            \"ChecksumType\": \"FULL_OBJECT\",\n            \"Size\": 62855,\n            \"StorageClass\": \"STANDARD\",\n            \"Key\": \"prova-primeiro-bimestre-devops/terraform.tfstate\",\n            \"VersionId\": \"q3n1Kl7rA1wbvqJtyFL2Z8BI2yB16hTg\",\n            \"IsLatest\": true,\n            \"LastModified\": \"2026-09-29T12:33:10+00:00\",\n            \"Owner\": {\n                \"ID\": \"5add9c86a025bd46041b29931dd66b39229ff3065c33752cb956279f0b099db7\"\n            }\n        },\n        {\n            \"ETag\": \"\\\"0c1abfb59625974cfd7ca9e549d90f35\\\"\",\n            \"ChecksumAlgorithm\": [\n                \"SHA256\"\n            ],\n            \"ChecksumType\": \"FULL_OBJECT\",\n            \"Size\": 54368,\n            \"StorageClass\": \"STANDARD\",\n            \"Key\": \"prova-primeiro-bimestre-devops/terraform.tfstate\",\n            \"VersionId\": \"IliOLD7L975PkCCO1s1S.wR5y3V7XNow\",\n            \"IsLatest\": false,\n            \"LastModified\": \"2026-09-29T12:33:10+00:00\",\n            \"Owner\": {\n                \"ID\": \"5add9c86a025bd46041b29931dd66b39229ff3065c33752cb956279f0b099db7\"\n            }\n        },\n        {\n            \"ETag\": \"\\\"6f1aa3820d1c3e8fd622b1d8bdb9e42e\\\"\",\n            \"ChecksumAlgorithm\": [\n                \"SHA256\"\n            ],\n            \"ChecksumType\": \"FULL_OBJECT\",\n            \"Size\": 48282,\n            \"StorageClass\": \"STANDARD\",\n            \"Key\": \"prova-primeiro-bimestre-devops/terraform.tfstate\",\n            \"VersionId\": \"EjGCEIsYsnlawMefbJxCzd5n6mY7w6uM\",\n            \"IsLatest\": false,\n            \"LastModified\": \"2026-09-29T12:27:32+00:00\",\n            \"Owner\": {\n                \"ID\": \"5add9c86a025bd46041b29931dd66b39229ff3065c33752cb956279f0b099db7\"\n            }\n        }\n    ],\n    \"RequestCharged\": null,\n    \"Prefix\": \"prova-primeiro-bimestre-devops/terraform.tfstate\"\n}\n"
+}
+
+CAPTURA lock-after-apply
+{
+  "started": "2026-09-29T09:33:42-03:00",
+  "finished": "2026-09-29T09:33:44-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitized_output": ""
+}
+
+CAPTURA plan
+{
+  "started": "2026-09-29T09:34:10-03:00",
+  "finished": "2026-09-29T09:34:25-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "plan",
+    "-input=false",
+    "-no-color",
+    "-lock-timeout=60s",
+    "-detailed-exitcode",
+    "-out=postapply.local.tfplan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b46f76a23599e27f4614ddb04cbd13399638f803968a84f00a545aae12b4b660",
+  "sanitized_output": "\nWarning: Deprecated Parameter\n\nThe parameter \"dynamodb_table\" is deprecated. Use parameter \"use_lockfile\"\ninstead.\nAcquiring state lock. This may take a few moments...\ndata.aws_ami.selected: Reading...\nmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-02f929ba0204c6c07]\ndata.aws_ami.selected: Read complete after 1s [id=ami-048da71c4d98f46b1]\nmodule.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-077afb6dd7f8bdfbd]\nmodule.vpc.aws_route_table.private: Refreshing state... [id=rtb-061c1854c7a479bbb]\nmodule.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-04fd3c6ae447925bf]\nmodule.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-0493e2731c46fff3b]\nmodule.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0ca900230f70ab9a1]\nmodule.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-0c20867ed9b442235]\nmodule.security_group.aws_security_group.rds: Refreshing state... [id=sg-0622ad42cefbb6b38]\nmodule.security_group.aws_security_group.ec2: Refreshing state... [id=sg-04c0129a3f542812b]\nmodule.vpc.aws_route_table.public: Refreshing state... [id=rtb-0e6d609d1cf0f2953]\nmodule.security_group.aws_vpc_security_group_egress_rule.web[\"80\"]: Refreshing state... [id=sgr-09a3c976a6a925952]\nmodule.security_group.aws_vpc_security_group_ingress_rule.postgres: Refreshing state... [id=sgr-0d1aae7a6704f7969]\nmodule.security_group.aws_vpc_security_group_egress_rule.postgres: Refreshing state... [id=sgr-0c0f6fdf5ee43d180]\nmodule.security_group.aws_vpc_security_group_ingress_rule.api[\"[SSH_CIDR_OCULTO]\"]: Refreshing state... [id=sgr-0902c70576fa9e6fc]\nmodule.security_group.aws_vpc_security_group_ingress_rule.ssh: Refreshing state... [id=sgr-093ef5bfd93c88a78]\nmodule.security_group.aws_vpc_security_group_egress_rule.web[\"443\"]: Refreshing state... [id=sgr-04a8b2a7f3339361f]\nmodule.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-0b93c5ec17f1a879d]\nmodule.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-0cf278fe785731c97]\nmodule.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-00cf853ae7765dcc4]\nmodule.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-03b0623fda6316131]\nmodule.rds.aws_db_subnet_group.private: Refreshing state... [id=prova-6325231-rds-private]\nmodule.ec2.aws_instance.this: Refreshing state... [id=i-0f4b59a8181537b78]\nmodule.rds.aws_db_instance.this: Refreshing state... [id=db-QTAZ223JJM6K7VAWI5MAR57ENA]\n\nNo changes. Your infrastructure matches the configuration.\n\nTerraform has compared your real infrastructure against your configuration\nand found no differences, so no changes are needed.\n"
+}
+
+CAPTURA lock-final
+{
+  "started": "2026-09-29T09:35:18-03:00",
+  "finished": "2026-09-29T09:35:20-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitized_output": ""
+}
+
+RESUMO COMPUTADO SOBRE CONSULTAS/STATE REAIS:
+{
+  "checked_at": "2026-09-29T09:33:52-03:00",
+  "exit_code": 0,
+  "checks": [
+    "Apply real0",
+    "outputs exit0",
+    "state-pull exit0",
+    "23 recursos managed no state remoto real",
+    "Outputs exatos sem credenciais",
+    "APIURL formada, não comprova servidor",
+    "status exit0",
+    "instance exit0",
+    "vpc exit0",
+    "dns-support exit0",
+    "dns-hostnames exit0",
+    "routes exit0",
+    "igw exit0",
+    "subnets exit0",
+    "security-rules exit0",
+    "security-groups exit0",
+    "rds exit0",
+    "rds-subnets exit0",
+    "state-versions exit0",
+    "state-object exit0",
+    "lock-after-apply exit0",
+    "profile-effective exit0",
+    "VPC disponível/CIDR10.20.0.0/16/DNStrue",
+    "4subnets disponíveis na VPC",
+    "Subnet public0",
+    "Subnet public1",
+    "Subnet private0",
+    "Subnet private1",
+    "Rota públicas0/0 viaIGWactive",
+    "Rota privada sólocal semIGW/NAT",
+    "Associações explícitas rtb-0e6d609d1cf0f2953",
+    "Associações explícitas rtb-061c1854c7a479bbb",
+    "IGW attached própriaVPC",
+    "EC2 running/t2micro/AMI/subnetpublic0/IPoutput/SGúnico",
+    "IMDSv2 ativo/tagsdisabled/standardtenancy/keyvockey",
+    "Profile existenteLabInstanceProfile/LabRole efetivo",
+    "root-volume exit0",
+    "EBS8gp3encrypted/in-use/rootdelete",
+    "cpu-credits exit0",
+    "CPUcredits standard",
+    "RDS available/pg16.15/dbt3micro/20gp3encrypted/private/SingleAZ",
+    "RDS endpoint/porta/SGúnico corretos",
+    "RDSgrupo2privadas em2AZ/VPCprópria/Complete",
+    "Backup0/deletionProtectionfalse/semextendedsupport",
+    "6 regras exatas próprias",
+    "SG naVPCprópria",
+    "SG naVPCprópria",
+    "Regra efetiva False/22",
+    "Regra efetiva False/3000",
+    "Regra efetiva False/5432",
+    "Regra efetiva True/80",
+    "Regra efetiva True/443",
+    "Regra efetiva True/5432",
+    "StateS3real AES256/versionado/nonempty",
+    "Versão atual do objeto confirmada",
+    "Lock liberado apósapply",
+    "Tags19recursos maisrootEBS",
+    "rds-tags exit0",
+    "rds-tags",
+    "rds-subnet-tags exit0",
+    "rds-subnet-tags",
+    "Statebootstrap separado preservado"
+  ],
+  "resources_managed": 23,
+  "outputs": {
+    "api_url": "http://13.220.113.41:3000",
+    "ec2_instance_id": "i-0f4b59a8181537b78",
+    "ec2_public_ip": "13.220.113.41",
+    "rds_endpoint": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com",
+    "rds_port": 5432
+  },
+  "vpc_id": "vpc-02f929ba0204c6c07",
+  "ec2_state": "running",
+  "rds_status": "available",
+  "ec2_az": "us-east-1a",
+  "rds_az": "us-east-1a",
+  "state_s3": "objeto real AES256/VersionId/current confirmado e state pull0/23managed; lock liberado",
+  "credentials": "sensitive privado state/plano, não publicado",
+  "captures": [
+    "outputs",
+    "state-pull",
+    "status",
+    "instance",
+    "vpc",
+    "dns-support",
+    "dns-hostnames",
+    "routes",
+    "igw",
+    "subnets",
+    "security-rules",
+    "security-groups",
+    "rds",
+    "rds-subnets",
+    "state-versions",
+    "state-object",
+    "lock-after-apply",
+    "profile-effective",
+    "root-volume",
+    "cpu-credits",
+    "rds-tags",
+    "rds-subnet-tags",
+    "plan",
+    "lock-final"
+  ],
+  "limits": "Sem SSH/boot logs/Docker/HTTP/API/SQL/CRUD comprovados, T24/T25 pendentes; statuschecks EC2 registrados mas não substituem aplicação",
+  "postapply_plan": "exit0/No changes; lock ausente após o plano",
+  "ec2_status_checks": "system ok/instance ok"
+}
+Objeto S3 REALhead-object0/nonempty/AES256/VersionId atual corresponde listversions.
+Statepull0privado23managed,backendbootstrapseparadopreservado;LockID principal
+ausente apósapply e pósplan. DynamoDB continuaativo conforme prova eT21contenção.
+Plano posterior retorna0/No changes; não sobrescreveu plano aprovado; arquivo
+postapply.local.tfplan privado0600/ignorado. Nenhuma simulação de state/deploy.
+R20objeto real comprovado agora; outputsIP/endpoint/URL semsenha. URL é proposta
+doendereço do futuroserviço, não chamar deAPI disponível. Retençãorecursosdados/
+teardownT27/T28 requerrevisão concreta; backend preservaratéprincipal destruído.
