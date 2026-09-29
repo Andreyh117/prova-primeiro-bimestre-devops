@@ -740,3 +740,82 @@ Corrigida redação README que poderia sugerir CIDRs/EC2/RDS já aplicados: são
 decisões futuras, não implantação. API/suites anteriores não repetidas porque
 não houve alteração nesses componentes. Um único commit necessário preservará
 o conjunto coerente de preflight após stage/bytes/diff --cached --check.
+
+## 28/09/2026 — T14: bootstrap S3/DynamoDB com state local
+
+Prompt: aluno revisou T13 e pediu próxima tarefa conforme AGENTS; implementar,
+validar, corrigir e registrar evidências reais. Estado inicial HEAD 4bd94d4, dez
+commits reais, feat/api-reservas limpa; privado T13 já ignorado/0600. T14 iniciada:
+bootstrap infra/backend separado, versões exatas Terraform1.16.2/AWS6.65.0,
+S3 versionado/AES256/bloqueio público, DynamoDB PAY_PER_REQUEST/LockID String,
+tags e outputs do backend futuro. Sem IAM novo nem backend remoto principal
+antes de T16. STS read-only revalidou mesma conta/role voclabs em us-east-1;
+nenhuma duração restante de token inferida. Planejar cinco recursos somente.
+
+Plan real será gerado/inspecionado/sanitizado, sem apply. Variáveis/conta e plano
+binário locais ignorados/0600 antes da execução; backend começa local e segue
+separado do state principal. Aprovação específica é T15, aplicação T16. Memória
+de outro Lab relatou SCP/ObjectLock; isso não foi observado nesta conta/tarefa e
+não autoriza inventar falha nem adaptar criação por CLI sem evidência atual.
+Fontes primárias provider6.65.0/S3/DynamoDB, backend local e Terraform plan
+consultadas; manter fontes no design. Não repetir testes API/Docker sem mudanças.
+
+Resultado T14 (28/09/2026): criados versions/providers/variables/main/outputs e
+tfvars.example; lockfile gerado pelo init real deste root. Variáveis reais locais
+criadas com os valores preflight privados e nomes próprios com sufixo aleatório,
+sem conta/IP nos nomes, 0600/ignoradas. Antes de validar, regra do bucket ajustada
+para rejeitar -an reservado para namespace diferente, conforme fonte oficial;
+nenhum erro de aplicação anterior inventado para justificar esse ajuste.
+
+fmt/check passaram 0. Init comum falhou 1: no available releases match 6.65.0;
+Registry HTTPS 200 listava versão. Config CLI temporária direct passou init 0,
+provider assinado HashiCorp, sem mudar versões/config global. Validate 0.
+Repetição init lockfile readonly comum falhou 1: previously-selected version
+is no longer available; readonly com direct passou 0. Causa da diferença não
+comprovada. Logs originais privados/hashes e ambas falhas preservados, reprodução
+README inclui direct temporário. Não escrever que init comum foi bem-sucedido.
+
+Plan real usou credenciais AWS existentes, região us-east-1 e conta protegida:
+-detailed-exitcode retornou 2 esperado, cinco create/zero change/zero destroy.
+Show JSON retornou 0; assertivas executadas em memória conferiram conta/perfil,
+região de todos os recursos, S3 Enabled/AES256/quatro bloqueios/force_destroy=false,
+DynamoDB PAY_PER_REQUEST/LockID String, tags no bucket/tabela, ausência IAM/KMS,
+vínculos dos três configs e output futuro sem segredos. Arquivo JSON bruto não
+publicado: inclui variável sensível em texto claro. Plano válido SHA-256
+9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12.
+
+Negativo -var=state_bucket_name=prova-6325231-an foi rejeitado/1 esperado pela
+validação; tabela mostrada naquele plano parcial não foi criada, nenhum apply.
+Não salvou novo plano; hash do backend.tfplan válido permaneceu idêntico.
+S3 list-buckets filtrado apenas nome próprio retornou []/0 antes/depois; DynamoDB
+describe-table retornou ResourceNotFoundException/254 esperado antes/depois;
+STS query Account 0 e conta idêntica ao preflight conferida sem publicá-la.
+Ausência comprovada nesta conta, não unicidade global garantida. Terraform local
+backend configurado nos metadados, state de recursos ainda ausente; tfvars,
+plano e metadados 0600 ignorados. Config direct /tmp temporária, nenhuma alteração
+em ~/.terraformrc. Cache/variáveis/plano mantidos localmente para T15/T16.
+
+Evidências backend-validate.txt/backend-plan.txt geradas somente das capturas
+reais (stdout/stderr combinados, conta mascarada, só espaços finais normalizados),
+hashes/exit codes conferidos. Fonte e detalhes design/README; specs/AGENTS
+atualizados: T14 verificada, R19/R20/R21 parciais. Sem bloqueio restante;
+T15 revisão/custo/autorização, T16 aplicação/conferência, T21 locking real.
+Zero apply/destroy/merge/push/PR, recursos criados ou testes API/Docker repetidos.
+Ferramentas reais: Codex, terminal Python/Git/Terraform/AWS CLI e navegador;
+sem skills/agentes auxiliares. Um único commit necessário para implementação,
+evidências e documentação do mesmo marco, após revisão de escopo/segredos.
+
+Conferência final/documentação encerrada em 29/09/2026 após meia-noite;
+fmt/init/validate/plan/negativo ocorreram em 28/09, com timestamps nas evidências.
+Primeiro verificador documental temporário retornou 1: regex lendo todo tasks.md
+confundiu tabela Git futura com tabela de estados, sobrescrevendo T08–T12 no
+mapa. Corrigida só seleção da seção no script /tmp; não alterados estados para
+forçar sucesso. Reexecução em 00:01:32 -03:00 retornou 0: 15 arquivos de escopo,
+45 arquivos anteriores preservados por SHA-256, guia intacto, Markdown/links/
+newlines/diff corretos, 34 tarefas consistentes, R19/R20/R21 parciais; scanner
+delimitado sem achados, conta/IP privados ausentes. Capturas/codes/hashes
+conferidos; plano válido intacto, vars/plano/metadados ignorados/0600 e state de
+recursos ausente. Sem apply nem bloqueio T14. Evidência preserva a falha da sonda
+sem apresentá-la como problema AWS. Próximo T15 continua revisão/autorização.
+Stage deve conter somente estes 15 arquivos, bytes idênticos ao worktree;
+commit único proposto: feat(backend): adiciona bootstrap S3 e DynamoDB.

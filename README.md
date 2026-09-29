@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T13 foram concluídas. O commit inicial `21cb5f0` está em
+Em 28/09/2026, T01–T14 foram verificadas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -49,7 +49,13 @@ T13 confirmou identidade/região e opções AWS por consultas de leitura. O alun
 confirmou Learner Lab, US$0 usados de US$50 e acesso API só do seu IP /32.
 Terraform1.16.2/providerAWS6.65.0 passaram init/validate/schema em sonda isolada;
 backend S3 e recursos do projeto ainda não existem. Falhas/correções registradas.
-Próxima tarefa: T14, bootstrap S3/DynamoDB; apply requer aprovação específica T15.
+T14 implementou o bootstrap em infra/backend com state local separado, versões
+fixas e lockfile real. fmt/init/validate passaram; plano revisado propõe cinco
+criações, zero alterações/exclusões em us-east-1. Bucket/tabela seguem ausentes
+nas consultas após o plano. Falhas de init comum foram preservadas; instalação
+direct temporária passou na mesma versão, causa da diferença não comprovada.
+Próxima tarefa: T15, revisar recursos/custo e autorizar especificamente o bootstrap;
+apply/conferência efetiva ficam em T16. Locking principal ainda pendente T21.
 
 ## Contrato aprovado para implementação
 
@@ -100,6 +106,8 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Compose rede/saúde T11](evidencias/compose-rede-saude.txt): ordem real, rede/volume/portas, CRUD/SQL, defaults do exemplo e limpeza.
 - [Persistência Compose T12](evidencias/compose-persistencia.txt): falha inicial/correção, HTTP/SQL antes/depois, IDs/volume, negativos, checkpoint e limpeza reais.
 - [Preflight AWS T13](evidencias/aws-preflight.txt): consultas reais, versões/schema isolados, falhas/correções e decisões humanas; sem criação de recursos.
+- [Validação bootstrap T14](evidencias/backend-validate.txt): fmt/init/validate reais, falhas de instalação/correção e rejeição de nome S3 reservado.
+- [Plano bootstrap T14](evidencias/backend-plan.txt): cinco criações propostas, revisão do JSON sanitizada e consultas antes/depois sem recursos criados.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -418,8 +426,75 @@ logs/lockfile real estão em aws-preflight.txt. Isso não é validate dos módul
 infra futuros nem teste de locking. O argumento dynamodb_table permanece
 suportado/depreciado no Terraform 1.16.2 e será usado conforme a prova.
 [Backend S3 oficial](https://developer.hashicorp.com/terraform/language/backend/s3).
-Lockfiles dos dois roots serão versionados quando criados; nenhuma atualização
-de ferramenta/provider foi feita para acrescentar commits.
+O [lockfile do bootstrap](infra/backend/.terraform.lock.hcl) foi gerado e conferido
+em T14; o lockfile principal será criado em T21. Nenhuma atualização de versão
+foi feita para acrescentar commits.
+
+### Bootstrap Terraform disponível — T14
+
+O [bootstrap](infra/backend/main.tf) cria o destino do state principal antes de
+esse backend ser usado. Seu próprio state usa backend local em
+infra/backend/terraform.tfstate e permanece separado. O plano atual contém:
+
+- Bucket S3 e três configurações: versionamento Enabled, SSE-S3 AES256 e quatro
+  flags de bloqueio público ativadas.
+- Tabela DynamoDB PAY_PER_REQUEST, chave de partição LockID do tipo String.
+
+São cinco recursos Terraform e dois serviços AWS. Tags Project/Environment/Owner
+estão no bucket/tabela; configurações do bucket não têm tags próprias. Provider
+restringe região a us-east-1 e conta à conferida por STS; não cria IAM/KMS.
+force_destroy=false conserva a revisão da limpeza de versões para T29/T30.
+[Backend local oficial](https://developer.hashicorp.com/terraform/language/backend/local).
+
+Na primeira configuração, copie o exemplo sem substituir arquivo existente:
+
+```bash
+umask 077
+cp --no-clobber infra/backend/terraform.tfvars.example infra/backend/terraform.tfvars
+chmod 600 infra/backend/terraform.tfvars
+```
+
+Edite somente o arquivo local: conta real do Lab, perfil com credenciais
+temporárias e nomes exclusivos com sufixo aleatório; todos os placeholders
+precisam ser substituídos. Nomes não contêm conta/IP. O arquivo é ignorado;
+credenciais e session token ficam no perfil AWS fora do repositório.
+
+Execute na raiz, com Terraform 1.16.2 e conta/região conferidas. Nesta máquina,
+init comum falhou duas vezes ao localizar a versão, embora o Registry a liste.
+Este procedimento direct temporário passou com provider 6.65.0 assinado,
+sem alterar configuração global ou versões:
+
+```bash
+bootstrap_cli_config=$(mktemp /tmp/prova-backend-cli-XXXXXX.tfrc)
+printf 'provider_installation {\n  direct {}\n}\n' > "$bootstrap_cli_config"
+TF_CLI_CONFIG_FILE="$bootstrap_cli_config" terraform -chdir=infra/backend init -input=false -no-color -lockfile=readonly
+rm -- "$bootstrap_cli_config"
+terraform fmt -check -recursive infra
+terraform -chdir=infra/backend validate -no-color
+terraform -chdir=infra/backend plan -input=false -no-color -detailed-exitcode -out=backend.tfplan
+```
+
+Mantenha umask 077 também ao gerar planos/state. O lockfile versionado garante
+os hashes/versão; -lockfile=readonly impede atualização nessa reprodução.
+Com -detailed-exitcode, 2 indica plano com mudanças, 0 nenhuma mudança e 1 erro.
+[Referência de plan](https://developer.hashicorp.com/terraform/cli/commands/plan).
+O negativo com state_bucket_name=prova-6325231-an retornou 1 esperado pela
+validação; o plano válido salvo manteve seu hash. Nomes com esse sufixo são
+reservados para outro namespace, conforme [regras S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
+
+O plano binário e o JSON bruto podem conter variáveis sensíveis em texto claro;
+não publique nenhum deles. Plano/tfvars/metadados estão ignorados e 0600 nesta
+execução. Evidências públicas contêm saída revisada e resumo dos atributos,
+com conta mascarada. Backend local inicializado não comprova recursos criados:
+terraform.tfstate do bootstrap ainda está ausente; a criação ocorrerá em T16.
+O output backend_config aparece somente como proposta no plano; valores
+aplicados serão usados em T21 após conferência T16. Root remoto principal ainda
+não foi implementado/inicializado. [Cuidados com show JSON](https://developer.hashicorp.com/terraform/cli/commands/show).
+
+Preserve o plano atual para T15. Antes de apply, revalide credenciais/conta,
+reconfira o plano/nomes/custo e obtenha autorização específica. Mudança no código
+ou variáveis exige novo plano/revisão. A consulta filtrada confirmou ausência do
+bucket nesta conta; a disponibilidade global do nome só se confirma na criação.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega

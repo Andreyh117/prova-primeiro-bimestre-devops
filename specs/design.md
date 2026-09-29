@@ -357,8 +357,9 @@ sonda isolada, init/validate/schema reais sem credenciais/backend remoto. Fixar
 essas versões e versionar `.terraform.lock.hcl` em ambos os roots quando criados.
 Não atualizar sem necessidade/revisão de compatibilidade. A sonda tem lockfile
 real em /tmp/devops-t13-provider.lock.hcl; a configuração final gera seu próprio.
-`infra/backend` começa com state local ignorado e protegido; `infra` tem backend
-S3 parcial em providers, configurado por `backend.local.hcl` ignorado.
+`infra/backend` usa state local ignorado e protegido, implementado em T14;
+o root principal `infra` futuro terá backend S3 parcial em providers,
+configurado por `backend.local.hcl` ignorado, somente após conferência T16.
 
 S3 exclusivo com nome globalmente único, versionamento, encriptação SSE-S3
 AES256 e bloqueio de acesso público. DynamoDB on-demand, chave de partição
@@ -507,3 +508,45 @@ Identidade e entrega foram informadas em 28/09/2026: Andreyh Rodrigues de Souza,
 RA 6325231, entrega 01/10/2026. Os acessos AWS continuam pendentes até a etapa
 correspondente. Mudanças futuras atualizam requisitos, design e tarefas antes de
 código. A revisão das specs não autoriza provisionar/destruir nem abrir o PR.
+
+## T14 — bootstrap implementado e plano revisado
+
+infra/backend tem versions/providers/variables/main/outputs, tfvars.example
+sem dados reais e .terraform.lock.hcl gerado neste root. Terraform=1.16.2 e
+AWS=6.65.0 permanecem exatos. backend local path terraform.tfstate não usa S3;
+state de recursos ainda ausente antes de apply. Provider allowed_account_ids
+confere conta privada STS, região validada us-east-1; default_tags no bucket/tabela.
+
+Cinco recursos: aws_s3_bucket.state (force_destroy=false), versioning Enabled,
+server_side_encryption AES256, public_access_block quatro flags true e tabela
+locks PAY_PER_REQUEST, hash_key LockID/String. Três configurações dependem do
+bucket.id; outputs propõem bucket/key/region/encrypt/dynamodb_table do principal,
+sem segredos. Sem IAM/KMS novos, credenciais em HCL, módulos principais ou
+backend remoto implementado antes do bootstrap. Nomes reais próprios com sufixo
+aleatório, sem conta/IP; unicidade global não comprovada antes da criação.
+
+fmt/check/init direct/validate passaram 0. Init comum falhou 1 inicialmente e
+com lockfile readonly; Registry listava 6.65.0. CLI config direct temporária
+0600 passou nas duas tentativas, provider assinado; causa da diferença não
+comprovada, sem config global/upgrade. Plano real retornou 2 esperado com
+-detailed-exitcode: cinco create, zero update/delete. JSON conferido em memória
+validou todos os atributos/vínculos e conta privada, sem publicar valores
+sensíveis. Negativo de nome reservado -an retornou 1; plano válido preservado.
+S3 filtrado []/0 e tabela ResourceNotFoundException/254 antes/depois, STS mesma
+conta; nenhum recurso criado. Dados/plan/cache locais ignorados/0600,
+lockfile não sensível versionável. Evidências backend-validate/backend-plan.
+
+T14 verificada não significa R20 completo: S3/DynamoDB efetivos são T16, state
+remoto/locking ativo T21. T15 revisa plano/custo e obtém autorização específica.
+Nenhuma falha SCP/ObjectLock atual observada ou ajuste por CLI de criação.
+
+Fontes primárias consultadas na versão fixada:
+[provider AWS6.65.0](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/index.html.markdown),
+[bucket](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket.html.markdown),
+[versionamento](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket_versioning.html.markdown),
+[encriptação](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket_server_side_encryption_configuration.html.markdown),
+[DynamoDB](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/dynamodb_table.html.markdown),
+[backend local](https://developer.hashicorp.com/terraform/language/backend/local),
+[plan/exit codes](https://developer.hashicorp.com/terraform/cli/commands/plan),
+[show JSON sensível](https://developer.hashicorp.com/terraform/cli/commands/show),
+[nomes S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).

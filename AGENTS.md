@@ -70,10 +70,30 @@ Locking ativo ainda T21, não comprovado aqui. .terraform.lock.hcl da sonda em
 /tmp/devops-t13-provider.lock.hcl; criar/versionar lockfiles dos roots quando
 implementá-los em T14/T21. Caches/sondas próprias removidos; zero recursos criados.
 
-Próxima tarefa T14, implementar/bootstrap validate/plan; apply só depois da
-revisão/autorização T15. R13 em andamento, SG/RDS/S3/DynamoDB efetivos futuros.
+Ao encerrar T13, próxima era T14, implementar/bootstrap validate/plan; apply
+só depois da revisão/autorização T15. Estado atual T14 abaixo. R13 em andamento, SG/RDS/S3/DynamoDB efetivos futuros.
 Sem bloqueio T13. Commits apenas por marcos reais necessários, um único commit
 para o conjunto coerente de preflight/documentação, nunca por quantidade.
+
+Atualização T14 em 28/09/2026: T01–T14 verificadas, início HEAD 4bd94d4/dez
+commits reais. Bootstrap infra/backend implementado com backend local,
+Terraform=1.16.2/AWS=6.65.0, cinco recursos S3/configs/DynamoDB e lockfile real.
+fmt/check/init direct/validate passaram 0; plan detailed-exitcode 2 esperado,
+cinco create/zero update/delete; show JSON 0 conferiu região/tags/conta/segurança/
+vínculos/outputs. Negativo S3 -an retornou 1; plano válido permaneceu intacto.
+
+Init comum falhou duas vezes inclusive readonly, embora Registry liste versão;
+config CLI direct temporária 0600 passou nas duas, mesma versão assinada.
+Causa não comprovada; README documenta procedimento, não alterar config global/
+versões para esconder erro. Capturas em backend-validate.txt/backend-plan.txt.
+S3 [] e DynamoDB ResourceNotFoundException antes/depois do plano; STS mesma conta
+privada. Sem apply/recurso criado, nenhuma falha SCP/ObjectLock atual observada.
+Tfvars/plano/metadados ignorados/0600; state de recursos ainda ausente. Preserve
+variáveis/nomes/plano local para T15; revalidar credenciais/conta e plano antes
+de apply. Backend principal não implementado/inicializado, locking ainda T21.
+R19/R20/R21 parciais. Próxima T15 revisa recursos/custo e obtém autorização
+específica; T16 aplica/conferência. Sem bloqueio T14. Commit único coerente,
+merge T32. Não repetir suites API/Docker/Compose porque não mudaram.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de

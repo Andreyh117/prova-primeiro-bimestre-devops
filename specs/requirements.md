@@ -22,7 +22,8 @@ Restart da API nativa foi verificado em T09; Dockerfile/contexto/runtime em T10.
 Compose/ambiente/healthchecks foram verificados em T11 com CRUD/SQL reais.
 T12 comprovou persistência após recriar containers mantendo o volume.
 Módulos Terraform/deploy AWS continuam pendentes; T13 verificou preflight por
-consultas de leitura e sonda local, sem criação de recursos.
+consultas de leitura e sonda local. T14 implementou bootstrap e validou plano
+real de cinco criações, sem apply/recurso criado; backend/locking ainda parciais.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. Seis commits reais foram confirmados em T09;
 R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
@@ -50,9 +51,9 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | `evidencias/ec2-deploy.txt`, `evidencias/api-aws.txt`. | pendente |
 | R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | `evidencias/rds-crud.txt`, `evidencias/aws-rds.txt`. | pendente |
 | R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | `evidencias/aws-rds.txt`, `evidencias/aws-seguranca.txt`. | pendente |
-| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Código futuro e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | pendente |
-| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | `evidencias/backend.txt`, `evidencias/backend-locking.txt`. | pendente |
-| R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | `evidencias/backend.txt` e diário. | pendente |
+| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt e backend-plan.txt; módulos/root principal futuros e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
+| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend-validate.txt/backend-plan.txt (T14 proposto); `evidencias/backend.txt`, `evidencias/backend-locking.txt`. | em andamento |
+| R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local); `evidencias/backend.txt` e diário (apply/conferência futuros). | em andamento |
 | R22 / P+U | Evidências reais de build, execução, Compose, `terraform validate` e `plan` sem erros, CRUD local e nuvem; separar estática/local/AWS. | Cada aceite tem comando, ambiente, resultado e arquivo real; plano não serve como prova de CRUD/deploy. | Arquivos em `evidencias/` com índice no README. | em andamento |
 | R23 / P+U | Executar `terraform destroy` após coletar evidências; preparar limpeza do backend separadamente, preservando state até encerrar. | Plano de destruição revisado/autorizado, destroy principal real e ausência de recursos confirmada; explicitar retenções/pendências do backend. | `evidencias/terraform-destroy.txt`, `evidencias/aws-pos-destroy.txt`, `evidencias/backend-teardown.txt`. | pendente |
 | R24 / P | Usar Kiro ou outra LLM como copiloto para parte da solução e documentar uso crítico. | Histórico e diário identificam Codex, prompts, revisão humana, geração e correções efetivamente ocorridas. | `docs/diario-ia.md`, `relatorio.md`. | em andamento |
@@ -212,3 +213,21 @@ sem backend remoto e sem credenciais; erros e correções reais em aws-preflight
 DynamoDB depreciado ainda suportado pelo core, preservado como exigência.
 Sondas/cache próprias removidos; nenhuma mudança/criação na nuvem/plan/apply.
 T13 verificado, próximo T14; não validar módulos inexistentes como aprovados.
+
+## Evidência T14 — avanço parcial R19/R20/R21
+
+Bootstrap infra/backend implementado com versões/lockfile reais, state local,
+variáveis validadas e outputs do principal futuro. fmt/check/init direct/validate
+0; plano real 2 esperado, cinco criações/zero alterações/zero exclusões em
+us-east-1. JSON conferiu S3 versionado/AES256/bloqueio público, tags bucket/tabela,
+DynamoDB on-demand/LockID String, vínculos e IAM ausente. Nomes privados de conta
+não publicados; tfvars/plano/metadados 0600 ignorados. State local ainda ausente.
+
+Falhas de init comum (1) e procedimento direct temporário (0) preservados na
+mesma versão, causa não comprovada. Negativo de bucket reservado -an retornou 1;
+plano válido não substituído. S3 []/0 e DynamoDB ResourceNotFoundException/254
+antes/depois do plano; STS mesma conta do Lab. Não houve apply/recurso criado.
+Evidências backend-validate.txt/backend-plan.txt e diário; T14 verificada.
+R19/R20/R21 continuam em andamento: módulos/composição, apply/bootstrap efetivo,
+state remoto e locking real ainda pendentes. R22/R31 também não completos.
+Próximo T15, revisão de recursos/custo e autorização específica antes de T16.

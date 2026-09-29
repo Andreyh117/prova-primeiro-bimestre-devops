@@ -35,8 +35,10 @@ Após revisão, o aluno autorizou T13 e reforçou commits somente por mudanças
 necessárias/coerentes. T13 verificada: consultas AWS read-only, Lab/saldo/CIDRs
 confirmados pelo aluno, opções EC2/RDS/AZ/key/profile reais, versões/schema
 validados em sonda local sem backend remoto. Falhas/correções preservadas.
-Próxima tarefa pendente: T14, bootstrap S3/DynamoDB; plan exige revisão e apply
-continua dependente da autorização específica T15.
+Após revisão, T14 implementou bootstrap local e passou fmt/init direct/validate/
+plan real revisado: cinco criações propostas, sem apply. Falhas/correção de init
+e consultas antes/depois estão preservadas. Próxima tarefa pendente: T15,
+revisar plano/custo e obter autorização específica; aplicação fica em T16.
 
 ## Plano de tarefas pequenas
 
@@ -60,7 +62,7 @@ Cada tarefa recebe entrada no diário.
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt e trecho api-local.txt: config/up/ps/ordem/rede/CRUD/SQL reais. | verificado |
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt: falha inicial/correção, duas reexecuções, HTTP/SQL/IDs/volume, negativos/checkpoint/limpeza; README. | verificado |
 | T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | aws-preflight.txt: consultas reais/compatibilidade/erros; decisões humanas no diário; preflight.local.json 0600 ignorado. | verificado |
-| T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt e plano sanitizado; commit backend. | pendente |
+| T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt/backend-plan.txt: fmt/init/validate/plan reais, falhas/correção, revisão JSON e consultas; commit backend. | verificado |
 | T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | Decisão no diário; plano binário local ignorado. | pendente |
 | T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt; sem marcar infraestrutura principal implantada. | pendente |
 | T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | Diário e revisão estática do módulo. | pendente |
@@ -500,3 +502,30 @@ README/AGENTS/design/matriz/diário sincronizados, sem simular infraestrutura.
 Nenhum recurso criado, plan/apply/destroy/merge/push/PR; sem bloqueio restante.
 Um único marco documental/configuração será revisado para commit, sem aumentar
 histórico por cada tentativa. Próximo T14; autorização T13 não autoriza apply.
+
+### T14 — resultado verificado em 28/09/2026
+
+Após revisão do aluno, implementado bootstrap infra/backend com backend local
+separado, Terraform=1.16.2/providerAWS=6.65.0 e lockfile gerado no root. Cinco
+recursos propostos: S3, versionamento Enabled, SSE-S3 AES256, quatro bloqueios
+públicos true e DynamoDB PAY_PER_REQUEST/LockID String. Provider protege conta/
+região, tags no bucket/tabela e outputs sem segredos; sem IAM/KMS novos.
+
+fmt/check 0, init comum 1 por versão não disponível no retorno; Registry HTTPS
+200 listava 6.65.0. Init direct temporário 0 assinado HashiCorp; validate 0.
+Init readonly comum repetiu falha 1; readonly direct passou 0. Causa da diferença
+não comprovada, sem upgrade/config global. Plan real detailed-exitcode 2,
+cinco create/zero update/delete. Show JSON real 0 conferido em memória, atributos,
+região/tags/conta/vínculos/outputs/local state verificados. Bucket reservado -an
+rejeitado/1 esperado, plano válido com mesmo hash. Plano privado 0600/ignorado.
+S3 []/0 e describe-table ResourceNotFoundException/254 antes/depois comprovam
+ausência dos nomes nesta conta/região; não garantem disponibilidade global S3.
+STS voltou mesma conta do preflight; nenhuma criação/apply/destroy.
+
+backend-validate.txt/backend-plan.txt preservam saídas reais/falhas/hashes e
+resumo sanitizado; README traz reprodução direct temporária e interpretação
+exit codes. AGENTS/specs/diário sincronizados, R19/R20/R21 em andamento.
+API/Docker/Compose/guia/evidências antigas preservados, sem repetir suas suites.
+Sem bloqueio restante T14; próximo T15, revisão/autorização específica. T16
+apply/conferência e T21 backend/locking continuam pendentes. Um único commit
+coerente de backend será feito após revisão, sem criar histórico por tentativa.
