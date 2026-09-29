@@ -497,3 +497,23 @@ terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um comm
 coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
 sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
 privados em /tmp preservados, nenhuma credencial oustate completo versionado.
+
+## Estado atual — T24 verificada em 29/09/2026
+
+Substitui próximaT24 da atualização T23; histórico preservado. T01–T24 verificadas,
+próximaT25 CRUD/persistência EC2/RDS e verify-aws.py. HEAD inicial4895f98/18commits,
+feature limpa/main preservada/zero merges. Deploy-api.py/install-remote.sh/unit/
+11testes implementados. Build gitarchive appcommit4895f98/amd64/UID1000;
+checksum econfigOCI conferidos após incompatibilidade índiceDocker29/configDocker25.
+Primeirodeploy1 corrigido, retry0/repetição0; CRLFtest1 corrigido,11pass0;
+consolelatest254 e auxiliares corrigidos, falhas preservadas ec2-deploy.txt.
+SSH por EIC existente/chave temporária0600/hostfingerprint comparadaAWSconsole,
+sem IAM/keypair/SG novo. Migração na imagem via RDSprivado/TLSv1.3/CA/rejecttrue,
+OID16451/4colunas/3constraints/zero registros iguais após repetição/reboot.
+Ambiente root0600/dir0700/CA0644, API/Docker enabled/active, sóAPIcontainer.
+RebootCLI0/boot_id diferente/mesmaimagem e três healthHTTP200/SQLreal.
+R07 verificado; R06/R16/R17/R22/R29 parciais até T25/entrega, não alegarCRUD.
+Evidências ec2-deploy.txt/health-aws.txt; app/infra/estados/evidências anteriores
+preservados. Sem bloqueio; recursos ativos/faturáveis. Sem apply/destroy/push/
+merge/PR; autorização deploy vigente, teardown futuro com revisão própria.
+Um commit coerente real, nunca por quantidade; mergeT32 pendente.

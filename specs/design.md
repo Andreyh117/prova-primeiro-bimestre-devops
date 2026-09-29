@@ -411,17 +411,17 @@ e preparar /opt/prova-reservas(root0755) e /etc/prova-reservas(root0700), sem
 senha/token GitHub/credenciais AWS. Não aceita user-data arbitrário como input.
 Root T21 selecionou AMI explícita Amazon Linux2023 standard/x86_64/HVM/EBS/root8GiB
 em us-east-1 compatível com t2.micro, ID/OS/arquitetura consultados antes do plan;
-boot/instalação efetivos pendentes T23. Disco raiz gp3 8GiB/encriptado/excluído na
+boot/Docker efetivos conferidos por SSH em T24. Disco raiz gp3 8GiB/encriptado/excluído na
 terminação, tags no disco/instância. IMDSv2 obrigatório/hop1, metadata tags
 desabilitadas, CPUcredits standard. Mudança no user-data propõe recriação pelo
 provider, sempre sujeita à revisão do plano; não é autorização de apply/destroy.
 
-Proposta de deploy por SSH/SCP a partir da máquina do aluno, sem depender de
-registry privado ou nova role:
+Deploy por SSH/SCP implementado em T24, sem depender de registry privado ou
+nova role. Passos1–3/5 executados; CRUD do passo4 continua T25:
 
 1. Build da imagem x86_64 a partir do commit escolhido e lockfile. Salvar imagem
    em tar fora do Git; calcular checksum. Registrar commit/tag/checksum.
-2. SCP de imagem, SQL e bundle CA público oficial; provisionar arquivo de ambiente
+2. SCP de imagem contendo a migração SQL e bundle CA público oficial; provisionar arquivo de ambiente
    por transferência protegida sem conteúdo em logs. Secret local e remoto com
    modo 0600 fora do repo; não colocar segredo em argumento de linha de comando.
 3. Carregar a mesma imagem na EC2; executar comando de migração nela usando
@@ -867,3 +867,20 @@ terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um comm
 coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
 sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
 privados em /tmp preservados, nenhuma credencial oustate completo versionado.
+
+## D12 implementada T24 — ajustes fundamentados
+
+SQL é transferido dentro da imagem já versionada, executado por node src/migrate.js;
+evita cópia separada divergente. Docker29/containerd local expôs índice OCI,
+Docker25 clássico remoto identificou configuração; archive_identity derivaSHA256
+dos bytes config no tar, valida commit/linuxamd64/Usernode antes de enviar.
+Primeirodeploy1 preservado; mesma imagem corrigidamente identificada passou duas
+vezes0. systemd é responsável por restart/boot; Docker run --rm sem --restart,
+conforme documentação Docker. EIC já autorizado renovou pública temporária por
+conexão, sem role/keypair/SG novo, em alternativa à vockey não localizada.
+Hostkey comparada com AWSconsole, StrictHostKeyChecking=yes. Env root0600/
+dir0700/CApública0644. Migração TLS RDS idempotente, SQL e reboot/health reais
+verificados ec2-deploy.txt/health-aws.txt. Passo4 (CRUD/persistência) aindaT25.
+Fontes: https://docs.docker.com/engine/storage/containerd/ e
+https://github.com/opencontainers/image-spec/blob/main/config.md;
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html.

@@ -1455,3 +1455,67 @@ privados ignorados0600 e plano aprovado intacto. T01–23verificadas/T24–34pen
 R16/R17/R22parciais atéAPI/SQL/CRUD. Apply0/23add e consultas reais, S3state real,
 lockliberado/postplan0 confirmados. Stage/commit só deste marco; semvazio/push/
 merge/PR. Recursos ativos preservados, nenhuma destruição/limpeza de dados.
+
+## Registro T24 — deploy e reboot verificados na AWS
+
+Em 29/09/2026, após revisão do aluno, início HEAD4895f98/18 commits reais,
+feature feat/api-reservas limpa/main preservada/zero merges. Implementados
+scripts/deploy-api.py, deploy/install-remote.sh, deploy/prova-reservas-api.service
+e scripts/tests/test_deploy.py. App/schema/Dockerfile/Compose/infra/modules/
+provider/lockfiles/states/planos e evidências anteriores preservados.
+
+Imagem construída de git archive do commit4895f98590a44d20917c872ddf9b77135ccf4456,
+linux/amd64/Usernode/UID1000. Arquivo81632256bytes, SHA256
+59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518;
+configOCI sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88.
+Commit identifica código app na imagem, não o commit futuro dos scripts de deploy.
+CA RDS regional oficial obtida HTTPS200. Conta/default/voclabs/us-east-1/IP atual
+/32/EC2 do projeto/RDS available/private/encrypted revalidados antes dos SCP.
+
+vockey privada não localizada; aluno foi consultado sobre caminho, mas bloqueio
+resolvido por EC2 Instance Connect já permitido: chave ed25519 local0600/
+pública temporária renovada por conexão. Sem nova key pair/IAM/SG nem edição
+permanente de authorized_keys. Fingerprint de host comparada com console AWS
+confiável; StrictHostKeyChecking=yes. SSH real UID1000/Docker25.0.16 ativo.
+SSM retornou1 instância gerenciada em consulta, não foi usado para deploy.
+
+Falhas reais: console --latest UnsupportedOperation254 no t2.micro; auxiliares
+JSONDecodeError e base64decode ValueError corrigidos para ler console sem latest/
+texto já decodificado. Teste CRLF inicial1 corrigido read_text para read_bytes;
+retry9pass0. Cadeia inicial shell0 refletia último systemd-analyze0, não unittest1;
+captura isolada confirmou falha real. Primeiro deploy1: imagem carregada,
+LoadState=not-found/sem ambiente instalado. Digest de índice OCI exposto pelo
+Docker29 local divergia do IDconfig usado pelo Docker25 clássico remoto.
+Corrigida derivação dos bytes config no tar; mesmo arquivo/hash/commit preservados.
+Onze testes finais passaram0, incluindo identidadeOCI/arquitetura. Bash-n/unit
+verify0. Capturas iniciais/correções/reexecuções reais em ec2-deploy.txt.
+
+Retry deploy0 e repetição0 carregaram imagem verificada e executaram migração
+idempotente contida nela via EC2/RDS TLS. SQL real confirmou TLSv1.3/cipher
+TLS_AES_256_GCM_SHA384/rejectUnauthorized=true/hostnameRDS/PG16.15. SchemaOID16451,
+4colunas(id identity/cliente/dataDATE/status),3constraints e contagem0 iguais antes/
+depois da repetição/reboot. Nenhum dado inserido/apagado nesta tarefa; não alegar
+persistência de reserva AWS com tabela vazia. /health externo200/databaseok em
+três verificações. systemd API eDocker enabled/active; containerUID1000/mesmaimagem/
+owner6325231. Ambiente root0600/diretório0700/CApública0644; sem segredo em Git/log.
+Inventário docker ps -a sóAPI, nenhum PostgreSQL container. Reboot real por AWS CLI
+retornou0; boot_id mudou e API voltou automaticamente com mesmaimagem/schema.
+Staging exclusivo removido pelo deploy. Credenciais/dados privados permanecem
+protegidos0600 fora do Git; conta/IP de origem/usuário/senha/ARN ocultados nos logs.
+
+T01–T24 verificadas nos respectivos ambientes; R07 agora verificado pelo health
+local/Compose e AWS. R06/R16/R17/R22/R29 permanecem parciais: seis rotas/CRUD e
+persistência de reserva RDS/script verify-aws.py ainda T25; entrega futura.
+Próxima T25, não iniciada. Sem bloqueio remanescente T24; autorização vigente
+para deploy solicitado, sem repetir pergunta. Recursos ativos/faturáveis,
+saldo atual/duração restante não inferidos. Sem apply/destroy/push/merge/PR;
+teardown tem revisão própria futura. Um commit coerente real após revisão de
+scope/stage/segredos; merge T32 pendente. Não repetir suites anteriores inalteradas.
+
+T24 negativo adicional: checksum deliberadamente incorreto retornou1 esperado
+antes de STS/SCP, sem alteração remota; captura real em ec2-deploy.txt.
+
+Revisão final: git diff --cached --check retornou2 por um espaço final na saída
+BuildKit de ec2-deploy.txt. Normalizado somente esse espaço no texto versionado,
+com declaração na evidência; captura bruta/hash preservados. Checagem repetida
+antes do commit, sem alterar código ou simular saída da ferramenta.

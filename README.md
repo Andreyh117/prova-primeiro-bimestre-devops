@@ -58,7 +58,7 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T24, deploy repetível da API na EC2 e inicialização do RDS.
+pendente: T25, CRUD/persistência na EC2/RDS. Deploy T24 concluído abaixo.
 T22 foi autorizada e T23 provisionou/conferiu a infraestrutura AWS real. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usaram provider mock, sem chamadas AWS em T17; a rede foi implantada/conferida em T23. Backend S3/locking
@@ -70,7 +70,7 @@ fmt/init/validate/grafo/schema passaram após corrigir conflito do provider.
 O banco real e seus atributos foram conferidos em T23; SQL/CRUD da API seguem pendentes.
 T20 implementou módulo EC2/user-data: dez testes Terraform mock e três testes
 de fluxo Bash com stubs passaram, além de fmt/init/validate/grafo/schema/bash-n.
-T20 não criou instância; T23 a provisionou. Boot/Docker/API reais seguem pendentes de T24.
+T20 não criou instância; T23 a provisionou. T24 conferiu boot/Docker/API reais.
 T21 compôs o root e inicializou S3 real: fmt/init/validate/grafo 0, plano real
 2 com 23 criações/zero alterações/exclusões. Contenção DynamoDB comprovada:
 segundo plano falhou1 enquanto o primeiro mantinha lock; primeiro terminou2
@@ -789,7 +789,7 @@ informa unauthenticated, não novo download assinado. Testes rejeitam subnets
 senha curta/caracteres inválidos, tags ausentes e política snapshot incoerente.
 Não comprovam AZ/rotas privadas/permissões/KMS/endpoint disponível ou SQL/CRUD
 na AWS. R17/R18/R19/R22 em andamento; root/plano real T21 concluídos,
-execução T23 conferida e deploy/CRUD T24/T25 continuam pendentes.
+execução T23 e deploy T24 conferidos; CRUD T25 permanece pendente.
 
 ### EC2 — T20 verificada localmente
 
@@ -966,9 +966,9 @@ correspondem ao aprovado. Saldo atual e duração restante do Lab não foram inf
 
 Outputs reais: IP EC2 `13.220.113.41`, endpoint RDS
 `prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com`, porta5432 e URL
-proposta `http://13.220.113.41:3000`. **A API ainda não foi implantada.** HTTP,
-SQL, CRUD, SSH e bootstrap Docker efetivos dependem de T24/T25. Os outputs não
-comprovam o serviço.
+`http://13.220.113.41:3000`. Na conclusão de T23 a API ainda não estava implantada;
+T24 abaixo agora comprova SSH/Docker/SQL TLS e /health. CRUD continua T25.
+Os outputs, isoladamente, não comprovam o serviço.
 
 O objeto de state principal no S3 foi confirmado: versionado, AES256 e não vazio.
 head-object/list-object-versions e state pull privado passaram; há 23 recursos
@@ -978,7 +978,115 @@ em postapply.local.tfplan ignorado/0600; o plano aprovado original foi preservad
 Não publicar plano, state, JSON, cache ou tfvars com dados sensíveis, nem remover
 o backend ou destruir recursos nesta etapa.
 
-Próxima tarefa: **T24**, deploy repetível por SSH/SCP, imagem, migração SQL no RDS,
-ambiente protegido e serviço da API, seguido da validação de /health e reboot.
+T24 foi a tarefa seguinte e está concluída abaixo. Próxima: **T25**,
+verify-aws.py e CRUD/persistência efetivos na EC2/RDS.
 Os recursos continuam ativos e podem consumir créditos; a estimativa T22 não é
 um teto de custo nem uma fatura.
+
+## Deploy T24 — imagem por SSH, RDS TLS e systemd
+
+O deploy usa `scripts/deploy-api.py`, `deploy/install-remote.sh` e
+`deploy/prova-reservas-api.service`. O script confere conta/role, EC2 do projeto,
+IP atual /32, RDS privado e ambiente antes de transferir qualquer segredo.
+Não executa Terraform, não cria IAM e não altera grupos de segurança.
+
+A imagem contém a migração `node src/migrate.js`; não há uma segunda cópia de SQL
+para transferir. Ela executa pela EC2 no RDS, com `PGSSL=true`, bundle CA oficial
+e `rejectUnauthorized=true`. O ambiente é root:root/0600 em diretório 0700;
+a CA pública tem modo 0644 para o usuário node/UID1000 lê-la. O systemd gerencia
+reinício e boot; o container usa `--rm`, sem política Docker concorrente.
+
+Dependências: Python3 stdlib, Docker local, AWS CLI autenticada no Learner Lab,
+OpenSSH (ssh/scp/ssh-keygen), curl, EC2 existente com Docker e RDS available.
+Para reproduzir o build, escolha um commit existente que contenha `app/`:
+
+```bash
+umask 077
+DEPLOY_DIR=$(mktemp -d /tmp/prova-deploy-local-XXXXXXXX)
+export DEPLOY_DIR
+SOURCE_COMMIT=$(git rev-parse HEAD)
+export SOURCE_COMMIT
+git archive --format=tar -o "$DEPLOY_DIR/context.tar" "$SOURCE_COMMIT" app
+tar -xf "$DEPLOY_DIR/context.tar" -C "$DEPLOY_DIR"
+docker build --platform linux/amd64 \
+  --label "org.opencontainers.image.revision=$SOURCE_COMMIT" \
+  -t "prova-reservas:${SOURCE_COMMIT:0:12}" "$DEPLOY_DIR/app"
+docker save -o "$DEPLOY_DIR/image.tar" "prova-reservas:${SOURCE_COMMIT:0:12}"
+curl --fail --silent --show-error \
+  -o "$DEPLOY_DIR/rds-ca.pem" \
+  https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem
+```
+
+Derive o ID do conteúdo de configuração OCI do arquivo: Docker29/containerd local
+e Docker25 clássico da EC2 apresentam identificadores de níveis diferentes.
+O script valida esse ID, o commit, linux/amd64, usuário node e checksum do tar.
+
+```bash
+IMAGE_ID=$(python3 -B - <<'PY'
+import os, runpy
+from pathlib import Path
+module = runpy.run_path('scripts/deploy-api.py')
+print(module['archive_identity'](Path(os.environ['DEPLOY_DIR']) / 'image.tar')[0])
+PY
+)
+IMAGE_SHA256=$(sha256sum "$DEPLOY_DIR/image.tar" | cut -d ' ' -f 1)
+python3 -B - <<'PY'
+import json, os, subprocess
+from pathlib import Path
+context = json.loads(Path('infra/terraform.tfvars.json').read_text())
+outputs = json.loads(subprocess.check_output(['terraform', '-chdir=infra', 'output', '-json']))
+env = {'PGHOST': outputs['rds_endpoint']['value'], 'PGPORT': '5432',
+       'PGDATABASE': 'reservas', 'PGUSER': context['rds_username'],
+       'PGPASSWORD': context['rds_password'], 'PGSSL': 'true',
+       'PGSSLROOTCERT': '/etc/ssl/certs/rds-ca.pem', 'PORT': '3000',
+       'NODE_ENV': 'production'}
+path = Path(os.environ['DEPLOY_DIR']) / 'api.env'
+path.write_text(''.join(k + '=' + value + '\n' for k, value in env.items()))
+path.chmod(0o600)
+PY
+```
+
+Configure `SSH_ACCESS_KEY` e `SSH_KNOWN_HOSTS` com caminhos privados 0600.
+A chave de host deve ser comparada com a fingerprint publicada no console AWS
+confiável da própria instância; `ssh-keyscan` sozinho não autentica o servidor.
+O deploy exige `StrictHostKeyChecking=yes`. Pode usar a chave privada vockey
+existente. Como ela não foi localizada nesta execução, foi usada chave ed25519
+local temporária e EC2 Instance Connect, já permitido pela role existente.
+Para esse método, gere a chave fora do Git com `ssh-keygen -t ed25519 -N '' -f`
+e seu caminho escolhido, e acrescente `--instance-connect` ao comando abaixo.
+A chave pública é renovada por conexão; nenhuma nova key pair/IAM é criada.
+
+```bash
+python3 -B scripts/deploy-api.py \
+  --instance-id i-0f4b59a8181537b78 \
+  --identity-file "$SSH_ACCESS_KEY" --known-hosts "$SSH_KNOWN_HOSTS" \
+  --aws-context infra/terraform.tfvars.json \
+  --env-file "$DEPLOY_DIR/api.env" --ca-file "$DEPLOY_DIR/rds-ca.pem" \
+  --image-archive "$DEPLOY_DIR/image.tar" --image-id "$IMAGE_ID" \
+  --image-sha256 "$IMAGE_SHA256" --source-commit "$SOURCE_COMMIT" \
+  --instance-connect
+```
+
+Com vockey, retire `--instance-connect`. O script retorna 0 apenas após instalar,
+migrar e confirmar /health local; falha retorna 1 sem imprimir stderr arbitrário
+que possa conter dados privados. Staging remoto exclusivo é removido em finally;
+ambiente de runtime permanece protegido. O manifesto público remoto fica em
+`/opt/prova-reservas/deployment.json`, sem senha ou hash do arquivo de segredos.
+
+Verificação local do instalador: `python3 -B scripts/tests/test_deploy.py`,
+`bash -n deploy/install-remote.sh` e
+`systemd-analyze verify deploy/prova-reservas-api.service`.
+Evidências reais e resultado AWS estão em [ec2-deploy.txt](evidencias/ec2-deploy.txt)
+e [health-aws.txt](evidencias/health-aws.txt). O acesso HTTP continua limitado ao
+IP /32 aprovado; mudar de rede exige revisar acesso antes de repetir comandos.
+
+Resultado real em29/09/2026: deploy repetido0, migração preservou schemaOID16451/
+4colunas/3constraints/contagem0. SQL confirmou PG16.15/TLSv1.3 no RDS privado.
+Serviço enabled/active, UID1000, nenhum PostgreSQL container. Reboot CLI0 mudou
+boot_id e /health voltou200 automaticamente; três chamadas externas passaram200.
+Onze testes locais passaram0; falhas CRLF/digest OCI/consulta console preservadas.
+Imagem app construída do commit4895f98590a44d20917c872ddf9b77135ccf4456,
+arquivoSHA25659f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518.
+T24 verificada, sem bloqueio. **T25 é a próxima**: seis rotas/CRUD/persistência
+real de uma reserva e verify-aws.py. Tabela vazia nesta etapa não comprova isso.
+Recursos continuam ativos/faturáveis; sem teardown/push/merge/PR nesta execução.

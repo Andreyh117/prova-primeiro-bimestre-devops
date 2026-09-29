@@ -57,8 +57,9 @@ ainda ausente sem apply: gravação/conferência pendentes T23, R20 parcial.
 T22 verificada: aluno autorizou explicitamente o plano principal revisado.
 T23 verificada na AWS: apply0/23add/0change/0destroy, EC2 running/ok/ok, RDS
 available/private/encrypted, state S3 real/versionado e lock liberado; plano
-posterior0/No changes. Próxima pendente T24, deploy repetível/SQL/serviço;
-principal/EC2/RDS/teardown exigem revisão/autorização separadas.
+posterior0/No changes. T24 agora verificada: deploy repetido/SQL TLS/serviço e
+reboot reais, evidências ec2-deploy.txt/health-aws.txt. Próxima T25 CRUD/persistência
+EC2/RDS; teardown exige revisão/autorização própria futura.
 
 ## Plano de tarefas pequenas
 
@@ -92,7 +93,7 @@ Cada tarefa recebe entrada no diário.
 | T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init S3 real/validate/plan; vínculos/tags e locking real; objeto S3 confirmado ausente sem apply, gravação/conferência T23. | terraform-validate.txt/terraform-plan.txt/backend-locking.txt: init/validate 0, plan 2/23 create, contenção 1 esperada e release real; sem apply. | verificado |
 | T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist concreto executado; aluno autorizou explicitamente em29/09 após revisão. | infra-revisao.txt/diário: consultas/cálculo reais e decisão recebida; aprovação não comprova deploy. | verificado |
 | T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt/aws-rds.txt/aws-seguranca.txt/terraform-outputs.txt: apply0, consultas/assertivas reais, S3 state e plano posterior0/No changes; sem deploy/CRUD. | verificado |
-| T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt, health-aws.txt; commit deploy. | pendente |
+| T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt/health-aws.txt: build/11 testes/SSH/TLS/schema/repetição/reboot e três HTTP200 reais; falhas corrigidas preservadas. | verificado |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt, rds-crud.txt, aws-seguranca.txt. | pendente |
 | T26 | T25 | R24, R25, R30 | Redigir relatório com contribuição do aluno, a partir do diário/evidências. | Quatro respostas dissertativas de dez linhas cada; IA e ferramentas reais; aluno revisa sua experiência. | relatorio.md, diário; limitações honestas, sem inventar desafios. | pendente |
 | T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | Diário, checklist e plano de destroy sanitizado. | pendente |
@@ -811,3 +812,19 @@ terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um comm
 coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
 sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
 privados em /tmp preservados, nenhuma credencial oustate completo versionado.
+
+## Registro T24 — aceite executado na AWS
+
+29/09/2026: inícioHEAD4895f98/18commits reais/feature limpa/main preservada.
+Implementados scripts/deploy-api.py, deploy/install-remote.sh, unit systemd e
+11testes de proteção. Imagem app do commit4895f98/checksum/configOCI conferidos;
+SSH/SCP EIC existente com hostkey validada e ambiente root0600. SQL RDS efetivo
+TLSv1.3/CA/rejecttrue, migração preservou OID16451/4colunas/3constraints/contagem0.
+Deploy retry0/repetição0, rebootCLI0/nova boot_id/serviço automático, três HTTP200.
+SóAPIcontainer/UID1000/API eDocker enabled/active. Falhas reais CRLF/digestOCI/
+console e correções preservadas em ec2-deploy.txt; diário contém detalhes.
+T24 verificada, R07 verificado; R06/R16/R17/R22/R29 continuam parciais.
+T25 próxima, ainda pendente: seis rotas/CRUD/SQL e persistência de reserva RDS.
+Sem bloqueio; nenhum dado inserido/apagado T24. App/infra/estados/evidências
+anteriores preservados. Sem apply/destroy/push/merge/PR; recursos ativos/faturáveis.
+Commit único coerente real, mergeT32 futuro; saldo atual não inferido.
