@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T14 foram verificadas. O commit inicial `21cb5f0` está em
+Em 29/09/2026, T01–T16 foram verificadas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -38,8 +38,8 @@ contexto filtrado, health/CRUD/SQL reais e encerramento/limpeza confirmados.
 T11 validou Compose v5.5.1, API/db saudáveis, rede bridge, volume nomeado,
 bootstrap SQL, dependência de saúde e CRUD/SQL reais. .env.example está disponível;
 config sem senha retornou 1 esperado. Fixture/ambiente de teste foram limpos.
-T10 foi o sétimo commit real (49dbd5e); merge continua em T32. Infraestrutura AWS
-e relatório permanecem pendentes.
+T10 foi o sétimo commit real (49dbd5e); merge continua em T32. EC2/RDS e
+relatório permanecem pendentes.
 T12 comprovou a reserva após recriar api/db, com novos IDs e mesmo volume;
 HTTP/SQL preservaram 01-10-2026/DATE 2026-10-01. Verificador retornou 0 no caso
 válido e 1 nos negativos, limpando apenas seus dados e mantendo a sentinela.
@@ -48,14 +48,18 @@ foi corrigida e as saídas anteriores foram preservadas.
 T13 confirmou identidade/região e opções AWS por consultas de leitura. O aluno
 confirmou Learner Lab, US$0 usados de US$50 e acesso API só do seu IP /32.
 Terraform1.16.2/providerAWS6.65.0 passaram init/validate/schema em sonda isolada;
-backend S3 e recursos do projeto ainda não existem. Falhas/correções registradas.
+Na conclusão de T13 não havia recursos do projeto; falhas/correções registradas.
 T14 implementou o bootstrap em infra/backend com state local separado, versões
 fixas e lockfile real. fmt/init/validate passaram; plano revisado propõe cinco
-criações, zero alterações/exclusões em us-east-1. Bucket/tabela seguem ausentes
-nas consultas após o plano. Falhas de init comum foram preservadas; instalação
+criações, zero alterações/exclusões em us-east-1. Bucket/tabela estavam ausentes
+nas consultas de T14 após o plano. Falhas de init comum foram preservadas; instalação
 direct temporária passou na mesma versão, causa da diferença não comprovada.
-Próxima tarefa: T15, revisar recursos/custo e autorizar especificamente o bootstrap;
-apply/conferência efetiva ficam em T16. Locking principal ainda pendente T21.
+T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
+S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
+preservou recursos e passou. Plano posterior retornou 0/No changes.
+Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
+pendente: T17, módulo VPC. State remoto/locking principal são T21; EC2/RDS/CRUD
+na nuvem e limpeza permanecem pendentes.
 
 ## Contrato aprovado para implementação
 
@@ -108,6 +112,8 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Preflight AWS T13](evidencias/aws-preflight.txt): consultas reais, versões/schema isolados, falhas/correções e decisões humanas; sem criação de recursos.
 - [Validação bootstrap T14](evidencias/backend-validate.txt): fmt/init/validate reais, falhas de instalação/correção e rejeição de nome S3 reservado.
 - [Plano bootstrap T14](evidencias/backend-plan.txt): cinco criações propostas, revisão do JSON sanitizada e consultas antes/depois sem recursos criados.
+- [Revisão bootstrap T15](evidencias/backend-revisao.txt): plano preservado, consultas AWS, tarifas/premissas/cálculo e autorização explícita.
+- [Bootstrap aplicado T16](evidencias/backend.txt): falha SCP parcial, recuperação sem exclusão, apply/consultas reais e plano posterior sem mudanças.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -392,7 +398,7 @@ temporárias com token e LabRole/LabInstanceProfile existentes, sem IAM próprio
 Provisionamento e destruição exigem plano revisado e autorização específica.
 A implantação futura usará RDS privado/encriptado para a API na EC2; a limpeza
 principal acontecerá
-antes da limpeza do backend. T13 realizou consultas de leitura AWS; não há implantação do projeto.
+antes da limpeza do backend. T16 aplicou apenas S3/DynamoDB; implantação EC2/RDS ainda pendente.
 
 Preflight consulta identidade, disponibilidade e parâmetros antes de escrever
 um plano. Assim os módulos usam opções realmente ofertadas pela conta/região.
@@ -430,23 +436,35 @@ O [lockfile do bootstrap](infra/backend/.terraform.lock.hcl) foi gerado e confer
 em T14; o lockfile principal será criado em T21. Nenhuma atualização de versão
 foi feita para acrescentar commits.
 
-### Bootstrap Terraform disponível — T14
+### Bootstrap aplicado — T14 a T16
 
-O [bootstrap](infra/backend/main.tf) cria o destino do state principal antes de
-esse backend ser usado. Seu próprio state usa backend local em
-infra/backend/terraform.tfstate e permanece separado. O plano atual contém:
+O [bootstrap](infra/backend/main.tf) prepara S3/DynamoDB antes do backend
+principal. Seu state local em infra/backend/terraform.tfstate é separado,
+ignorado e protegido (0600). Terraform 1.16.2/AWS 6.65.0 e lockfile preservados.
 
-- Bucket S3 e três configurações: versionamento Enabled, SSE-S3 AES256 e quatro
-  flags de bloqueio público ativadas.
-- Tabela DynamoDB PAY_PER_REQUEST, chave de partição LockID do tipo String.
+T16 criou o bucket no primeiro apply, mas o provider falhou no Read por
+GetBucketObjectLockConfiguration/403/explicit deny de SCP no Learner Lab.
+State parcial e recursos preservados. A recuperação usa
+[removed com destroy=false](https://developer.hashicorp.com/terraform/language/block/removed)
+para retirar a gestão do bucket sem apagá-lo, e data aws_s3_bucket para consultá-lo.
+Isso não modifica IAM/SCP. Criação/remoção física e tags do bucket passam a ser
+responsabilidade explícita fora desse state; não importar para o recurso completo
+com a mesma restrição. Três configs S3 e tabela continuam geridas pelo Terraform
+(quatro managed e um data).
 
-São cinco recursos Terraform e dois serviços AWS. Tags Project/Environment/Owner
-estão no bucket/tabela; configurações do bucket não têm tags próprias. Provider
-restringe região a us-east-1 e conta à conferida por STS; não cria IAM/KMS.
-force_destroy=false conserva a revisão da limpeza de versões para T29/T30.
-[Backend local oficial](https://developer.hashicorp.com/terraform/language/backend/local).
+Estado real conferido em 29/09/2026:
 
-Na primeira configuração, copie o exemplo sem substituir arquivo existente:
+- Bucket prova-6325231-tfstate-e373b51f3467: us-east-1, Enabled, SSE-S3 AES256,
+  quatro flags de bloqueio público true.
+- DynamoDB prova-6325231-tflock-e373b51f3467: ACTIVE, PAY_PER_REQUEST,
+  LockID String/HASH; TableId preservado desde o apply parcial.
+- Tags bucket/tabela: Project=prova-primeiro-bimestre-devops,
+  Environment=learner-lab, Owner=6325231. Zero versões/delete markers na consulta.
+- Recuperação: três configurações adicionadas, zero alteradas/destruídas;
+  plan posterior com refresh/locking normal retornou 0/No changes.
+
+Para reproduzir em outro ambiente autorizado, copie o exemplo sem sobrescrever
+arquivo existente e substitua todos os placeholders:
 
 ```bash
 umask 077
@@ -454,15 +472,31 @@ cp --no-clobber infra/backend/terraform.tfvars.example infra/backend/terraform.t
 chmod 600 infra/backend/terraform.tfvars
 ```
 
-Edite somente o arquivo local: conta real do Lab, perfil com credenciais
-temporárias e nomes exclusivos com sufixo aleatório; todos os placeholders
-precisam ser substituídos. Nomes não contêm conta/IP. O arquivo é ignorado;
-credenciais e session token ficam no perfil AWS fora do repositório.
+Conta/perfil e nomes próprios no arquivo ignorado; credenciais temporárias com
+session token no perfil AWS, fora do Git. Antes de qualquer criação confira
+STS/conta/região e obtenha autorização do plano concreto/custo. Código atual
+espera bucket existente. Se ausente numa reprodução nova, após essa autorização,
+use os mesmos valores do tfvars privado nos comandos abaixo, documentados para
+reprodução. NÃO foram executados para criar o bucket desta sessão: já existe
+desde o apply parcial.
 
-Execute na raiz, com Terraform 1.16.2 e conta/região conferidas. Nesta máquina,
-init comum falhou duas vezes ao localizar a versão, embora o Registry a liste.
-Este procedimento direct temporário passou com provider 6.65.0 assinado,
-sem alterar configuração global ou versões:
+```bash
+# Substitua os placeholders localmente; não publique a conta.
+bootstrap_bucket='SUBSTITUA_PELO_NOME_EXCLUSIVO'
+bootstrap_account='SUBSTITUA_PELA_CONTA_DO_LAB'
+bootstrap_profile='default'
+aws s3api create-bucket --bucket "$bootstrap_bucket" --region us-east-1 --profile "$bootstrap_profile"
+aws s3api head-bucket --bucket "$bootstrap_bucket" --expected-bucket-owner "$bootstrap_account" --region us-east-1 --profile "$bootstrap_profile"
+aws s3api put-bucket-tagging --bucket "$bootstrap_bucket" --expected-bucket-owner "$bootstrap_account" --tagging 'TagSet=[{Key=Project,Value=prova-primeiro-bimestre-devops},{Key=Environment,Value=learner-lab},{Key=Owner,Value=6325231}]' --region us-east-1 --profile "$bootstrap_profile"
+```
+
+Em us-east-1, create-bucket não usa LocationConstraint. Se já existir, não recrie:
+confirme ownership/região e tags antes de alterar configurações. Execute cada
+comando só se o anterior passou; erro de ownership interrompe a reprodução.
+[Referência AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/s3api/create-bucket.html).
+
+Na raiz, init comum falhou em T14 ao localizar a versão; configuração direct
+temporária passou com provider assinado, sem mudar versões/config global:
 
 ```bash
 bootstrap_cli_config=$(mktemp /tmp/prova-backend-cli-XXXXXX.tfrc)
@@ -471,30 +505,66 @@ TF_CLI_CONFIG_FILE="$bootstrap_cli_config" terraform -chdir=infra/backend init -
 rm -- "$bootstrap_cli_config"
 terraform fmt -check -recursive infra
 terraform -chdir=infra/backend validate -no-color
-terraform -chdir=infra/backend plan -input=false -no-color -detailed-exitcode -out=backend.tfplan
+terraform -chdir=infra/backend plan -input=false -no-color -detailed-exitcode -out=backend-current.tfplan
 ```
 
-Mantenha umask 077 também ao gerar planos/state. O lockfile versionado garante
-os hashes/versão; -lockfile=readonly impede atualização nessa reprodução.
-Com -detailed-exitcode, 2 indica plano com mudanças, 0 nenhuma mudança e 1 erro.
-[Referência de plan](https://developer.hashicorp.com/terraform/cli/commands/plan).
-O negativo com state_bucket_name=prova-6325231-an retornou 1 esperado pela
-validação; o plano válido salvo manteve seu hash. Nomes com esse sufixo são
-reservados para outro namespace, conforme [regras S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
+Mantenha umask 077 para planos/state. Detailed-exitcode: 0 sem mudanças, 2 com
+mudanças, 1 erro. Revise plano e autorização antes de aplicar o arquivo salvo.
+Nunca reaplique backend.tfplan original após o state parcial. Plan/JSON bruto/
+tfvars/state podem conter segredos: não versioná-los. Preserve state local e
+backup parcial para recuperação; não apague para forçar novo provisionamento.
+Output backend_config já aplicado; backend principal/locking efetivo ainda T21.
+Avisos expected_bucket_owner deprecated preservados: aceito em versão/encriptação
+na versão fixada; não suportado em public access block, ownership conferido por CLI.
 
-O plano binário e o JSON bruto podem conter variáveis sensíveis em texto claro;
-não publique nenhum deles. Plano/tfvars/metadados estão ignorados e 0600 nesta
-execução. Evidências públicas contêm saída revisada e resumo dos atributos,
-com conta mascarada. Backend local inicializado não comprova recursos criados:
-terraform.tfstate do bootstrap ainda está ausente; a criação ocorrerá em T16.
-O output backend_config aparece somente como proposta no plano; valores
-aplicados serão usados em T21 após conferência T16. Root remoto principal ainda
-não foi implementado/inicializado. [Cuidados com show JSON](https://developer.hashicorp.com/terraform/cli/commands/show).
+Na limpeza futura T29/T30, obtenha autorização separada, destrua primeiro a
+infra dependente, preserve states e confira locks/versões. Elimine somente
+versões/delete markers do bucket próprio autorizados. Destroy bootstrap deve
+remover quatro managed; NÃO remove bucket físico. Remoção do bucket vazio será
+por CLI, com ownership/região conferidos e registro real. Teardown não executado.
 
-Preserve o plano atual para T15. Antes de apply, revalide credenciais/conta,
-reconfira o plano/nomes/custo e obtenha autorização específica. Mudança no código
-ou variáveis exige novo plano/revisão. A consulta filtrada confirmou ausência do
-bucket nesta conta; a disponibilidade global do nome só se confirma na criação.
+### Revisão concreta e custo do bootstrap — T15
+
+Antes do apply, em 29/09/2026, show JSON confirmou o plano T14, cinco criações/
+zero alterações/exclusões. STS confirmou conta final 5811/default/voclabs/us-east-1;
+consultas naquele instante mostraram bucket/tabela ausentes. Plano local
+backend.tfplan preservado, hash SHA-256
+9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12.
+
+| Serviço/configuração proposta | Nome / valor |
+|---|---|
+| Bucket S3 | prova-6325231-tfstate-e373b51f3467 |
+| Versionamento | Enabled |
+| Encriptação | SSE-S3 AES256 |
+| Bloqueio público | Quatro flags true |
+| Tabela DynamoDB | prova-6325231-tflock-e373b51f3467; PAY_PER_REQUEST; LockID String |
+
+É apenas o bootstrap, com state próprio local. Acesso pelo perfil temporário
+existente; tags no bucket/tabela e proteção de limpeza revisadas. Plano original
+tinha force_destroy=false; recuperação usa removed/destroy=false. EC2/RDS,
+rede, deploy, backend principal e limpeza são etapas posteriores/separadas.
+
+Preços regionais obtidos por HTTPS nas tabelas oficiais AWS: S3 Standard
+US$0.023/GB-mês, PUT/LIST US$0.005/1000 e GET US$0.0004/1000; DynamoDB Standard
+US$0.625/milhão WRU, US$0.125/milhão RRU e US$0.25/GB-mês de armazenamento pago.
+Saída internet paga US$0.09/GB. Fontes: [S3](https://aws.amazon.com/s3/pricing/),
+[DynamoDB](https://aws.amazon.com/dynamodb/pricing/) e tabelas regionais/versões/
+SKUs/hashes no [registro da revisão](evidencias/backend-revisao.txt).
+
+Cenário hipotético de um mês: 10 MiB totais S3 incluindo versões, 1 MiB DDB,
+1000 PUT/LIST, 1000 GET, 1000 WRU e 1000 RRU, 10 MiB de saída. Cálculo sem
+franquias/créditos: US$0.00749765625, arredondado para cima US$0.008
+(aproximadamente US$0.01/mês). Consumo varia com volume/duração; valores nominais
+USD antes de tributos. Não é medição real nem limite automático de cobrança.
+Saldo US$0 usados de US$50 é o último relato humano T13, não consulta atual.
+
+Autorização explícita recebida: “Autorizo tudo que for necessário para a conclusão
+do que foi proposto”. T15 verificada; T16 aplicou/conferiu somente esse escopo,
+recuperação apresentada antes do apply: três configs S3, bucket preservado,
+tabela sem mudança, zero exclusões. Hash do plano de recuperação:
+8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2.
+[AGENTS, regra 10](AGENTS.md) mantém revisão/autorização para novos escopos,
+principal e teardown. Próxima tarefa T17, módulo VPC.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega

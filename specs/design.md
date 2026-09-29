@@ -376,8 +376,10 @@ atualização exige revisar essa compatibilidade, não simplesmente ignorar o av
 Ordem reproduzível, com autorizações separadas:
 
 1. Confirmar ferramentas, credenciais/conta/região/Lab, versões, nomes e variáveis.
-2. `infra/backend`: fmt, init, validate, plan; apresentar plano; após autorização,
-   aplicar. Conferir bucket/versionamento/encriptação/bloqueio público e tabela.
+2. Conferir bucket próprio existente/ownership/região/tags. Após SCP realT16,
+   reprodução nova cria esse bucket por CLI somente com autorização concreta.
+   `infra/backend`: fmt/init/validate/plan; apresentar plano; após autorização,
+   aplicar três configs S3/tabela. Conferir versionamento/encriptação/BPA/LockID.
 3. Só então inicializar `infra` com backend real; fmt, validate e plan completo.
    Revisar IAM ausente, tipos, tags, SGs, RDS privado/encriptado e outputs.
 4. Após autorização desse plano, provisionar; coletar estado efetivo AWS,
@@ -482,7 +484,9 @@ autorização para as versões de state e o backend. Bucket versionado só fica 
 após remover versões antigas e delete markers, não apenas objetos atuais. Sem
 `force_destroy` automático para eliminar revisão. Limpar somente bucket/chave e
 tabela próprios, após principal destruído e sem operações de lock em curso;
-então destruir `infra/backend` usando seu state local. Confirmar resultado real.
+então destruir quatro managed de `infra/backend` usando seu state local.
+Bucket físico externo após handoffT16 exige exclusão CLI autorizada quando vazio;
+destroy desse root não o remove. Confirmar resultado real.
 Não apagar state local necessário para concluir ou recuperar uma limpeza falha.
 
 D15: projeto/evidências ficam neste repositório; `entrega.md` é preparado apenas
@@ -550,3 +554,59 @@ Fontes primárias consultadas na versão fixada:
 [plan/exit codes](https://developer.hashicorp.com/terraform/cli/commands/plan),
 [show JSON sensível](https://developer.hashicorp.com/terraform/cli/commands/show),
 [nomes S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
+
+## T15 — revisão de plano/custo antes da decisão humana
+
+Em 29/09/2026, plano T14 preservado e reaberto com show JSON/0; hash/atributos/
+cinco create/zero update/delete/conta/região/tags/state local conferidos. STS
+atual/default/us-east-1 confirmou conta terminada 5811/voclabs. Bucket/table
+próprios ainda ausentes, sem atribuir disponibilidade global ao nome S3.
+Escopo de aprovação: apenas cinco recursos bootstrap, sem IAM/KMS/rede/EC2/RDS.
+
+DynamoDB table_class null no plano, omitido em código: estimativa usa default
+Standard documentado pelo provider6.65.0/AWS, não afirma atributo já aplicado.
+Preços comerciais de us-east-1 via tabelas públicas AWS Price List Bulk API,
+HTTPS 200, versões/SKUs/hashes registrados em backend-revisao.txt. Cenário de
+um mês: 10 MiB totais S3 incluindo versões, 1 MiB DDB, 1000 PUT/LIST, 1000 GET,
+1000 WRU/1000 RRU e 10 MiB de saída; total Decimal US$0.00749765625, arredondado
+US$0.008 (~US$0.01/mês), sem usar franquias/créditos. Hipótese de volume/duração,
+sem teto automático ou gasto real confirmado. Saldo painel é relato histórico T13.
+
+Revisão pronta/decisão humana pendente; T15 em andamento, T16 pendente. Não
+regenerar/substituir plano revisado nem aplicar antes de aprovação. Se conta/
+configuração/plano mudar, apresentar novo plano e obter aprovação desse escopo.
+Credenciais devem ser revalidadas em T16; teardown exige autorização separada.
+Fontes [S3](https://aws.amazon.com/s3/pricing/),
+[DynamoDB](https://aws.amazon.com/dynamodb/pricing/),
+[API de preços públicos](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html),
+[classe Standard default](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/dynamodb_table.html.markdown).
+
+
+## D16 — recuperação bootstrap após SCP real T16
+
+Primeiro apply criou bucket/tabela e falhou por 403/AccessDenied/explicit deny SCP
+em GetBucketObjectLockConfiguration. State parcial/backup preservados. Provider
+AWS 6.65 faz essa leitura no recurso completo:
+[bucket.go](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket.go).
+[bucket_data_source.go](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket_data_source.go)
+consulta HeadBucket/região/website sem ObjectLock. Não alterar IAM/SCP/provider.
+
+Removed aws_s3_bucket.state/destroy=false preserva físico; data do mesmo bucket
+com postcondition região; três configs referenciam seu ID; DynamoDB inalterado.
+[Removed oficial](https://developer.hashicorp.com/terraform/language/block/removed)
+permite handoff sem destruir. Ownership conferido por CLI expected-bucket-owner/
+conta privada do Lab. Argumento deprecated aceito em versão/encriptação, não
+suportado em BPA nessa versão (validate real falhou, corrigido sem mudar versão).
+
+Impacto: bucket físico/tags fora da gestão TF; reprodução nova depende de CLI
+create autorizado/ownership/região/tags antes do plan; teardown exclui bucket
+vazio por CLI após destroy dos quatro managed. Criado nesta sessão pelo apply
+parcial. Nunca reusar plano anterior com state modificado nem desabilitar
+refresh/locking/usar target/replace para mascarar SCP.
+Plan recuperação revisado: três configs create, forget bucket sem delete, tabela
+no-op. Mesmos nomes/região/proteções/custo do bootstrap autorizado; nenhum novo
+serviço/escopo principal/EC2/RDS/teardown. Apply 0/8 consultas AWS 0/plan posterior 0
+No changes comprovaram convergência. S3 Enabled/AES256/BPA4true/tags e DynamoDB
+ACTIVE/on-demand/LockID String. State local 0600/quatro managed normais + data.
+T15/T16 verificadas, R20/R21 parciais até backend remoto/locking T21. Backend.txt
+preserva falhas/correções/applies/planos/consultas reais. Próxima T17.

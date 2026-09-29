@@ -37,8 +37,12 @@ confirmados pelo aluno, opções EC2/RDS/AZ/key/profile reais, versões/schema
 validados em sonda local sem backend remoto. Falhas/correções preservadas.
 Após revisão, T14 implementou bootstrap local e passou fmt/init direct/validate/
 plan real revisado: cinco criações propostas, sem apply. Falhas/correção de init
-e consultas antes/depois estão preservadas. Próxima tarefa pendente: T15,
-revisar plano/custo e obter autorização específica; aplicação fica em T16.
+e consultas antes/depois preservadas. T15 recebeu autorização explícita para
+bootstrap em 29/09/2026. T16 verificada: apply parcial falhou por SCP, recuperação
+preservou bucket/tabela e aplicou três configs S3; consultas AWS e plan posterior
+sem mudanças passaram. Evidência backend.txt, bucket físico fora da criação/
+remoção TF. Próxima pendente T17. State remoto/locking efetivo T21; principal/
+EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
 
@@ -63,8 +67,8 @@ Cada tarefa recebe entrada no diário.
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt: falha inicial/correção, duas reexecuções, HTTP/SQL/IDs/volume, negativos/checkpoint/limpeza; README. | verificado |
 | T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | aws-preflight.txt: consultas reais/compatibilidade/erros; decisões humanas no diário; preflight.local.json 0600 ignorado. | verificado |
 | T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt/backend-plan.txt: fmt/init/validate/plan reais, falhas/correção, revisão JSON e consultas; commit backend. | verificado |
-| T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | Decisão no diário; plano binário local ignorado. | pendente |
-| T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt; sem marcar infraestrutura principal implantada. | pendente |
+| T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | backend-revisao.txt: plano/identidade/custo revisados e autorização explícita recebida em 29/09; plano local ignorado. | verificado |
+| T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt: falha SCP parcial, recuperação sem exclusão, apply/8 consultas AWS/plan No changes; principal pendente. | verificado |
 | T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | Diário e revisão estática do módulo. | pendente |
 | T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | Diário/checklist de SG; execução efetiva ainda pendente. | pendente |
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | Diário/checklist do RDS. | pendente |
@@ -78,7 +82,7 @@ Cada tarefa recebe entrada no diário.
 | T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | Diário, checklist e plano de destroy sanitizado. | pendente |
 | T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
 | T29 | T28 | R23, R31 | Preparar limpeza backend, listar versões/delete markers e explicar retenção/state. | Conferir principal encerrado, state bootstrap disponível e nenhum lock ativo; obter autorização de escopo separado. | Diário e plano/checklist backend-teardown. | pendente |
-| T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza somente dos recursos do projeto, destroy bootstrap pelo state local; registrar sobras ou falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
+| T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza só do projeto: destroy quatro managed bootstrap pelo state local e exclusão CLI do bucket externo vazio autorizada; registrar sobras/falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
 | T31 | T30 | R01–R03, R22, R25, R29 | Criar verify-delivery.py, confirmar identidade/público, completar README/índice/evidências e revisar Git. | Arquivos/links/relatório; seis commits reais; script falha quando requisito observável faltar. | entrega-checklist.txt e revisão final de segredos. | pendente |
 | T32 | T31 | R02 | Merge da feature preservando histórico e branch; capturar evidência Git. | Merge real --no-ff, mensagens convencionais, grafo/branches e contagem final ≥6; trabalho limpo. | git-log.txt, git-branches.txt; commit final honesto de docs quando necessário. | pendente |
 | T33 | T32 | R01, R26, R27 | Preparar entrega.md no fork isolado; verificar acesso público, base/head, diff e data presencial. | Apenas caminho da prova alterado; checklist verdadeiro, links válidos e data confirmada; ainda sem abrir PR. | entrega.md no fork, diff revisado e diário. | pendente |
@@ -529,3 +533,37 @@ API/Docker/Compose/guia/evidências antigas preservados, sem repetir suas suites
 Sem bloqueio restante T14; próximo T15, revisão/autorização específica. T16
 apply/conferência e T21 backend/locking continuam pendentes. Um único commit
 coerente de backend será feito após revisão, sem criar histórico por tentativa.
+
+### T15 — revisão pronta em 29/09/2026; aguarda autorização específica
+
+Plan T14 reaberto/show JSON 0, SHA-256 idêntico, cinco criações/zero mudanças/
+exclusões; conta privada/perfil/região/atributos/tags/state local conferidos.
+STS atual 0 confirmou conta terminada 5811/role voclabs, S3 filtrado []/0,
+DynamoDB ResourceNotFoundException/254 esperado; recursos continuam ausentes.
+Tarifas oficiais regionais HTTPS 200 e cálculo Decimal real: cenário mensal
+10 MiB S3/1 MiB DDB, 1000 requests/unidades por categoria, 10 MiB saída,
+US$0.00749765625, arredondado para cima US$0.008, aproximadamente US$0.01.
+Não é gasto medido nem teto automático; não presume créditos/descontos.
+Erro real de soma manual na assertiva temporária corrigido, reexecução 0;
+preços/conta/código Terraform não alterados. Evidência backend-revisao.txt.
+A decisão humana está pendente: T15 em andamento, T16 pendente, nenhum apply.
+Não marcar verificado antes da resposta específica; revalidar conta/plano antes
+de aplicar somente esse escopo, em T16. Sem commit extra só para registrar
+quantidade; revisão preparada compõe marco coerente após decisão.
+
+
+### T15 — decisão recebida e T16 — verificada em 29/09/2026
+
+Autorização explícita registrada no diário/backend-revisao.txt, somente bootstrap
+apresentado. Primeiro apply 1/403/SCP no Read ObjectLock após criar bucket/tabela.
+Backup parcial 0600; nenhum recurso apagado. Recuperação removed/destroy=false +
+data bucket; três configs S3/tabela geridas. Validate inicial 1 por argumento
+unsupported em BPA corrigido; fmt/validate 0, plan 2/três create/forget bucket/zero delete.
+Apply recuperação0, oito consultas AWS 0: Enabled/AES256/BPA4true/us-east-1/tags,
+ACTIVE/on-demand/LockID String. Verificador temporário KeyError por sensitive omitido
+no state bruto corrigido/rechecado 0 com capturas e output nativo. Plan posterior
+0/No changes; fmt/state list/output 0. Evidência completa backend.txt.
+T01–T16 verificadas, T17 próxima sem iniciar módulo nesta retomada. R20/R21
+parciais até backend principal/state remoto/locking T21. Bucket físico externo:
+reprodução/teardown CLI autorizados, criado nesta sessão pelo apply parcial.
+Um commit coerente revisão/decisão/aplicação/recuperação, sem commits por tentativa.

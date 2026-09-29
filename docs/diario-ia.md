@@ -819,3 +819,188 @@ recursos ausente. Sem apply nem bloqueio T14. Evidência preserva a falha da son
 sem apresentá-la como problema AWS. Próximo T15 continua revisão/autorização.
 Stage deve conter somente estes 15 arquivos, bytes idênticos ao worktree;
 commit único proposto: feat(backend): adiciona bootstrap S3 e DynamoDB.
+
+## 29/09/2026 — T15: revisão concreta antes de autorização do bootstrap
+
+Prompt: aluno revisou T14 e pediu próxima tarefa conforme AGENTS; implementar,
+validar, corrigir e registrar evidências reais. Inicial HEAD d6f4d25/11 commits
+reais em feat/api-reservas, 0 merges, worktree limpa. Próxima T15 exige revisão
+plano/escopo/custo e decisão humana antes de apply; regra 10 não permite presumir
+aprovação específica pelo pedido genérico de executar a próxima tarefa.
+
+Snapshot por hash de todos os arquivos rastreados antes de editar, preservado
+em /tmp. Plano T14 privado local ignorado/0600 reaberto por show JSON/0 em
+00:11:53 -03:00, SHA-256 idêntico 9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12.
+Assertivas reais em memória: exatamente cinco create, zero update/delete,
+região us-east-1 em cada recurso, conta/perfil, versão1.16.2/provider6.65.0,
+versionamento/AES256/quatro flags de bloqueio/LockID S/PAY_PER_REQUEST/tags/
+force_destroy=false/outputs sem segredo/backend local conferidos. Nenhum JSON
+bruto publicado, state local de recursos ainda ausente. Não regenerado plano.
+
+Consultas read-only atuais: STS/default/us-east-1 0 mesma conta terminada5811/
+voclabs, sessão ocultada; S3 filtrado só nome próprio []/0 e DynamoDB nome próprio
+ResourceNotFoundException/254 esperado. Ausência na conta/região, sem afirmar
+unicidade global S3 ou duração futura do token. Credenciais/conta revalidar T16.
+Nenhum apply/destroy/criação, não constatada restrição SCP/ObjectLock atual.
+Código Terraform/.gitignore/lockfile/API/Docker/Compose/evidências anteriores
+preservados; suites sem mudanças não repetidas.
+
+Preços oficiais públicos HTTPS 200 em us-east-1: S3 versão20260928230416,
+DynamoDB versão20260911124422 e transferência versão20260916132208. Metadados/
+SKUs/unidades/faixas/hashes/instantes em backend-revisao.txt, JSONs públicos /tmp.
+Navegador retornou Internal Error nos dois JSONs; download Python HTTPS passou,
+sem falha AWS ou bloqueio restante. DynamoDB table_class null no plano, omitido;
+Default Standard confirmado em docs provider6.65.0/AWS, estimativa não afirma
+classe efetiva antes de apply. Não descontados créditos/franquias/free tier.
+Saldo US$0 usados de US$50 é relato humano T13, não medido agora.
+
+Cenário hipotético mensal: 10MiB totais S3 incluindo versões/1MiB DDB/1000
+requests Tier1/Tier2 e 1000 WRU/RRU/10MiB saída. Tarifa/storage/unidades reais
+conferidos; cálculo Decimal. Primeira execução da sonda custo retornou1 porque
+assertiva usava soma manual errada0.0074970703125. Corrigida assertiva temporária,
+mantendo preços e cálculo, verificada faixa0<total<0.01. Reexecução0, total real
+0.00749765625, arredondado para cima US$0.008 (~US$0.01/mês). Varia com uso/duração;
+sem custo medido/teto automático/tributos/conversão. Erro registrado sem
+apresentá-lo como problema de implantação.
+
+backend-revisao.txt registra plano concreto, consultas/custo/fontes/correções e
+decisão pendente. README/AGENTS/design/tasks/matriz sincronizados: T15 em
+andamento, R31 parcial, T16 pendente; aguardará autorização específica após
+conferência dos documentos. Ferramentas reais Codex, terminal Python/Git/AWS CLI/
+Terraform e navegador, sem skill/agentes auxiliares. Nenhum commit extra nesta
+preparação; mudanças reais permanecem para marco coerente após decisão.
+Não simular autorização/sucesso/T16; tempo decorrido não é aprovação.
+
+Conferência final antes de pedir autorização em 00:20:22 -03:00, exit0:
+sete arquivos de escopo (seis documentos + backend-revisao.txt), 54 anteriores
+preservados por SHA-256; guia/código Terraform/lockfile/old evidences intactos.
+Scanner delimitado sem achados; conta/IP completos ausentes, Markdown/links/
+newlines/diff --check 0. 34 tarefas consistentes, T15 em andamento/T16 pendente,
+R31 parcial, stage vazio/HEAD d6f4d25/11 commits/0 merges preservados. Capturas
+AWS/preços/hash/codes e cálculo Decimal conferidos; soma racional independente
+confirmou total0.00749765625. Arquivos privados ignorados/0600, plano com mesmo
+hash e variáveis locais conferidas em memória contra plano, valores idênticos.
+Revisão pronta para apresentar pergunta específica, sem antecipar resposta.
+
+Em 2026-09-29T00:22:50-03:00, pergunta específica enviada por request_user_input_async,
+accepted=true, com conta/região/nomes/cinco criações/hash e cenário de custo.
+Opções autorizar somente bootstrap descrito ou não autorizar agora. Exigência
+explicada com link e trecho literal da regra10/AGENTS. Nenhuma resposta recebida
+até este registro; não inferir aprovação de opção preselecionada/tempo decorrido.
+T15 segue em andamento, T16 pendente; aguardar resposta para registrar decisão,
+sem executar apply nem criar commit adicional nessa revisão pendente.
+
+## 29/09/2026 — decisão T15 e execução autorizada T16
+
+Em 2026-09-29T00:29:22-03:00, registrada resposta real à pergunta de bootstrap:
+"Autorizo tudo que for necessário para a conclusão do que foi proposto". Registra-se autorização para o escopo
+apresentado, cinco criações bootstrap/conta final5811/us-east-1/nomes/atributos e
+custo do cenário já revisado, plano SHA-256 9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12.
+Não estende para principal/EC2/RDS/rede/deploy/destruição. T15 verificada pela
+decisão explícita; T16 inicia revalidação conta/plano e apply seguido de consultas
+reais, conforme autorizado. Não pedir novamente a mesma autorização.
+
+Primeira tentativa de registrar essa decisão não executou nenhum comando:
+a revisão automática falhou por limite de uso, com mensagem 'Automatic approval
+review failed: You’ve hit your usage limit' e orientação de tentar às00:26.
+Isso foi falha de revisão, sem determinação de insegurança. Após 'continue de
+onde parou', nova leitura às00:28:34 passou pelo mesmo fluxo de aprovação, sem
+contorná-lo; confirmou que script/registro não existiam e nada fora aplicado.
+Predicado test -f do script ausente retornou1 esperado na leitura; não é falha AWS.
+
+HEAD inicial d6f4d25/11 commits/feat/api-reservas, 0 merges. Seis documentos e
+backend-revisao.txt preparados na T15 preexistem; serão preservados e comporão
+marco coerente de bootstrap aplicado/evidências. Snapshot SHA-256 dos arquivos
+rastreados e review preexistente em /tmp; credenciais/vars/plan fora do Git,0600.
+Nenhuma execução AWS será anunciada como verificada antes dos comandos reais.
+
+T16 preflight real em00:30:38 -03:00 passou: plano/hash/código/lockfile/vars
+intactos, STS0 mesma conta/voclabs, S3[]0 e tabelaNotFound254. Apply autorizado
+00:31:16–00:31:33 retornou1: tabela criada em13s, erro S3GetObjectLockConfiguration
+403/AccessDenied/explicit deny in a service control policy. Não é ExpiredToken
+nem falta de IAM a contornar. Nenhum sucesso total anunciado. Log bruto privado
+com hash; evidências mascaram todas contas/sessão e IDs de Organization/SCP.
+
+State parcial local0600 serial3 tem DynamoDB normal e buckettainted com os IDs
+próprios. Consultas00:34 em AWS confirmam bucketexistente/regiãoEast1/null,
+tags3/AES256/BPA4true e tabelaACTIVE/PAY_PER_REQUEST/LockIDS/tags3. Versioning
+retornou stdoutvazio/0 (sem status Enabled); configurações TF ainda não aplicadas.
+A criação do bucket ocorreu no applyparcial, não por CLI ou simulação.
+
+Fontes primárias providerAWS6.65 bucket.go confirmam chamada GetObjectLock no
+Read completo; bucket_data_source.go faz HeadBucket/região/website sem essa API.
+SCP é limite da organização, não alterarIAM/SCP/região para contorná-lo.
+Escolha de recuperação dentro do mesmo escopo autorizado: preservar recursos
+criados/nomes/região/custo; usar data bucketexistente e manter3configurações
+S3/tabela no Terraform. removed { destroy=false } representa handoff sem apagar
+bucket, documentado pelo Terraform1.16. Não usar-refresh=false/lock=false/target
+ou aplicar substituição do bucket tainted. Gerar/revisar plano de recuperação
+antes de aplicar; se houver delete/replace fora do escopo, não prosseguir.
+
+Em2026-09-29T00:35:32-03:00, backup
+exclusivo terraform.tfstate.pre-recovery0600/ignorado com bytes idênticos ao
+stateparcial, SHA256ad68b70502b13b33d34be84b2a23ceb4366fb5aa64a77256a1cbfe26147a18da. main/outputs ajustados
+para handoff e data regionpostcondition; expected_bucket_owner em3configs
+protege conta. Testar fmt/validate/plan reais antes de afirmar recuperação.
+Não recriar bucket/tabela nem ampliar escopo/principal; teardown segue separado.
+
+Primeiro validate da recuperação retornou1: expected_bucket_owner não suportado
+em aws_s3_bucket_public_access_block no provider6.65.0. Corrigido removendo só
+esse argumento nessa configuração; versão/encriptação suportam o campo.
+Ownership do bucket já foi conferido por CLI expected owner/conta/região antes
+de alterar a configuração. Não alterar provider/IAM para aceitar argumento.
+Preservar captura da falha e executar validate/plan da correção.
+
+Plano recuperação real00:37:04–00:37:12 -03:00 retornou2 esperado; show JSON0
+00:38:26 conferiu3create (configsversion/encrypt/BPA), bucketforgetsemdelete e
+DynamoDBno-op. Hash8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2, original9a66...ba12
+preservado. Nenhum delete/replace/serviço/região/nome novo; mesmas proteções e
+custo do bootstrap autorizado. Backup/stateparcial bytesidênticos antes do apply,
+privados0600ignorados. Conta/role STS0 e HeadBucketexpectedowner0 revalidados
+em2026-09-29T00:39:20-03:00.
+
+Plano concreto apresentado ao aluno em commentary antes de aplicar:3configs
+S3,0exclusões,bucketpreservado,tabela semalteração. Autorização explícita
+"tudo que for necessário para a conclusão do que foi proposto" cobre essa
+recuperação do mesmo escopo; não pedir de novo nem estender à infraestrutura
+principal/teardown. Avisos reais: bucketdesvinculado semdestruição e campos
+expectedownerdeprecated ainda suportadosna versãofixada; preservar no log.
+A recuperação não elimina/editaSCPnemIAM; deixa de usarAPIObjectLock nãoexigida
+para stateversionado/AES256/locking. Bucketexistenteconsultado, não recriado.
+
+
+Conclusão recuperação: apply 00:39:20–00:39:32 -03:00, exit 0, três configs adicionadas/
+zero alteradas/destruídas; bucket/tabela preservados. Oito consultas AWS 00:41:32
+retornaram0: regiãoEast1, Enabled/AES256/BPA4true/tags3, versions/delete markers0,
+tabelaACTIVE/on-demand/LockID String/mesmo TableId. Hash/saídas reais em backend.txt.
+Verificador temporário falhou após consultas por KeyError:'sensitive': state
+bruto omite campo opcional em output não sensível. Corrigido get('sensitive',False)
+e output-json nativo 0/sensitive=false. Rechecagem00:45:45/0 reutilizou capturas,
+sem repetir/sobrescrever AWS. T16 só aceita após corrigir esse erro local.
+Leitura docs/diario-de-implementacao.md retornou1 inexistente; corrigida para
+arquivo real docs/diario-ia.md. Uma tentativa apply_patch de script temporário
+falhou em validação do patch; nenhum arquivo aplicado, criação via terminal.
+Plan posterior00:41:54–00:42:02 com refresh/locking normal0/No changes.
+Fmt em 00:46:03/0,state list em 00:46:06/0,output em 00:46:23/0. State local serial 8/0600,
+4managednormais+data. Root remoto/init/objeto/lock efetivo não executadosT21.
+Conceito: state local bootstrap e handoff sem destruir para restrição real do
+Lab. Removed/destroyfalse preserva; data consulta sem ObjectLock; proteções S3/
+tabela no TF. Bucket físico/tags exigem reprodução/limpeza CLI autorizadas,
+documentadas. Nenhum create-bucketCLI nesta sessão. SemIAM/SCP/provider/escopo novo.
+Main/outputs, backend.txt/revisão e seis documentos sincronizados. T15/T16
+verificadas; R20/R21/R19/R22/R31 parciais. Próxima T17, não iniciada. API/Docker/
+Compose preservados, sem repetir testes. Sem principal/EC2/RDS/deploy/destruição,
+sem saldo/custo real medidos. Ferramentas Codex/Python/Git/Terraform/AWS CLI e
+fontes primárias web, nenhuma skill/agente auxiliar. Commit coerente necessário
+após diff/evidências/segredos, sem commit vazio/por tentativa/por quantidade.
+
+Conferência final em 00:57:15 -03:00/exit 0: dez arquivos de escopo, 52
+anteriores preservados por SHA-256, inclusive guia/API/Docker/Compose/provider/
+versions/lockfile/vars e evidências T14. Diário e revisão anteriores preservados
+como prefixos idênticos; 34 tarefas únicas/T01–T16 verificadas/T17–T34 pendentes,
+32 requisitos únicos e parciais mantidos. Links/fences/newlines/diff --check 0,
+scanner delimitado sem achados/conta-IP privados ausentes. State/backup/planos/
+tfvars/preflight ignorados/0600. Hashes originais de consultas AWS e planos
+conferidos; show JSON do plano posterior 0/todos no-op. Nenhum apply adicional.
+HEAD d6f4d25/11 commits/feature/zero merges intactos antes do commit. Preparar
+um único commit fix(backend) com recuperação/evidências e decisão T15, sem push.

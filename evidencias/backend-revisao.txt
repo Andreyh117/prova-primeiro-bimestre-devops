@@ -1,0 +1,293 @@
+T15 — revisao concreta do bootstrap antes de autorizacao (29/09/2026)
+Gerado em: 2026-09-29T00:19:02-03:00
+HEAD inicial: d6f4d250b7a731f9bbfd6d0b226f1bcf380fab7a, feat/api-reservas.
+11 commits reais/convencionais; 0 merges. Worktree inicialmente limpa.
+Aceite T15 inclui decisao humana; estado desta revisao: pronto, autorizacao pendente.
+
+Conceito: separar plan de apply. O plano identifica mudancas concretas antes
+de consumir recursos do Lab; sua aprovacao fica vinculada a conta/regiao,
+nomes/acoes e SHA-256. Nenhum apply/destroy foi executado nesta revisao.
+State bootstrap permanece local/separado; backend principal e locking efetivo
+continuam posteriores. Pedido generico de executar proxima tarefa nao substitui
+a autorizacao especifica ainda exigida pelo AGENTS regra 10 e T15.
+
+PLANO CONCRETO PARA O ALUNO
+Conta do Learner Lab terminada em 5811, perfil default, role assumed-role/voclabs,
+regiao us-east-1. Terraform=1.16.2/providerAWS=6.65.0, plano valido T14 preservado.
+Cinco create, zero update/delete; dois servicos AWS, cinco recursos Terraform:
+- aws_s3_bucket.state: prova-6325231-tfstate-e373b51f3467, force_destroy=false.
+- aws_s3_bucket_versioning.state: versionamento Enabled nesse bucket.
+- aws_s3_bucket_server_side_encryption_configuration.state: SSE-S3 AES256.
+- aws_s3_bucket_public_access_block.state: quatro flags true.
+- aws_dynamodb_table.locks: prova-6325231-tflock-e373b51f3467, PAY_PER_REQUEST,
+  chave de particao LockID tipo S/String. Classe Standard por default AWS;
+  table_class e null no plano, nao configurado nem atributo efetivo verificado.
+Tags Project=prova-primeiro-bimestre-devops, Environment=learner-lab,
+Owner=6325231 no bucket/tabela. Sem recursos novos IAM/KMS/EC2/RDS/rede/deploy.
+Acesso pelo perfil temporario do Lab, S3 com bloqueio publico; nenhuma policy
+publica/ACL/permissao IAM nova proposta. Configuracoes do bucket nao tem tags proprias.
+State/vars/plano/metadados locais ignorados/0600, credenciais fora do repo.
+Limpeza/retenção de versões e delete markers requer autorizacao separada T29/T30.
+Autorizacao deste escopo nao e aprovacao do plano principal nem de teardown.
+
+Arquivo concreto: infra/backend/backend.tfplan (binario local ignorado/0600).
+SHA-256: 9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12
+Comando para inspecao: terraform -chdir=infra/backend show -json backend.tfplan
+Exit code real: 0. JSON bruto conferido em memoria; inclui dados sensitive em
+texto claro, nao publicado. Resumo derivado das assertivas reais executadas:
+{
+  "checked_at": "2026-09-29T00:11:53-03:00",
+  "plan_sha256": "9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12",
+  "plan_unchanged_from_T14": true,
+  "show_json_exit_code": 0,
+  "actions": "5 create, 0 update, 0 delete",
+  "account_matches_private_preflight": true,
+  "account_suffix": "5811",
+  "profile": "default",
+  "region": "us-east-1",
+  "bucket": "prova-6325231-tfstate-e373b51f3467",
+  "table": "prova-6325231-tflock-e373b51f3467",
+  "s3_versioning": "Enabled",
+  "s3_encryption": "AES256",
+  "s3_public_access_block": {
+    "block_public_acls": true,
+    "block_public_policy": true,
+    "ignore_public_acls": true,
+    "restrict_public_buckets": true
+  },
+  "ddb_billing": "PAY_PER_REQUEST",
+  "ddb_key": "LockID/String",
+  "tags_bucket_table": {
+    "Project": "prova-primeiro-bimestre-devops",
+    "Environment": "learner-lab",
+    "Owner": "6325231"
+  },
+  "iam_kms_ec2_rds_network_resources": 0,
+  "bootstrap_state": "local, separado, arquivo de recursos ainda ausente",
+  "private_files": "0600, ignorados",
+  "authorization": "pendente; nenhuma criada/inferida"
+}
+
+CONSULTAS AWS ATUAIS READ-ONLY
+STS conta/role conferidos em memoria, session/ID completo ocultos na evidencia.
+Bucket filtrado []/0; describe-table ResourceNotFoundException/254 esperado.
+Ausencia na conta/regiao consultadas; disponibilidade global S3 so na criacao.
+Credenciais validas apenas no instante observado; revalidar antes de apply.
+Hashes das capturas originais JSON stdout/stderr privadas 0600 em /tmp;
+resultados abaixo sao resumos sanitizados e stderr real, sem simular respostas.
+
+Inicio real: 2026-09-29T00:11:53-03:00
+Comando: aws sts get-caller-identity --profile default --region us-east-1 --output json --no-cli-pager
+Exit code real: 0
+SHA-256 captura original: 1a19ef48bd745f6ad70e01723301d30a824d99dffcf5731a3965557e3f07180e
+Resultado sanitizado: {"account_suffix": "5811", "matches_private_preflight": true, "role": "assumed-role/voclabs", "session_id": "[OCULTO]"}
+
+Inicio real: 2026-09-29T00:11:54-03:00
+Comando: aws s3api list-buckets --query 'Buckets[?Name=='"'"'prova-6325231-tfstate-e373b51f3467'"'"'].Name' --profile default --region us-east-1 --output json --no-cli-pager
+Exit code real: 0
+SHA-256 captura original: 690133fb4a8a1aa3e4b0419a9cd7848e190d0d0b6c9bf9b83fe3f8e857259773
+Resultado sanitizado: []
+
+Inicio real: 2026-09-29T00:11:56-03:00
+Comando: aws dynamodb describe-table --table-name prova-6325231-tflock-e373b51f3467 --query '{name:Table.TableName,status:Table.TableStatus}' --profile default --region us-east-1 --output json --no-cli-pager
+Exit code real: 254
+SHA-256 captura original: 9a4b22da7f1b9c630b24b94c88d4fc83ee0433496d6dd56a5e0503f4ad85af25
+Resultado sanitizado: {"absent": true, "error": "aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: prova-6325231-tflock-e373b51f3467 not found"}
+
+PRECO OFICIAL E ESTIMATIVA (USD NOMINAL)
+HTTPS das tabelas publicas AWS Price List Bulk API passou 200; nenhuma API
+financeira autenticada/painel de saldo foi consultada. Metadados/versoes/hashes
+abaixo referem-se aos JSONs publicos efetivamente obtidos em us-east-1.
+Navegador nao abriu os dois JSONs de precos (Internal Error); downloads Python
+HTTPS passaram 200. Essa diferenca nao e falha AWS nem autorizacao de apply.
+Tarifas extraidas por SKU/unidade/faixa; valores nao sao gasto medido.
+
+S3 Standard: US$0.023/GB-mes na primeira faixa; PUT/COPY/POST/LIST
+US$0.005/1000; GET US$0.0004/1000.
+DynamoDB Standard on-demand: US$0.625/1 milhao WRU e US$0.125/1 milhao RRU;
+armazenamento pago US$0.25/GB-mes usado conservadoramente sem franquia.
+Saida internet: US$0.09/GB na primeira faixa paga, usada sem franquia global.
+
+Cenario para um mes: 10 MiB S3 totais incluindo todas versoes, 1 MiB DynamoDB,
+1000 PUT/COPY/POST/LIST, 1000 GET, 1000 WRU, 1000 RRU, 10 MiB de saida.
+MiB/1024 usados como GB de faturamento conforme AWS. Quantidades sao hipoteses,
+nao resultado real de uso. Quantidade de request units varia com tamanho,
+consistencia/transacoes; o cenario conta unidades, nao confunde WRU com operacoes.
+Nao desconta free tier/franquias/credito Academy e nao estima EC2/RDS principal.
+Custos variam com volume/duracao; imposto/conversao nao incluidos.
+
+Primeira execucao do calculador temporario retornou 1: assertiva usava soma
+manual incorreta 0.0074970703125. Erro observado no terminal, transcrito aqui:
+AssertionError em assert total==D('0.0074970703125').
+Nao houve falha na obtencao/precos AWS. Retirada comparacao manual incorreta,
+conservado calculo Decimal com tarifas verificadas; conferida faixa 0 < total
+< 0.01 para o cenario apresentado. Reexecucao retornou 0, valores reais:
+{
+  "calculated_at": "2026-09-29T00:15:42-03:00",
+  "currency": "USD",
+  "region": "us-east-1",
+  "sources": [
+    {
+      "retrieved_at": "2026-09-29T00:12:36-03:00",
+      "service": "AmazonS3",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json",
+      "http_status": 200,
+      "publication_date": "2026-09-28T23:04:16Z",
+      "version": "20260928230416",
+      "raw_sha256": "798f9727bc5102d15d471c5b84c15ed3e20297015330f515a33d5f6a032cc2f1",
+      "bytes": 473422
+    },
+    {
+      "retrieved_at": "2026-09-29T00:12:36-03:00",
+      "service": "AmazonDynamoDB",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDynamoDB/current/us-east-1/index.json",
+      "http_status": 200,
+      "publication_date": "2026-09-11T12:44:22Z",
+      "version": "20260911124422",
+      "raw_sha256": "b25d0fd8d26a9fd489b27c19abf895c9d86145ca6ed935fcf25303f784cfb15e",
+      "bytes": 43463
+    },
+    {
+      "retrieved_at": "2026-09-29T00:13:18-03:00",
+      "service": "AWSDataTransfer",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.json",
+      "http_status": 200,
+      "publication_date": "2026-09-16T13:22:08Z",
+      "version": "20260916132208",
+      "raw_sha256": "00f81657d01946d02c905e32ca87cc6c23720b5de079b90fef5775243abcee80"
+    }
+  ],
+  "scenario": "Um mes inteiro: 10 MiB totais S3 (inclui todas versoes), 1 MiB DynamoDB, 1000 PUT/COPY/POST/LIST, 1000 GET, 1000 WRU e 1000 RRU, 10 MiB de saida internet. Volumes propostos, nao medidos.",
+  "assumptions": "DynamoDB Standard por default AWS; nao descontar franquias/free tier/credito do Lab. Usar tarifa comercial de armazenamento DDB e transferencia mesmo abaixo da franquia. Itens/operacoes maiores consomem mais unidades. Valores USD nominais antes de tributos; sem taxa de cambio.",
+  "rates": {
+    "s3_storage": {
+      "usd_per_unit": "0.0230000000",
+      "unit": "GB-Mo",
+      "sku": "WP9ANXZGBYYSGJEA",
+      "rate_code": "WP9ANXZGBYYSGJEA.JRTCKXETXF.PGHJ3S3EYE",
+      "quantity": "0.009765625",
+      "cost_usd": "0.0002246093750000000"
+    },
+    "s3_put_list": {
+      "usd_per_unit": "0.0000050000",
+      "unit": "Requests",
+      "sku": "E9YHNFENF4XQBZR6",
+      "rate_code": "E9YHNFENF4XQBZR6.JRTCKXETXF.6YS6EN2CT7",
+      "quantity": "1000",
+      "cost_usd": "0.0050000000"
+    },
+    "s3_get": {
+      "usd_per_unit": "0.0000004000",
+      "unit": "Requests",
+      "sku": "ZWQ6Q48CRJXX4FXE",
+      "rate_code": "ZWQ6Q48CRJXX4FXE.JRTCKXETXF.6YS6EN2CT7",
+      "quantity": "1000",
+      "cost_usd": "0.0004000000"
+    },
+    "ddb_storage": {
+      "usd_per_unit": "0.2500000000",
+      "unit": "GB-Mo",
+      "sku": "F3E2EDSYC6ZNW7XP",
+      "rate_code": "F3E2EDSYC6ZNW7XP.JRTCKXETXF.VYAP54KATQ",
+      "quantity": "0.0009765625",
+      "cost_usd": "0.00024414062500000000"
+    },
+    "ddb_write": {
+      "usd_per_unit": "0.0000006250",
+      "unit": "WriteRequestUnits",
+      "sku": "FGXVD96DKJMUASY3",
+      "rate_code": "FGXVD96DKJMUASY3.JRTCKXETXF.6YS6EN2CT7",
+      "quantity": "1000",
+      "cost_usd": "0.0006250000"
+    },
+    "ddb_read": {
+      "usd_per_unit": "0.0000001250",
+      "unit": "ReadRequestUnits",
+      "sku": "4W4ZMC46EHE8XTTZ",
+      "rate_code": "4W4ZMC46EHE8XTTZ.JRTCKXETXF.6YS6EN2CT7",
+      "quantity": "1000",
+      "cost_usd": "0.0001250000"
+    },
+    "data_out": {
+      "usd_per_unit": "0.0900000000",
+      "unit": "GB",
+      "sku": "HQEH3ZWJVT46JHRG",
+      "rate_code": "HQEH3ZWJVT46JHRG.JRTCKXETXF.Q3Z75P77EN",
+      "quantity": "0.009765625",
+      "cost_usd": "0.0008789062500000000"
+    }
+  },
+  "total_usd": "0.00749765625000000000",
+  "rounded_up_usd": "0.008",
+  "approx_budget_presentation_usd": "0.01/mes para este cenario pequeno; consumo varia com uso, nao e gasto real nem limite automatico",
+  "scope": "Somente backend bootstrap; EC2/RDS/rede/deploy/destruicao requerem etapas/autorizacoes separadas.",
+  "learner_lab_balance": "Ultimo relato humano em T13: US$0 usados de US$50; nao reconsultado em painel/API nesta T15."
+}
+
+Total calculado US$0.00749765625 para o cenario; arredondado para cima a
+US$0.008 (aproximadamente US$0.01/mes). Estimativa de uso pequeno, sem limite
+automatico de consumo. Ultimo saldo informado pelo aluno em T13: US$0 de US$50
+usados; relato humano historico, nao saldo atual confirmado nesta T15.
+
+Fontes primarias:
+https://aws.amazon.com/s3/pricing/
+https://aws.amazon.com/dynamodb/pricing/
+https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/dynamodb_table.html.markdown
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.TableClasses.html
+
+DECISAO HUMANA
+Pendente. Revisao tecnica/custo pronta; T15 em andamento, nao verificada.
+Preparar pergunta especifica somente depois de conferir escopo/segredos/docs.
+Aguardar resposta explicita; tempo decorrido e revisao generica nao sao aprovacao.
+Nenhum apply/recurso criado nem teardown executado; T16 pendente.
+Sem novo commit neste ponto: manter mudancas reais de revisao para compor marco
+coerente apos decisao, sem gerar commit extra para quantidade.
+
+CONFERENCIA FINAL ANTES DA PERGUNTA
+Comando: python3 /tmp/devops-t15-check.py
+Exit code real: 0
+{
+  "checked_at": "2026-09-29T00:20:22-03:00",
+  "result": "PASSOU",
+  "exit_code": 0,
+  "scope": "6 documentos existentes + backend-revisao.txt; nenhum Terraform/codigo/lockfile alterado",
+  "previous_files_preserved_by_sha256": 54,
+  "git": "11 commits, 0 merges, HEAD/main/feature preservados, stage vazio",
+  "evidence": "capturas AWS/precos reais, hashes/exit codes; custo Decimal confirmado por soma racional independente",
+  "security": "scanner delimitado sem achados; conta/IP completos ausentes; plano/vars ignorados 0600 e hash original intacto",
+  "documentation": "Markdown/links/newlines, 34 tarefas e R31 parcial conferidos; git diff --check 0",
+  "authorization": "pendente; T15 em andamento, T16 pendente; nenhum apply; nao verificado antes da resposta"
+}
+Variaveis locais reais conferidas em memoria contra variaveis do plano salvo;
+valores identicos, sem publicar conta/arquivo privado. Show JSON retornou 0.
+
+SOLICITACAO DE AUTORIZACAO ENVIADA
+Data/hora de registro: 2026-09-29T00:22:50-03:00
+Ferramenta request_user_input_async aceitou a pergunta (accepted=true).
+Escopo apresentado: plano T14 SHA-256 9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12,
+conta final5811/default/voclabs/us-east-1; cinco create/zero update/delete,
+bucket/configs/tabela com os nomes e atributos acima. Estimativa ~US$0.01/mes
+sob as premissas registradas, variando com uso. Opcoes: Autorizo somente o
+bootstrap descrito; Nao autorizo a aplicacao agora. Sem resposta recebida
+ate este registro; escolha preselecionada/tempo decorrido nao sao aprovacao.
+T15 permanece em andamento, T16 pendente; nenhum apply nem novo commit.
+
+DECISAO HUMANA RECEBIDA — T15 CONCLUIDA
+Registro em 2026-09-29T00:29:22-03:00. Pergunta request_user_input_async call_wlzZvcQaBbdOlwVvkWZAV2Lj
+recebeu resposta explicita: "Autorizo tudo que for necessário para a conclusão do que foi proposto".
+Autorizacao aplicada ao escopo apresentado: somente bootstrap da conta final5811,
+default/voclabs/us-east-1, plano T14 SHA-256 9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12,
+cinco create/zero update/delete, bucket/configs/tabela/nomes/custo acima.
+Abrangencia "tudo necessario" cobre concluir esse bootstrap; planos EC2/RDS/rede/
+deploy/principal/teardown seguem etapas separadas conforme pergunta apresentada.
+T15 verificada pela resposta real; T16 iniciada, revalidar identidade/plano antes
+do apply e conferir atributos reais. Nao repetir pedido ja respondido.
+
+Atualização posterior — T16 verificada em 29/09/2026
+Decisão explícita acima permitiu bootstrap apresentado. Primeiro apply 1 por
+SCP/Object Lock, recursos parciais preservados; recuperaçãotrês configs/forget bucket
+sem exclusão/DDB no-op mesmoescopo. Apply 0, oito consultas AWS 0, plan 0/No changes.
+Falhas/correções/recovery em backend.txt. Bucket físico externo após handoff;
+state/configs/tabela preservados. Estimativa não mudou, consumo real não medido.
+Principal/EC2/RDS/rede/deploy/teardown exigem etapas/autorização separadas.

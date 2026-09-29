@@ -1,0 +1,1002 @@
+T16 — apply bootstrap autorizado e recuperação SCP — 29/09/2026
+Terraform1.16.2 / AWS6.65.0 / default-voclabs / us-east-1 / conta final5811.
+Autorização: "Autorizo tudo que for necessário para a conclusão do que foi proposto".
+Escopo somente bootstrap T15, sem principal/EC2/RDS/rede/deploy/destruição.
+Primeiro apply NÃO teve sucesso total: exit1/403/AccessDenied por SCP na leitura
+GetBucketObjectLockConfiguration; criou bucket/tabela parcialmente.
+Recuperação: removed/destroy=false preserva bucket físico; data consulta bucket;
+três configs S3 e tabela permanecem Terraform managed. Nenhum CLI create-bucket,
+recurso apagado/recriado, alteração IAM/SCP/provider ou novo serviço autorizado.
+Plano original histórico preservado; não reaplicá-lo após state parcial.
+Logs brutos privados /tmp, hashes abaixo; saídas sanitizadas ocultam todas contas
+12 dígitos, sessão voclabs e IDs Organization/SCP. Normalização SOMENTE de espaços
+finais das linhas para diff --check. Asserções/resumos identificados como derivados.
+Nenhum state bruto, tfvars, JSON completo de plano ou credencial publicado.
+Falha anterior de revisão automática por limite de uso não executou comandos;
+retomada após pedido do aluno passou pelo mesmo fluxo de aprovação.
+
+
+Preflight
+Conferência derivada das capturas reais:
+{
+  "checked_at": "2026-09-29T00:30:38-03:00",
+  "result": "PASSOU",
+  "plan_sha256": "9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12",
+  "source_and_lockfile_unchanged": true,
+  "tfvars_match_plan": true,
+  "account_suffix": "5811",
+  "profile": "default",
+  "role": "voclabs",
+  "region": "us-east-1",
+  "resource_actions": "5 create, 0 update, 0 delete",
+  "bucket": "prova-6325231-tfstate-e373b51f3467",
+  "table": "prova-6325231-tflock-e373b51f3467",
+  "state": "local e ainda ausente",
+  "private_files": "0600/ignorados",
+  "apply_authorization": "resposta explicita do aluno registrada em diario/backend-revisao.txt"
+}
+
+
+Consultas preflight: stdout/stderr reais sanitizados
+Conferência derivada das capturas reais:
+[
+  {
+    "name": "sts",
+    "started": "2026-09-29T00:30:33-03:00",
+    "command": [
+      "aws",
+      "sts",
+      "get-caller-identity",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "sanitized_result": {
+      "account_suffix": "5811",
+      "matches_preflight": true,
+      "role": "assumed-role/voclabs",
+      "session": "[OCULTA]"
+    },
+    "raw_sha256": "1a19ef48bd745f6ad70e01723301d30a824d99dffcf5731a3965557e3f07180e"
+  },
+  {
+    "name": "s3",
+    "started": "2026-09-29T00:30:34-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "list-buckets",
+      "--query",
+      "Buckets[?Name=='prova-6325231-tfstate-e373b51f3467'].Name",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "sanitized_result": {
+      "stdout": "[]\n",
+      "stderr": ""
+    },
+    "raw_sha256": "690133fb4a8a1aa3e4b0419a9cd7848e190d0d0b6c9bf9b83fe3f8e857259773"
+  },
+  {
+    "name": "ddb",
+    "started": "2026-09-29T00:30:36-03:00",
+    "command": [
+      "aws",
+      "dynamodb",
+      "describe-table",
+      "--table-name",
+      "prova-6325231-tflock-e373b51f3467",
+      "--query",
+      "{name:Table.TableName,status:Table.TableStatus}",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 254,
+    "sanitized_result": {
+      "stdout": "",
+      "stderr": "\naws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: prova-6325231-tflock-e373b51f3467 not found\n"
+    },
+    "raw_sha256": "9a4b22da7f1b9c630b24b94c88d4fc83ee0433496d6dd56a5e0503f4ad85af25"
+  }
+]
+
+
+=== apply ===
+{
+  "started": "2026-09-29T00:31:16-03:00",
+  "finished": "2026-09-29T00:31:33-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "apply",
+    "-input=false",
+    "-no-color",
+    "backend.tfplan"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "aae700771d46b781130f8abcab82b898324274f7228b78eef26eba8098d3b7d4",
+  "approved_plan_sha256": "9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12"
+}
+Saída real sanitizada:
+aws_dynamodb_table.locks: Creating...
+aws_s3_bucket.state: Creating...
+aws_dynamodb_table.locks: Still creating... [00m10s elapsed]
+aws_dynamodb_table.locks: Creation complete after 13s [id=prova-6325231-tflock-e373b51f3467]
+
+Error: reading S3 Bucket (prova-6325231-tfstate-e373b51f3467) object lock configuration: operation error S3: GetObjectLockConfiguration, https response error StatusCode: 403, RequestID: QBEWVFNVECED7SFH, HostID: JVscgXit+mGxRuWdt2Mja1L0OoZU1xWAPx4YNDQwENUWhV0MLTYhpvBctTomSfRNDRoRTHWLCuQvjPf/cUWntoNBSVZmj72n, api error AccessDenied: User: arn:aws:sts::[CONTA_OCULTA]:assumed-role/voclabs/[SESSAO_OCULTA] is not authorized to perform: s3:GetBucketObjectLockConfiguration on resource: "arn:aws:s3:::prova-6325231-tfstate-e373b51f3467" with an explicit deny in a service control policy: arn:aws:organizations::[CONTA_OCULTA]:policy/[ORG_OCULTA]/service_control_policy/[SCP_OCULTA]
+
+  with aws_s3_bucket.state,
+  on main.tf line 1, in resource "aws_s3_bucket" "state":
+   1: resource "aws_s3_bucket" "state" {
+
+
+Exit code real: 1
+
+
+Consultas após apply parcial: stdout/stderr reais sanitizados
+Conferência derivada das capturas reais:
+[
+  {
+    "name": "location",
+    "started": "2026-09-29T00:34:02-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-location",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "8c9ac7fbca35ef9c5feafeec4e3caf51a025c790229c705051a91d393064706b",
+    "stdout": "{\n    \"LocationConstraint\": null\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "versioning",
+    "started": "2026-09-29T00:34:02-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-versioning",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "06ad139528c8e7190e747885cd37e2c0a4c179f7cd8e49a22d7167b21248432f",
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "encryption",
+    "started": "2026-09-29T00:34:02-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-encryption",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "9220d8f7ac06c029a299fe60ccd435358f1c9b35dc1585eeea4e363f5c1b04f4",
+    "stdout": "{\n    \"ServerSideEncryptionConfiguration\": {\n        \"Rules\": [\n            {\n                \"ApplyServerSideEncryptionByDefault\": {\n                    \"SSEAlgorithm\": \"AES256\"\n                },\n                \"BucketKeyEnabled\": false,\n                \"BlockedEncryptionTypes\": {\n                    \"EncryptionType\": [\n                        \"SSE-C\"\n                    ]\n                }\n            }\n        ]\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "public-block",
+    "started": "2026-09-29T00:34:02-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-public-access-block",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "6a5bbcfdb78308f0013c5193d0787412e4c227dac573e032484153f24989db86",
+    "stdout": "{\n    \"PublicAccessBlockConfiguration\": {\n        \"BlockPublicAcls\": true,\n        \"IgnorePublicAcls\": true,\n        \"BlockPublicPolicy\": true,\n        \"RestrictPublicBuckets\": true\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "s3-tags",
+    "started": "2026-09-29T00:34:04-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-tagging",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "9616b19797e1705c0f3f387198c3273875f655dc549e012500d3fdb62a93581c",
+    "stdout": "{\n    \"TagSet\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        }\n    ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "ddb",
+    "started": "2026-09-29T00:34:04-03:00",
+    "command": [
+      "aws",
+      "dynamodb",
+      "describe-table",
+      "--table-name",
+      "prova-6325231-tflock-e373b51f3467",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "534f28ad00bd0893114f00634139db119a4711b4f8fda95c5fe5f6ded766455f",
+    "stdout": "{\n    \"Table\": {\n        \"AttributeDefinitions\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"AttributeType\": \"S\"\n            }\n        ],\n        \"TableName\": \"prova-6325231-tflock-e373b51f3467\",\n        \"KeySchema\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"KeyType\": \"HASH\"\n            }\n        ],\n        \"TableStatus\": \"ACTIVE\",\n        \"CreationDateTime\": \"2026-09-29T00:31:21.513000-03:00\",\n        \"ProvisionedThroughput\": {\n            \"NumberOfDecreasesToday\": 0,\n            \"ReadCapacityUnits\": 0,\n            \"WriteCapacityUnits\": 0\n        },\n        \"TableSizeBytes\": 0,\n        \"ItemCount\": 0,\n        \"TableArn\": \"arn:aws:dynamodb:us-east-1:[CONTA_OCULTA]:table/prova-6325231-tflock-e373b51f3467\",\n        \"TableId\": \"b7c1c155-4190-4c96-8925-07dc86ad13e7\",\n        \"BillingModeSummary\": {\n            \"BillingMode\": \"PAY_PER_REQUEST\",\n            \"LastUpdateToPayPerRequestDateTime\": \"2026-09-29T00:31:21.513000-03:00\"\n        },\n        \"DeletionProtectionEnabled\": false,\n        \"WarmThroughput\": {\n            \"ReadUnitsPerSecond\": 12000,\n            \"WriteUnitsPerSecond\": 4000,\n            \"Status\": \"ACTIVE\"\n        }\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "ddb-tags",
+    "started": "2026-09-29T00:34:04-03:00",
+    "command": [
+      "aws",
+      "dynamodb",
+      "list-tags-of-resource",
+      "--resource-arn",
+      "arn:aws:dynamodb:us-east-1:[CONTA_OCULTA]:table/prova-6325231-tflock-e373b51f3467",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "3b7bd743d1dc2762a82fdaf03fd09eef06a75e7c7380aefdf106fa0e739fb4a0",
+    "stdout": "{\n    \"Tags\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        }\n    ]\n}\n",
+    "stderr": ""
+  }
+]
+
+
+=== recovery-fmt ===
+{
+  "started": "2026-09-29T00:36:13-03:00",
+  "finished": "2026-09-29T00:36:13-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "fmt",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+Saída real sanitizada:
+
+Exit code real: 0
+
+
+=== recovery-validate ===
+{
+  "started": "2026-09-29T00:36:13-03:00",
+  "finished": "2026-09-29T00:36:17-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "validate",
+    "-no-color"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "066f5d5642c3da6392fa4b32675dfd0a23952985eb7885abd188531325d46657"
+}
+Saída real sanitizada:
+
+Error: Unsupported argument
+
+  on main.tf line 46, in resource "aws_s3_bucket_public_access_block" "state":
+  46:   expected_bucket_owner = var.aws_account_id
+
+An argument named "expected_bucket_owner" is not expected here.
+
+Exit code real: 1
+
+
+=== recovery-fmt-2 ===
+{
+  "started": "2026-09-29T00:36:50-03:00",
+  "finished": "2026-09-29T00:36:50-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "fmt",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+Saída real sanitizada:
+
+Exit code real: 0
+
+
+=== recovery-validate-2 ===
+{
+  "started": "2026-09-29T00:36:50-03:00",
+  "finished": "2026-09-29T00:36:54-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "validate",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1"
+}
+Saída real sanitizada:
+Success! The configuration is valid.
+
+
+Exit code real: 0
+
+
+=== recovery-plan ===
+{
+  "started": "2026-09-29T00:37:04-03:00",
+  "finished": "2026-09-29T00:37:12-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "plan",
+    "-input=false",
+    "-no-color",
+    "-detailed-exitcode",
+    "-out=backend-recovery.tfplan"
+  ],
+  "exit_code": 2,
+  "raw_sha256": "aae1094981cd6500c790710f30d597f754f8112f7b2cbd48f02e0ef88109d045"
+}
+Saída real sanitizada:
+data.aws_s3_bucket.state: Reading...
+aws_dynamodb_table.locks: Refreshing state... [id=prova-6325231-tflock-e373b51f3467]
+data.aws_s3_bucket.state: Read complete after 1s [id=prova-6325231-tfstate-e373b51f3467]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+ # aws_s3_bucket.state will no longer be managed by Terraform, but will not be destroyed
+ # (destroy = false is set in the configuration)
+ . resource "aws_s3_bucket" "state" {
+        id                          = "prova-6325231-tfstate-e373b51f3467"
+        # (13 unchanged attributes hidden)
+
+        # (3 unchanged blocks hidden)
+    }
+
+  # aws_s3_bucket_public_access_block.state will be created
+  + resource "aws_s3_bucket_public_access_block" "state" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = "prova-6325231-tfstate-e373b51f3467"
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + region                  = "us-east-1"
+      + restrict_public_buckets = true
+    }
+
+  # aws_s3_bucket_server_side_encryption_configuration.state will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
+      + bucket                = "prova-6325231-tfstate-e373b51f3467"
+      + expected_bucket_owner = (sensitive value)
+      + id                    = (known after apply)
+      + region                = "us-east-1"
+
+      + rule {
+          + blocked_encryption_types = (known after apply)
+          + bucket_key_enabled       = (known after apply)
+
+          + apply_server_side_encryption_by_default {
+              + kms_master_key_id = (known after apply)
+              + sse_algorithm     = "AES256"
+            }
+        }
+    }
+
+  # aws_s3_bucket_versioning.state will be created
+  + resource "aws_s3_bucket_versioning" "state" {
+      + bucket                = "prova-6325231-tfstate-e373b51f3467"
+      + expected_bucket_owner = (sensitive value)
+      + id                    = (known after apply)
+      + region                = "us-east-1"
+
+      + versioning_configuration {
+          + mfa_delete = (known after apply)
+          + status     = "Enabled"
+        }
+    }
+
+Plan: 3 to add, 0 to change, 0 to destroy.
+
+Warning: Some objects will no longer be managed by Terraform
+
+If you apply this plan, Terraform will discard its tracking information for
+the following objects, but it will not delete them:
+ - aws_s3_bucket.state
+
+After applying this plan, Terraform will no longer manage these objects. You
+will need to import them into Terraform to manage them again.
+
+Warning: Argument is deprecated
+
+  with aws_s3_bucket_versioning.state,
+  on main.tf line 26, in resource "aws_s3_bucket_versioning" "state":
+  26:   expected_bucket_owner = var.aws_account_id
+
+expected_bucket_owner is deprecated. It will be removed in a future verion of
+the provider.
+
+(and one more similar warning elsewhere)
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: backend-recovery.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "backend-recovery.tfplan"
+
+Exit code real: 2
+
+
+Revisão do plano recuperação / show JSON0
+Conferência derivada das capturas reais:
+{
+  "checked_at": "2026-09-29T00:38:26-03:00",
+  "result": "PASSOU",
+  "show_json_exit_code": 0,
+  "recovery_plan_sha256": "8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2",
+  "original_plan_sha256": "9a66a21421881b982e3d8a6603bf5d0f57d2c035825b339e54816877171dba12",
+  "actions": {
+    "aws_dynamodb_table.locks": [
+      "no-op"
+    ],
+    "aws_s3_bucket.state": [
+      "forget"
+    ],
+    "aws_s3_bucket_public_access_block.state": [
+      "create"
+    ],
+    "aws_s3_bucket_server_side_encryption_configuration.state": [
+      "create"
+    ],
+    "aws_s3_bucket_versioning.state": [
+      "create"
+    ]
+  },
+  "proposed_apply": "3 configs create, 0 update/delete; forget de bucket nao o apaga, DynamoDB existente no-op",
+  "cloud_scope": "mesmos bucket/tabela/regiao/seguranca/custo do bootstrap autorizado; nenhum servico adicional",
+  "region": "us-east-1",
+  "account_suffix": "5811",
+  "bucket_preserved": "prova-6325231-tfstate-e373b51f3467",
+  "table_preserved": "prova-6325231-tflock-e373b51f3467",
+  "state_partial_backup": "bytes identicos, 0600/ignorado",
+  "credentials": "existentes/default/voclabs, sem IAM/SCP alterados",
+  "ownership": "CLI expected owner confirmado; campos expected owner em versao/encriptacao",
+  "warnings": "handoff sem destroy; expected_bucket_owner depreciado na versao fixada, ainda aceito",
+  "public_backend_config": {
+    "bucket": "prova-6325231-tfstate-e373b51f3467",
+    "dynamodb_table": "prova-6325231-tflock-e373b51f3467",
+    "encrypt": true,
+    "key": "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "region": "us-east-1"
+  }
+}
+
+
+=== recovery-apply ===
+{
+  "started": "2026-09-29T00:39:20-03:00",
+  "finished": "2026-09-29T00:39:32-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "apply",
+    "-input=false",
+    "-no-color",
+    "backend-recovery.tfplan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e410da8c453fa53d755f7b7f40d4cbf56ffd46d60f43ef59c142e9f262a2c6d4"
+}
+Saída real sanitizada:
+aws_s3_bucket_public_access_block.state: Creating...
+aws_s3_bucket_versioning.state: Creating...
+aws_s3_bucket_server_side_encryption_configuration.state: Creating...
+aws_s3_bucket_public_access_block.state: Creation complete after 6s [id=prova-6325231-tfstate-e373b51f3467]
+aws_s3_bucket_server_side_encryption_configuration.state: Creation complete after 6s [id=prova-6325231-tfstate-e373b51f3467,[CONTA_OCULTA]]
+aws_s3_bucket_versioning.state: Creation complete after 8s [id=prova-6325231-tfstate-e373b51f3467,[CONTA_OCULTA]]
+
+Warning: Argument is deprecated
+
+  with aws_s3_bucket_versioning.state,
+  on main.tf line 26, in resource "aws_s3_bucket_versioning" "state":
+  26:   expected_bucket_owner = var.aws_account_id
+
+expected_bucket_owner is deprecated. It will be removed in a future verion of
+the provider.
+
+(and one more similar warning elsewhere)
+
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+backend_config = {
+  "bucket" = "prova-6325231-tfstate-e373b51f3467"
+  "dynamodb_table" = "prova-6325231-tflock-e373b51f3467"
+  "encrypt" = true
+  "key" = "prova-primeiro-bimestre-devops/terraform.tfstate"
+  "region" = "us-east-1"
+}
+
+Exit code real: 0
+
+
+Oito consultas finais AWS: stdout/stderr reais sanitizados
+Conferência derivada das capturas reais:
+[
+  {
+    "name": "location",
+    "started": "2026-09-29T00:41:32-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-location",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "8c9ac7fbca35ef9c5feafeec4e3caf51a025c790229c705051a91d393064706b",
+    "stdout": "{\n    \"LocationConstraint\": null\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "versioning",
+    "started": "2026-09-29T00:41:32-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-versioning",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "8cd9934dfd735c51cf0b2f8d795ebaf640a4192e310c1c2231940c57161bf75c",
+    "stdout": "{\n    \"Status\": \"Enabled\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "encryption",
+    "started": "2026-09-29T00:41:32-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-encryption",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "9220d8f7ac06c029a299fe60ccd435358f1c9b35dc1585eeea4e363f5c1b04f4",
+    "stdout": "{\n    \"ServerSideEncryptionConfiguration\": {\n        \"Rules\": [\n            {\n                \"ApplyServerSideEncryptionByDefault\": {\n                    \"SSEAlgorithm\": \"AES256\"\n                },\n                \"BucketKeyEnabled\": false,\n                \"BlockedEncryptionTypes\": {\n                    \"EncryptionType\": [\n                        \"SSE-C\"\n                    ]\n                }\n            }\n        ]\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "public-block",
+    "started": "2026-09-29T00:41:32-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-public-access-block",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "6a5bbcfdb78308f0013c5193d0787412e4c227dac573e032484153f24989db86",
+    "stdout": "{\n    \"PublicAccessBlockConfiguration\": {\n        \"BlockPublicAcls\": true,\n        \"IgnorePublicAcls\": true,\n        \"BlockPublicPolicy\": true,\n        \"RestrictPublicBuckets\": true\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "s3-tags",
+    "started": "2026-09-29T00:41:34-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "get-bucket-tagging",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "9616b19797e1705c0f3f387198c3273875f655dc549e012500d3fdb62a93581c",
+    "stdout": "{\n    \"TagSet\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        }\n    ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "versions",
+    "started": "2026-09-29T00:41:34-03:00",
+    "command": [
+      "aws",
+      "s3api",
+      "list-object-versions",
+      "--bucket",
+      "prova-6325231-tfstate-e373b51f3467",
+      "--expected-bucket-owner",
+      "[CONTA_OCULTA]",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "9a6450e1af6085d61a9b9f6c6aeef60bd0c9f094247398c5541fc690cd9967f5",
+    "stdout": "{\n    \"RequestCharged\": null,\n    \"Prefix\": \"\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "ddb",
+    "started": "2026-09-29T00:41:34-03:00",
+    "command": [
+      "aws",
+      "dynamodb",
+      "describe-table",
+      "--table-name",
+      "prova-6325231-tflock-e373b51f3467",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "534f28ad00bd0893114f00634139db119a4711b4f8fda95c5fe5f6ded766455f",
+    "stdout": "{\n    \"Table\": {\n        \"AttributeDefinitions\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"AttributeType\": \"S\"\n            }\n        ],\n        \"TableName\": \"prova-6325231-tflock-e373b51f3467\",\n        \"KeySchema\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"KeyType\": \"HASH\"\n            }\n        ],\n        \"TableStatus\": \"ACTIVE\",\n        \"CreationDateTime\": \"2026-09-29T00:31:21.513000-03:00\",\n        \"ProvisionedThroughput\": {\n            \"NumberOfDecreasesToday\": 0,\n            \"ReadCapacityUnits\": 0,\n            \"WriteCapacityUnits\": 0\n        },\n        \"TableSizeBytes\": 0,\n        \"ItemCount\": 0,\n        \"TableArn\": \"arn:aws:dynamodb:us-east-1:[CONTA_OCULTA]:table/prova-6325231-tflock-e373b51f3467\",\n        \"TableId\": \"b7c1c155-4190-4c96-8925-07dc86ad13e7\",\n        \"BillingModeSummary\": {\n            \"BillingMode\": \"PAY_PER_REQUEST\",\n            \"LastUpdateToPayPerRequestDateTime\": \"2026-09-29T00:31:21.513000-03:00\"\n        },\n        \"DeletionProtectionEnabled\": false,\n        \"WarmThroughput\": {\n            \"ReadUnitsPerSecond\": 12000,\n            \"WriteUnitsPerSecond\": 4000,\n            \"Status\": \"ACTIVE\"\n        }\n    }\n}\n",
+    "stderr": ""
+  },
+  {
+    "name": "ddb-tags",
+    "started": "2026-09-29T00:41:34-03:00",
+    "command": [
+      "aws",
+      "dynamodb",
+      "list-tags-of-resource",
+      "--resource-arn",
+      "arn:aws:dynamodb:us-east-1:[CONTA_OCULTA]:table/prova-6325231-tflock-e373b51f3467",
+      "--profile",
+      "default",
+      "--region",
+      "us-east-1",
+      "--output",
+      "json",
+      "--no-cli-pager"
+    ],
+    "exit_code": 0,
+    "raw_sha256": "3b7bd743d1dc2762a82fdaf03fd09eef06a75e7c7380aefdf106fa0e739fb4a0",
+    "stdout": "{\n    \"Tags\": [\n        {\n            \"Key\": \"Project\",\n            \"Value\": \"prova-primeiro-bimestre-devops\"\n        },\n        {\n            \"Key\": \"Owner\",\n            \"Value\": \"6325231\"\n        },\n        {\n            \"Key\": \"Environment\",\n            \"Value\": \"learner-lab\"\n        }\n    ]\n}\n",
+    "stderr": ""
+  }
+]
+
+
+Verificador temporário /tmp/devops-t16-verify.py: primeira execução exit1 por
+KeyError: 'sensitive', após as oito consultas AWS já retornarem0. State bruto
+omite campo opcional em output não sensível. Corrigido para get('sensitive',False),
+mais confirmação independente terraform output -json/0/backend_config.sensitive=false.
+Reexecução das asserções00:45:45 -03:00/exit0 reutilizou respostas AWS capturadas,
+sem repetir/sobrescrevê-las. Erro do verificador não era falha AWS; T16 só aceita
+após correção.
+
+
+Conferência final corrigida
+Conferência derivada das capturas reais:
+{
+  "verified_at": "2026-09-29T00:45:45-03:00",
+  "result": "PASSOU",
+  "aws_queries_exit_codes": "8 consultas reais: todas 0",
+  "region_actual": "us-east-1 (LocationConstraint null)",
+  "owner_checks": "expected-bucket-owner confirmado em consultas S3; conta privada do Lab",
+  "bucket": "prova-6325231-tfstate-e373b51f3467",
+  "s3_versioning_actual": "Enabled",
+  "s3_encryption_actual": "AES256",
+  "public_access_block_actual": {
+    "BlockPublicAcls": true,
+    "IgnorePublicAcls": true,
+    "BlockPublicPolicy": true,
+    "RestrictPublicBuckets": true
+  },
+  "tags_bucket_table_actual": {
+    "Project": "prova-primeiro-bimestre-devops",
+    "Environment": "learner-lab",
+    "Owner": "6325231"
+  },
+  "table": "prova-6325231-tflock-e373b51f3467",
+  "table_status_actual": "ACTIVE",
+  "table_billing_actual": "PAY_PER_REQUEST",
+  "table_hash_key_actual": "LockID/String",
+  "table_id_preserved_from_partial_apply": true,
+  "s3_object_versions_actual": 0,
+  "s3_delete_markers_actual": 0,
+  "terraform_state": "local 0600, 4 recursos managed normais + 1 data bucket; bucket fisico fora de gestao TF",
+  "state_serial": 8,
+  "backend_config_actual": {
+    "bucket": "prova-6325231-tfstate-e373b51f3467",
+    "dynamodb_table": "prova-6325231-tflock-e373b51f3467",
+    "encrypt": true,
+    "key": "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "region": "us-east-1"
+  },
+  "limitations": "backend principal/locking DynamoDB ativo/EC2/RDS/CRUD nuvem/teardown ainda pendentes; custo real nao medido",
+  "bucket_lifecycle": "criado no apply parcial, preservado no handoff; criacao/remocao futura por CLI com revisao/autorizacao"
+}
+
+
+=== postapply-plan ===
+{
+  "started": "2026-09-29T00:41:54-03:00",
+  "finished": "2026-09-29T00:42:02-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "plan",
+    "-input=false",
+    "-no-color",
+    "-detailed-exitcode",
+    "-out=backend-postapply.tfplan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "957282e4cad93e4a16d1b1390cc04c1bf03358eda9feef12600447dc17f5eecc"
+}
+Saída real sanitizada:
+data.aws_s3_bucket.state: Reading...
+aws_dynamodb_table.locks: Refreshing state... [id=prova-6325231-tflock-e373b51f3467]
+data.aws_s3_bucket.state: Read complete after 0s [id=prova-6325231-tfstate-e373b51f3467]
+aws_s3_bucket_versioning.state: Refreshing state... [id=prova-6325231-tfstate-e373b51f3467,[CONTA_OCULTA]]
+aws_s3_bucket_public_access_block.state: Refreshing state... [id=prova-6325231-tfstate-e373b51f3467]
+aws_s3_bucket_server_side_encryption_configuration.state: Refreshing state... [id=prova-6325231-tfstate-e373b51f3467,[CONTA_OCULTA]]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+Warning: Argument is deprecated
+
+  with aws_s3_bucket_versioning.state,
+  on main.tf line 26, in resource "aws_s3_bucket_versioning" "state":
+  26:   expected_bucket_owner = var.aws_account_id
+
+expected_bucket_owner is deprecated. It will be removed in a future verion of
+the provider.
+
+(and one more similar warning elsewhere)
+
+Exit code real: 0
+
+
+=== final-fmt ===
+{
+  "started": "2026-09-29T00:46:03-03:00",
+  "finished": "2026-09-29T00:46:03-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-check",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+Saída real sanitizada:
+
+Exit code real: 0
+
+
+=== final-state-list ===
+{
+  "started": "2026-09-29T00:46:05-03:00",
+  "finished": "2026-09-29T00:46:06-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "state",
+    "list"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "9a1f070360cfae2f90e5054abcdab443f1974381116abecce9c52f2751c694aa"
+}
+Saída real sanitizada:
+data.aws_s3_bucket.state
+aws_dynamodb_table.locks
+aws_s3_bucket_public_access_block.state
+aws_s3_bucket_server_side_encryption_configuration.state
+aws_s3_bucket_versioning.state
+
+Exit code real: 0
+
+
+=== final-output ===
+{
+  "started": "2026-09-29T00:46:22-03:00",
+  "finished": "2026-09-29T00:46:23-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra/backend",
+    "output",
+    "-json",
+    "backend_config"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "228722d22e4469cfe889b5e38a09b291055d0221e69f0fa9d1c6d24f82d75705"
+}
+Saída real sanitizada:
+{"bucket":"prova-6325231-tfstate-e373b51f3467","dynamodb_table":"prova-6325231-tflock-e373b51f3467","encrypt":true,"key":"prova-primeiro-bimestre-devops/terraform.tfstate","region":"us-east-1"}
+
+Exit code real: 0
+
+
+Conclusão T16 verificada no Learner Lab: recovery apply0, oito consultasAWS0,
+plan pós-apply0/No changes, fmt/state list/output0. State bootstrap local0600,
+quatro managed normais+data bucket; backup parcial preservado/ignorado/0600.
+Bucket físico fora da criação/remoção TF: reprodução/teardown CLI precisam de
+revisão/autorização, ownership e limpeza de versões. Criado no apply parcial.
+Nenhuma escrita de objeto/lock simulou backend. Principal/state remoto/locking
+ativo/EC2/RDS/CRUD nuvem/destroy futuros; custo/saldo real não medidos. Próxima T17.
+Fontes primárias consultadas após falha real:
+https://developer.hashicorp.com/terraform/cli/commands/apply
+https://developer.hashicorp.com/terraform/language/block/removed
+https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket.go
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket_data_source.go
+
+Conferência de preservação/documentos/privacidade antes do commit
+Resumo derivado das verificações reais:
+{
+  "checked_at": "2026-09-29T00:57:15-03:00",
+  "result": "PASSOU",
+  "files_scope": [
+    "AGENTS.md",
+    "README.md",
+    "docs/diario-ia.md",
+    "specs/design.md",
+    "specs/requirements.md",
+    "specs/tasks.md",
+    "infra/backend/main.tf",
+    "infra/backend/outputs.tf",
+    "evidencias/backend-revisao.txt",
+    "evidencias/backend.txt"
+  ],
+  "previous_files_preserved_sha256": 52,
+  "guide_preserved": true,
+  "diary_and_review_append_only": true,
+  "tasks": "34 IDs únicos; T01–T16 verificadas; T17–T34 pendentes",
+  "requirements": "32 IDs únicos; R19/R20/R21/R22/R31 ainda parciais",
+  "private_files": "state/backup/plans/tfvars/preflight ignorados e 0600; não staged",
+  "sensitive_scan": "sem achados nos padrões/valores delimitados; não prova ausência universal de segredos",
+  "markdown_links_fences_newlines": "PASSOU",
+  "diff_check_exit_code": 0,
+  "aws_raw_captures_hashes": "preservados",
+  "postapply_show_json_exit_code": 0,
+  "postapply_changes": "todos no-op, sem apply adicional",
+  "git": "11 commits/0 merges, HEAD/main/feature preservados antes do commit"
+}

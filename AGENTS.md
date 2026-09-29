@@ -95,6 +95,21 @@ R19/R20/R21 parciais. Próxima T15 revisa recursos/custo e obtém autorização
 específica; T16 aplica/conferência. Sem bloqueio T14. Commit único coerente,
 merge T32. Não repetir suites API/Docker/Compose porque não mudaram.
 
+Atualização T15, 29/09/2026: revisão técnica/custo preparada, decisão humana
+pendente; T15 em andamento/T16 pendente. HEAD inicial d6f4d25, 11 commits, feature
+limpa antes da revisão. Plano T14/hash preservados; show JSON 0, STS 0 atual
+mesma conta terminada 5811/voclabs/us-east-1, S3 []/0 e tabela NotFound/254.
+Nenhum recurso criado/apply. Preços oficiais regionais/cálculo Decimal reais
+em backend-revisao.txt, cenário hipotético pequeno ~US$0.01/mês, sem descontar
+franquias/créditos ou alegar saldo atual. Código Terraform/versões/lockfile e
+capturas T14 preservados; vars/plano 0600/ignorados. Perguntar autorização
+específica somente após registros/checks completos, conforme regra 10/T15;
+aguardar resposta explícita, não inferir por revisão genérica ou tempo decorrido.
+Não marcar T15 verificada antes da decisão. Após aprovação, T16 exige revalidar
+credenciais/plano e aplicar/conferir apenas bootstrap. Aprovação não inclui
+principal/rede/EC2/RDS/teardown. Sem commit extra de quantidade nesta preparação;
+registrar revisão/decisão no próximo marco coerente, sem esconder mudanças.
+
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
 parser JavaScript/localidade/timezone para interpretar esse formato.
@@ -220,3 +235,25 @@ validação e responsabilidade. Quebras artificiais e títulos não substituem t
 Trabalhar no fork da disciplina em checkout/worktree separado. Não presumir
 autenticação GitHub, remote público, PR ou deploy só pela configuração local.
 Não realizar push/publicação nesta etapa. Consultar `specs/tasks.md` para retomar.
+
+
+## Estado atual — T15/T16 verificadas em 29/09/2026
+
+Substitui estado pendente da revisão T15 acima, preservando histórico. Aluno
+explicitamente autorizou tudo necessário para bootstrap apresentado, sem
+principal/EC2/RDS/rede/deploy/destruição. Não repetir mesma aprovação.
+Primeiro apply 1: bucket/tabela criados, Read Object Lock 403/explicit denySCP.
+Backup privado preservado; removed/destroy=false+data fez handoff sem apagar.
+Três configs/tabela managed; bucket físico/tags externos ao state: reprodução/
+remoção CLI revisada/autorizada. Não alterar IAM/SCP/região/provider nem usar
+refresh=false/lock=false/target. Validate inicial 1 unsupported em BPA corrigido;
+fmt/validate 0, plan 2/três create/forgetsem delete/DDB no-op, apply 0. Oito consultas AWS 0:
+Enabled/AES256/BPA4true/tags/us-east-1, ACTIVE/on-demand/LockID String. Verificador
+KeyError sensitive corrigido/rechecado 0; plan posterior 0/No changes.
+State local 0600/4managednormais+data, backup/plan/tfvars ignorados preservados.
+Backend.txt/revisão/diário reais. T01–T16 verificadas, próxima T17. R20/R21
+parciais, locking principal T21. Um commit coerente revisão/apply/recuperação,
+sem repetir suites API/Docker/Compose inalteradas. Merge T32, sem push/PR automático.
+T29/T30: destroy bootstrap não remove bucket externo; versões/delete markers e
+bucket próprio precisam limpeza CLI separada autorizada, principal já destruído,
+locks conferidos e states necessários preservados.
