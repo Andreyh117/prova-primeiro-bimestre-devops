@@ -45,7 +45,10 @@ remoção TF. Após revisão de T16, aluno autorizou T17, agora localmente verif
 módulo VPC/testes, fmt/init/validate/grafo 0 e nove testes mock locais 0; sem API
 AWS/provisionamento. Após revisão, T18 local verificada: security-group/regras
 separadas, fmt/init/validate/grafo 0 e 14 testes mock locais 0. Primeiro fmt 2
-corrigido, captura preservada. Próxima pendente T19. State remoto/locking efetivo T21;
+corrigido, captura preservada. Após revisão, T19 local verificada: módulo RDS,
+fmt/init/validate/grafo/schema 0 e 17 testes mock locais 0 após corrigir conflito
+password/manage_master_user_password=false. Capturas preservadas, nenhuma AWS.
+Próxima pendente T20. State remoto/locking efetivo T21;
 principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
@@ -75,7 +78,7 @@ Cada tarefa recebe entrada no diário.
 | T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt: falha SCP parcial, recuperação sem exclusão, apply/8 consultas AWS/plan No changes; principal pendente. | verificado |
 | T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | vpc-validate.txt/diário: fmt/init/validate/grafo 0, duas falhas corrigidas e 9 testes locais mock aprovados; AWS futura. | verificado |
 | T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | security-group-validate.txt: fmt inicial 2 corrigido; fmt/init/validate/grafo 0, 14 testes locais mock 0, referências/outputs/schema conferidos; AWS futura. | verificado |
-| T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | Diário/checklist do RDS. | pendente |
+| T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | rds-validate.txt: fmt/init/validate/grafo/schema 0, conflito real corrigido e 17 testes locais mock aprovados; AWS/SQL futuros. | verificado |
 | T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | Diário/checklist EC2. | pendente |
 | T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init real/validate/plan; outputs alimentam inputs; confirmar state remoto/locking e tags. | terraform-validate.txt, terraform-plan.txt, backend-locking.txt; commit módulos. | pendente |
 | T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist humano do plano com conta/região, tipos, SG, subnet, state e IAM. | Diário da revisão/autorização; não marcar deploy verificado. | pendente |
@@ -614,3 +617,23 @@ security-group-validate.txt. R15/R19/R22 parciais; T18 local verificada, próxim
 T19 não iniciada. Sem bloqueio; sem repetir suites inalteradas/API/Docker/Compose/
 bootstrap. Commit único coerente de implementação/evidência, sem quantidade,
 sem push/merge/PR. Aplicação principal exige plano/autorização próprios T21/T22.
+
+### T19 — RDS verificado localmente em 29/09/2026
+
+Após revisão do aluno, início HEAD7755f73/14 commits reais, feature limpa/main
+preservada/zero merges. Quatro .tf e tests/database.tftest.hcl, 11 inputs/3 outputs,
+DB subnet group com dois IDs privados distintos/DB instance com único SG RDS.
+PostgreSQL16.15/db.t3.micro/gp3/20GiB/Single-AZ, encriptado e sem acesso público;
+sem IAM/KMS próprios/Secrets Manager/Enhanced Monitoring/autoscale. Tags em ambos.
+Username/password sensíveis sem default; outputs identifier/hostname/port sem
+segredos; senha ainda no state/plano protegido. Política snapshot requerida e
+coerente, não autoriza destruição/retenção. AZs/rotas/SGs/KMS reais ainda futuros.
+Fmt/init/validate0; primeiro test1 conflitava password/manage_master_user_password
+false, 0passed/1failed/16skip. Removido argumento incompatível; validate0/retrytest0,
+17passed. Fmt-check/grafo/schema0, oito vínculos sem ciclo/cópia e lockfile readonly
+idênticos. Evidência rds-validate.txt com capturas/falha/correção/revisão local.
+Sem credenciais reais/API AWS/plan principal/backend remoto/apply/destroy/SQLRDS.
+T19 local verificada; R17/R18/R19/R22 parciais, próxima T20 não iniciada. Sem
+bloqueio; não repetir suites API/Docker/Compose/módulos anteriores/bootstrap
+inalterados. Um commit coerente real por marco, nunca por quantidade/tentativa;
+sem push/merge/PR. Plano principal T21/revisão T22/atributos AWS T23 futuros.

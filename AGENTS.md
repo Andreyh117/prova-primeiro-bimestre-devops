@@ -297,3 +297,24 @@ Root/plano real T21/aplicação autorizada T23 futuros. Não repetir suites
 API/Docker/Compose/bootstrap inalteradas; preservar state/plan/tfvars/cache.
 Um commit real/coerente necessário por marco, feature preservada/mergeT32,
 sem push/PR automático. Nenhum módulo RDS/EC2 implementado nesta tarefa.
+
+## Estado atual — T19 local verificada em 29/09/2026
+
+Substitui próxima T19 dos registros históricos: agora T20. Módulo infra/modules/rds
+com quatro .tf/teste, 11 inputs/3 outputs, dois recursos DB subnet group/instância.
+PostgreSQL16.15/db.t3.micro/gp3/20GiB sem autoscale/Single-AZ/encriptado/privado,
+um SG RDS, dois inputs de subnets distintos; root T21 deve ligar privadas VPC/SG
+RDS e conferir AZ/rotas reais. Username/password sensitive sem default, mas senha
+fica no state/plano; outputs identifier/hostname(address sem porta)/port seguros.
+Sem IAM/KMS próprios/Secrets Manager/Enhanced Monitoring; políticas Lab explícitas
+backup0/delete_automated_backups true/deletion_protection false, skip_final_snapshot
+obrigatório + final_snapshot_identifier coerente. São propostas, não aprovação de
+descarte/retenção/destroy; rever T22/T27/T28. Versão/opções reais revalidar T21.
+Primeiro test1, conflito password/manage_master_user_password=false; omitido este
+argumento, sem mudar provider/senha sensível. Fmt/init/validate/grafo/schema0,
+17 testes mock/command=plan0, oito referências sem ciclo, cópias/lockfile idênticos;
+rds-validate.txt preserva falha/correção. Nenhum serviço RDS real/SQL foi testado.
+T01–T19 verificadas nos respectivos ambientes, T20–T34 pendentes; R17/R18/R19/R22
+parciais. Sem API AWS/plan principal/backend remoto/apply/destroy; sem bloqueio.
+Não repetir suites inalteradas nem tocar state/plan/tfvars/cache/evidências
+anteriores; commit único coerente, feature preservada/mergeT32/sem push/PR.

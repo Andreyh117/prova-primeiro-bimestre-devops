@@ -1123,3 +1123,63 @@ decorativas da captura fmt (o wrapper Python retornou 1). Rechecagem registrada
 em 2026-09-29T08:16:16-03:00 confirmou 2; normalizados somente esses seis espaços na
 evidência publicada. Log bruto/hash fmt preservados, transformação explicitada,
 sem código/teste Terraform alterado nem reexecução de suites inalteradas.
+
+## T19 — módulo RDS privado, 29/09/2026
+
+Prompt do aluno: “Revisei o que foi feito. Execute a próxima tarefa pendente de
+specs/tasks.md, seguindo AGENTS.md. Implemente, valide, corrija e registre evidências
+reais. Explique o conceito aplicado, os arquivos alterados, o teste executado e o
+próximo passo. Se houver bloqueio, registre-o sem simular sucesso.”
+HEAD7755f73/14 commits reais/feature limpa/main preservada, próxima T19. Codex leu
+R17/R18/R19/D09/D10/D11/D14 e regras, usando terminal/Python/Git/Terraform/navegador
+com fontes primárias; sem skill/subagentes/entregas de colegas ou vivências do aluno
+inventadas. Escalonamento dos comandos locais devido ao isolamento previamente
+limitado por mountinfo. Uma busca incluiu infra/backend/README.md inexistente;
+contratos lidos nas specs/README raiz. Página provider db_subnet_group retornou
+Internal Error duas vezes; documentação AWS e schema real conferiram o contrato.
+
+Conceito: isolamento do banco por subnets privadas/SG único, encriptação em repouso
+separada de TLS/conectividade; sensitive apenas oculta saída usual, não remove
+senha do state/plano. Subnet group precisa duas AZs mesmo Single-AZ. Inputs de IDs
+sozinhos não provam privacidade/AZ/rotas: root T21 e AWS T23 devem conferir vínculo
+com output privado VPC/SG RDS. Engine16.15/classe db.t3.micro/gp3/20GiB observadas
+T13 e propostas no código, disponibilidade/permissões reais revalidar antes do plan.
+Sem autoscale/serviços extras/IAM/KMS próprios/Secrets Manager/monitoramento extra.
+Snapshot requer decisão explícita sem default; retenção/descarte serão revistos
+no plano e antes de destroy autorizado, nunca inferidos das credenciais/fixtures.
+
+Implementados quatro .tf e tests/database.tftest.hcl, 11 inputs/3 outputs, tags
+instância/subnet group, username/password sensitive, sem outputs de credenciais.
+Root /tmp/devops-t19-rds-t62k8elf com cópia exata/lockfile bootstrap readonly/cache
+filesystem, nenhum state/tfvars privado. AWS_*/TF_VAR_*/CLIargs/logs retirados do
+ambiente, configs AWS=/dev/null/IMDS disabled. Init unauthenticated pelo mirror,
+sem novo download assinado. Fmt08:21:48/0,init08:21:58–08:22:01/0,
+validate08:22:01–05/0. Test08:22:05–08/1: password conflita com
+manage_master_user_password=false; 0passed/1failed/16skip. Removido argumento
+incompatível, preservando password sensível. Fmt08:22:31/0,sync bytes idênticos,
+validate08:22:31–36/0,test08:22:36–39/0:17passed/0failed. Validate estático passou
+antes da falha; plan mock detectou conflito adicional do provider, sem API AWS.
+Fmt-check08:23:02/0,grafo08:23:03–07/0,schema08:23:03–09/0; revisão08:24:15/0
+confirmou oito vínculos sem ciclo, password sensitive no schema/cópia e lockfile
+idênticos, nenhum state/plan local. Capturas/hashes/falha/correção rds-validate.txt.
+
+Documentos sincronizados em 2026-09-29T08:27:50-03:00: README/reprodução/índice, specs/matriz,
+AGENTS/diário. T19 local verificada, R17/R18/R19/R22 em andamento; não afirmar
+RDS disponível/privadas/KMS/SQL/CRUD reais. Próxima T20, não implementada. Sem
+bloqueio; sem consultas AWS/backend remoto/plan principal/apply/destroy. Suites
+API/Docker/Compose/bootstrap/módulos anteriores não repetidas por estarem
+inalteradas. Preparar um commit necessário/coerente após revisão de escopo/segredos,
+sem commits vazios/quantidade/por tentativa/push/merge/PR nesta etapa.
+
+Conferência final 2026-09-29T08:29:15-03:00/0: doze arquivos no escopo; 68 anteriores
+preservados por SHA-256 e histórico do diário/AGENTS como prefixos. Guia/API/
+Docker/Compose/bootstrap/módulos anteriores/evidências/lockfile intactos. Links/
+fences/newlines/whitespace passaram incluindo arquivos novos. T01–T19 verificadas
+nos seus ambientes/T20–T34 pendentes, 34 IDs/32 requisitos únicos e parciais
+mantidos. Scanner delimitado sem achados/conta-IP privados ausentes; arquivos
+privados ignorados/0600, não é prova universal de ausência de segredos.
+Em 2026-09-29T08:30:06-03:00, removido somente root temporário próprio após conferir ausência
+recursiva de state/plan, prefixo/tmp/sem symlink. Cache original por inode/tamanho
+/mtime intacto; logs/brutos/falha/metadados em /tmp preservados. Recursos AWS/
+state/plan/tfvars reais não removidos. Preparar commit após conferir stage exato;
+comandos dependentes param no erro para impedir commit após checagem falhada.

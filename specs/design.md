@@ -295,7 +295,7 @@ NAT para o CRUD. Uma EC2 em uma pública basta; não propor ALB/NAT Gateway.
 | `vpc` | Nome, CIDR, AZs, CIDRs de subnets, tags. | `vpc_id`, `public_subnet_ids`, `private_subnet_ids`; alimenta SG, EC2 e RDS. |
 | `security-group` | `name`, `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
 | `ec2` | Primeira pública, SG EC2, AMI, `t2.micro`, key pair existente, user-data sem segredos, profile existente opcional, tags. | ID e IP público; URL API composta no root. |
-| `rds` | Privadas, SG RDS, engine version, `db.t3.micro`, nome do banco, credenciais sensíveis, tags. | Identifier, hostname e porta; alimenta configuração posterior do deploy na EC2. |
+| `rds` | identifier, duas privadas, SG RDS único, engine_version, instance_class=db.t3.micro, db_name, username/password sensíveis, skip_final_snapshot explícito/final_snapshot_identifier, tags. | identifier, hostname (address sem porta) e port; alimentam deploy futuro, sem credenciais nos outputs. |
 
 D10: conforme decisão do aluno em T13, SG EC2 restringe SSH e API 3000 somente
 ao seu IP atual IPv4 /32, explícito e revalidado antes do plano. Módulo rejeita
@@ -663,3 +663,28 @@ Fmt inicial 2 por teste multilinha corrigido; fmt/init/validate/grafo 0 e
 14 testes mock/command=plan 0. Grafo confirma referências/outputs sem ciclos;
 schema confirma tags. Evidência security-group-validate.txt, sem API AWS ou
 plan principal. R15/R19/R22 parciais até T21/T23; próxima T19, não implementada.
+
+## Implementação T19 — RDS validado localmente
+
+Em 29/09/2026, módulo rds contém dois recursos/11 inputs/3 outputs, encriptação,
+acesso público false, PostgreSQL 16.15/db.t3.micro/gp3 20GiB sem autoscale e
+Single-AZ. Classe limitada à prova, versão16.x completa; disponibilidade AWS
+precisa novo preflight, não inferida de mock. Root T21 deverá usar privadas do
+módulo VPC (duas AZs) e SG RDS do módulo security-group; formato de IDs não prova
+privacidade/rotas/AZs. Outputs identifier/hostname(address)/port sem credenciais.
+Username/password sensitive sem default, senha ainda presente no state/plano;
+proteção existente mantida. Sem IAM/KMS próprios/Secrets Manager/monitoramento
+extra. Engine Extended Support desabilitado, versão menor automática false;
+rever disponibilidade/manutenção antes do plan real. Tags instância/subnet group.
+Proposta Lab sem backup automático retido e sem deletion_protection. Política de
+snapshot explícita: skip_final_snapshot obrigatório; final_snapshot_identifier
+coerente, necessário ao retê-lo. D14 mantém revisão de dados/retenção/custos e
+consentimento antes de destruir; nenhum fixture autoriza apagar/reter dados.
+Primeiro test1: password conflita com manage_master_user_password=false; omissão
+corrigiu, senha sensível preservada. Retry17 mock/plan passed, fmt/init/validate/
+grafo/schema0, oito vínculos sem ciclo. rds-validate.txt preserva todas capturas
+inclusive falha; não comprova AWS/SQL. Fontes:
+[provider](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/db_instance.html.markdown),
+[VPC/RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html),
+[API RDS](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html).
+T19 local verificada, R17/R18/R19/R22 parciais; próxima T20 não implementada.

@@ -58,12 +58,15 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T19, RDS privado. T17 implementou VPC/quatro subnets/IGW/tabelas e
+pendente: T20, módulo EC2. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usam provider mock, sem chamadas AWS: rede não implantada. State remoto/locking
 principal são T21. T18 implementou grupos EC2/RDS e regras separadas, com
 14 testes mock locais, fmt/init/validate/grafo aprovados. EC2/RDS/CRUD na nuvem
 e limpeza permanecem pendentes; os security groups ainda não foram aplicados.
+T19 implementou o módulo RDS privado/encriptado; 17 testes mock locais e
+fmt/init/validate/grafo/schema passaram após corrigir conflito do provider.
+O banco real, seus acessos e o CRUD na nuvem ainda não foram executados.
 
 ## Contrato aprovado para implementação
 
@@ -120,6 +123,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Bootstrap aplicado T16](evidencias/backend.txt): falha SCP parcial, recuperação sem exclusão, apply/consultas reais e plano posterior sem mudanças.
 - [Módulo VPC T17](evidencias/vpc-validate.txt): fmt/init/validate/grafo reais, duas falhas de testes corrigidas e nove casos locais aprovados; sem execução AWS.
 - [Security groups T18](evidencias/security-group-validate.txt): fmt inicial corrigido, fmt/init/validate/grafo e 14 testes locais aprovados; sem execução AWS.
+- [Módulo RDS T19](evidencias/rds-validate.txt): falha real do provider/correção, fmt/init/validate/grafo/schema e 17 testes mock aprovados; sem RDS real.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -571,7 +575,7 @@ recuperação apresentada antes do apply: três configs S3, bucket preservado,
 tabela sem mudança, zero exclusões. Hash do plano de recuperação:
 8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2.
 [AGENTS, regra 10](AGENTS.md) mantém revisão/autorização para novos escopos,
-principal e teardown. Ao concluir T16 a próxima era T17; agora T19.
+principal e teardown. Ao concluir T16 a próxima era T17; agora T20.
 
 
 ### Módulo VPC — T17 verificada localmente
@@ -631,7 +635,7 @@ externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois
 reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
 comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
 cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
-Root composto/plan real T21, aplicação T23. T18 local concluída abaixo; próxima T19.
+Root composto/plan real T21, aplicação T23. T18/T19 locais concluídas abaixo; próxima T20.
 
 ### Security groups — T18 verificada localmente
 
@@ -697,7 +701,78 @@ Schema confirmou tagging; grafo nativo conferiu 12 vínculos e ausência de cicl
 Init filesystem informa unauthenticated; lockfile readonly/hashes preservados.
 Após conferir, remover somente o root temporário mostrado; logs reais preservados.
 Não comprova conectividade, SGs efetivos, deploy ou state remoto. R15/R19/R22
-continuam em andamento; próxima tarefa T19 (RDS privado), root/plano T21/AWS T23.
+continuam em andamento; T19 local concluída abaixo, próxima T20, root/plano T21/AWS T23.
+
+### RDS — T19 verificada localmente
+
+[infra/modules/rds](infra/modules/rds/main.tf) define DB subnet group e instância
+PostgreSQL 16.15/db.t3.micro/gp3 20GiB, Single-AZ, sem autoscale, encriptada e
+publicly_accessible=false. São configurações locais propostas; ainda sem banco
+provisionado. Versão/opções observadas em T13 precisam novo preflight em T21.
+
+Onze inputs: identifier, private_subnet_ids, rds_sg_id, engine_version,
+instance_class, db_name, username, password, skip_final_snapshot,
+final_snapshot_identifier e tags. Root T21 deve fornecer private_subnet_ids do
+módulo VPC e rds_sg_id do módulo SG; dois IDs válidos não comprovam privadas/AZs.
+Subnet group exige duas AZs mesmo com instância Single-AZ, conforme
+[documentação AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html).
+Tags nos dois recursos; outputs identifier/hostname(address sem porta)/port,
+sem usuário ou senha. São os valores para consultas/PGHOST/PGPORT no deploy futuro.
+
+Username/password são sensitive e não têm default. A senha ainda é armazenada
+no state/plano, apesar de ocultada na saída usual: proteger arquivos locais,
+backend e acesso aos objetos, nunca publicar JSON de plano/state sem revisão.
+[Provider 6.65.0](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/db_instance.html.markdown).
+Sem Secrets Manager/IAM/KMS próprios; encriptação por chave AWS gerenciada,
+permissões reais pendentes. Primeiro teste encontrou conflito entre password e
+manage_master_user_password=false, removido do código; senha sensível preservada.
+Validate estático sozinho não detectou esse conflito; plan mock o revelou.
+
+Proposta Lab: backup_retention_period=0, delete_automated_backups=true e
+deletion_protection=false. Skip_final_snapshot é obrigatório/sem default:
+true exige final_snapshot_identifier=null; false exige nome de snapshot explícito.
+Não pressupor descarte/retensão aprovados a partir dos fixtures. Revisar política
+no plano T21/T22 e obter autorização específica de destruição T27/T28; eventual
+snapshot retido tem custo. Não executar apply/destroy durante esta validação.
+
+Reprodução local usa cache/lockfile do bootstrap, sem state/tfvars privados,
+provider mock e command=plan em todos os runs. Credenciais de fixture no teste
+são fictícias e públicas, não utilizá-las na AWS. Na falha, o bloco para e mantém
+root; após conferir/remover somente esse root, preservar logs e cache original.
+
+```bash
+(
+  set -eu
+  umask 077
+  repo_dir=$(pwd)
+  rds_validation_root=$(mktemp -d /tmp/prova-rds-XXXXXX)
+  cp infra/modules/rds/*.tf "$rds_validation_root/"
+  cp -R infra/modules/rds/tests "$rds_validation_root/"
+  cp infra/backend/.terraform.lock.hcl "$rds_validation_root/.terraform.lock.hcl"
+  printf 'provider_installation {\n  filesystem_mirror {\n    path = "%s/infra/backend/.terraform/providers"\n    include = ["registry.terraform.io/hashicorp/aws"]\n  }\n}\n' "$repo_dir" > "$rds_validation_root/provider-mirror.tfrc"
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
+  unset TF_CLI_ARGS TF_CLI_ARGS_init TF_CLI_ARGS_validate TF_CLI_ARGS_test TF_CLI_ARGS_graph TF_LOG TF_LOG_PATH
+  export TF_CLI_CONFIG_FILE="$rds_validation_root/provider-mirror.tfrc"
+  export AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_EC2_METADATA_DISABLED=true
+  printf 'Root temporário: %s\n' "$rds_validation_root"
+  terraform fmt -check -recursive infra
+  terraform -chdir="$rds_validation_root" init -backend=false -input=false -no-color -lockfile=readonly
+  terraform -chdir="$rds_validation_root" validate -no-color
+  terraform -chdir="$rds_validation_root" test -no-color
+  terraform -chdir="$rds_validation_root" graph -type=plan > "$rds_validation_root/dependencies.dot"
+)
+```
+
+[Resultados reais](evidencias/rds-validate.txt): primeiro test 1, conflito do
+provider/16 casos skip; correção e nova execução com 17 passed/0 failed.
+Fmt/init/validate/grafo/schema finais 0; oito referências no grafo sem ciclos,
+cópia/lockfile idênticos, schema confirma senha sensível e tags. Init filesystem
+informa unauthenticated, não novo download assinado. Testes rejeitam subnets
+única/repetidas/malformadas, SG/classe/versão/identificador/nomes inválidos,
+senha curta/caracteres inválidos, tags ausentes e política snapshot incoerente.
+Não comprovam AZ/rotas privadas/permissões/KMS/endpoint disponível ou SQL/CRUD
+na AWS. R17/R18/R19/R22 em andamento; próxima tarefa T20, EC2. Root/plano T21,
+execução real T23 e deploy/CRUD T24/T25 continuam pendentes.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega
