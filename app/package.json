@@ -10,7 +10,8 @@
   "scripts": {
     "test": "node test/run-postgres.js",
     "db:migrate": "node src/migrate.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test:docker": "node test/run-docker.js"
   },
   "dependencies": {
     "express": "5.2.1",

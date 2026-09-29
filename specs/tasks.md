@@ -23,7 +23,9 @@ POST/GET HTTP reais e SQL independente. O aluno aprovou a regra de commits,
 revisou T07 e autorizou T08, agora verificada com CRUD completo, saúde/503 e
 48 testes reais. Após revisão de T08, o aluno autorizou T09, verificada com 51
 testes: script exit 0/1 e reserva mantida por SQL/GET ao reiniciar a API nativa.
-Próxima tarefa pendente: T10, Dockerfile não-root e execução com banco real.
+T09 foi commitada em 93d313c. Após revisão, o aluno autorizou T10, verificada
+com duas execuções Docker/UID/contexto/HTTP/SQL reais, exit 0 e limpeza confirmada.
+Próxima tarefa pendente: T11, Compose, ambiente local e healthchecks.
 
 ## Plano de tarefas pequenas
 
@@ -43,7 +45,7 @@ Cada tarefa recebe entrada no diário.
 | T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | app/test/api.test.js, api-local.txt (35 testes) e t07-execucao.txt. | verificado |
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | api.test.js, z-unavailable.test.js, api-local.txt e health-local.txt (48 testes). | verificado |
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt (51 testes); script exit 0/1, SQL e restart nativo reais. | verificado |
-| T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt, docker-run.txt; commit real Docker. | pendente |
+| T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt e docker-run.txt: duas execuções reais, UID 1000, HTTP/SQL e limpeza. | verificado |
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt; commit real Compose. | pendente |
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt e README atualizado. | pendente |
 | T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | Decisões no diário e aws-preflight.txt; variáveis locais ignoradas. | pendente |
@@ -99,8 +101,8 @@ histórico inventado. A auditoria local foi executada em HEAD `dbcd6a1`:
 [git-auditoria.txt](../evidencias/git-auditoria.txt). R02 continua em andamento.
 
 A tabela abaixo preserva o plano da auditoria. T08 já foi commitada como
-cbf2410; T09 passou o aceite e aguarda revisão de stage/commit neste marco.
-T10 e seguintes permanecem propostas futuras.
+cbf2410; T09 foi commitada em 93d313c, total seis commits reais. T10 passou o
+aceite Docker e prepara seu marco; T11 e seguintes permanecem propostas futuras.
 Executar uma tarefa autorizada por vez, incluir implementação, testes/evidências
 e documentação correspondente, revisar o diff e só então criar o commit.
 Não separar uma alteração trivial em vários commits para aumentar a contagem.
@@ -351,3 +353,33 @@ duas evidências e AGENTS/README/specs/diário sincronizados. Marco preparado pa
 cbf2410, sem commit vazio. R02 permanece parcial até merge em T32; auditoria
 anterior com 4 commits permanece histórica. Próximo passo: T10. Não houve
 Dockerfile/Compose da API, volume persistente, AWS, merge, push ou PR nesta tarefa.
+
+### T10 — resultado verificado em 28/09/2026
+
+Dockerfile multi-stage e .dockerignore criados; npm script test:docker chama
+runner reprodutível. Node 24.21.0 bookworm-slim fixado por digest oficial resolvido;
+npm ci de produção com lockfile, cópias seletivas e USER node/UID 1000. PID 1
+node src/server.js verificado em execução. Nenhuma senha em build/contexto/logs.
+
+Duas execuções reais `npm --prefix app run test:docker`: 22:17:32 e 22:19:07
+-03:00, ambas exit 0. Exportar contexto real confirmou somente 10 arquivos
+permitidos, excluindo marcadores sem segredos em .env/PEM, node_modules e testes.
+Build instalou 82 pacotes pelo lockfile na primeira execução; segunda usou cache.
+Migração pela imagem, health 200 e CRUD completo via verify-api.py passaram com
+PostgreSQL 16.15 separado. SQL confirmou linha ID 2, DATE 2026-10-01/JSON
+01-10-2026 e zero linhas após DELETE. API SIGTERM/exit 0; cleanup confirmou zero
+containers/redes próprios e marcadores removidos; consulta posterior confirmou.
+Imagem local prova-reservas:local foi preservada, sem push.
+
+Aviso de depreciação --time observado na primeira execução foi corrigido para
+--timeout no novo runner; saídas de ambas preservadas. Revisão adicionou assertion
+PID 1/UID e citação dos argumentos nos comandos exibidos e retirou check de cache
+inacessível em /root. Reexecução passou sem aviso. Sem bloqueio restante.
+Evidências: docker-build.txt/docker-run.txt; logs T06–T09 e guia intactos.
+
+Arquivos: app/Dockerfile, .dockerignore, test/run-docker.js e package.json;
+evidências, AGENTS/README/specs/diário. Código API/schema/lockfile preservados;
+não repetida a suíte nativa T09 de 51 testes, pois a mudança foi de distribuição.
+R08 verificado local; R22 parcial até demais ambientes. Marco real proposto:
+`build(docker): adiciona imagem da API com usuario nao root`. Próximo T11;
+sem Compose, volume persistente, AWS, merge, publicação ou PR nesta tarefa.

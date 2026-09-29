@@ -18,10 +18,11 @@ na verificação Git/documental local. T06 passou com PostgreSQL 16.15 real:
 18 testes, migração, configuração negativa e limpeza. T07 passou 35 testes:
 POST/GET HTTP reais, validação e leitura SQL independente, com limpeza completa.
 T08 passou 48 testes com CRUD completo, health/503 e falhas reais do banco.
-Restart/persistência, Dockerfile/Compose e Terraform/AWS continuam pendentes.
+Restart da API nativa foi verificado em T09; Dockerfile/contexto/runtime em T10.
+Compose, persistência de volume e Terraform/AWS continuam pendentes.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
-inicial e feature branch reais. R02 permanece em andamento até seis commits e
-merge reais; a captura T05 é um snapshot histórico, não prova de R02 completo. Caminhos de evidência são
+inicial e feature branch reais. Seis commits reais foram confirmados em T09;
+R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
 planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 
 ## Matriz requisito → verificação → evidência → estado
@@ -35,7 +36,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R05 / P | POST valida campos obrigatórios; GET por ID inexistente retorna 404. | Omitir cada obrigatório, enviar vazio/inválido e buscar ID ausente; não gravar entradas rejeitadas. As demais regras são decisões D01–D04. | Testes de integração e logs de CRUD. | em andamento |
 | R06 / P | CRUD usa PostgreSQL real localmente e RDS na nuvem, lendo e gravando no banco; sem armazenamento em memória substituindo persistência. | Conferir a linha por SQL, reiniciar a API e consultá-la novamente nos dois ambientes. | `evidencias/postgres-local.txt`, `evidencias/rds-crud.txt`. | em andamento |
 | R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | em andamento |
-| R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt`. | pendente |
+| R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt` (T10 real, UID 1000 e HTTP/SQL). | verificado |
 | R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt`. | pendente |
 | R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | pendente |
 | R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt`. | pendente |
@@ -148,3 +149,17 @@ R02: HEAD cbf2410 antes desta tarefa tem cinco commits reais; marco T09 será o
 sexto, com mudanças de script/testes. Merge preservando a feature segue em T32;
 não declarar R02 completo apenas por atingir a contagem. Guia e evidências
 anteriores preservados; revisão de stage/segredos continua exigida neste marco.
+
+## Evidência T10 — R08 e avanço parcial R22
+
+R08 verificado local: Dockerfile/.dockerignore funcionais, base Node 24.21.0
+fixada por digest, build multi-stage/npm ci e runtime USER node/UID 1000.
+Contexto real exportado contém somente 10 arquivos permitidos; marcadores .env/
+PEM excluídos. Duas execuções test:docker passaram com PostgreSQL 16.15 separado,
+migração pela imagem, health 200 e CRUD/SQL reais. PID 1/UID e SIGTERM/exit 0
+comprovados. API JSON 01-10-2026 e SQL DATE 2026-10-01; zero linhas e containers/
+redes temporários ao final. Imagem local preservada; sem publicação.
+R22 permanece em andamento: evidências docker-build.txt/docker-run.txt existem,
+mas Compose/AWS/plan/deploy continuam futuros. R09–R11 pendentes; rede/tmpfs
+do teste não comprovam Compose/volume. R02 continua parcial pelo merge pendente;
+T09 foi o sexto commit real (93d313c), T10 prepara outro marco com alterações.

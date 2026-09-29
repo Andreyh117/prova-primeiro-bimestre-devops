@@ -1,0 +1,25 @@
+# Permitir somente os arquivos usados pelo build/runtime.
+**
+!package.json
+!package-lock.json
+!src/
+!src/**
+!sql/
+!sql/**
+
+# Também excluir artefatos sensíveis dentro dos diretórios permitidos.
+**/.env
+**/.env.*
+**/.npmrc
+**/*.pem
+**/*.key
+**/*tfstate*
+**/*.tfvars*
+**/*.tfplan*
+**/*.log
+**/node_modules
+**/node_modules/**
+**/.git
+**/.git/**
+**/test
+**/test/**

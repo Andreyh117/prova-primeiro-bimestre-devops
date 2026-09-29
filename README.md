@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T09 foram concluídas. O commit inicial `21cb5f0` está em
+Em 28/09/2026, T01–T10 foram concluídas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -30,10 +30,13 @@ parada e por GET em outro processo na mesma porta. APIs encerradas e zero
 containers de teste ao final. Datas JSON mantidas em DD-MM-YYYY.
 
 Express 5.2.1 e pg 8.23.0 estão fixados no package.json/lockfile. A imagem oficial
-PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. T09 é o marco
-previsto para o sexto commit real; merge preservando a feature continua em T32.
-Dockerfile/Compose da API, infraestrutura AWS e relatório continuam pendentes.
-Próxima tarefa: T10, Dockerfile não-root, build e execução com banco real.
+PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. T09 foi o sexto
+commit real (`93d313c`); merge preservando a feature continua em T32.
+T10 construiu a imagem da API com Node 24.21.0 fixado por digest, USER node/UID
+1000 e dependências instaladas via lockfile. Teste Docker passou duas vezes, com
+contexto filtrado, health/CRUD/SQL reais e encerramento/limpeza confirmados.
+Compose, infraestrutura AWS e relatório continuam pendentes.
+Próxima tarefa: T11, Compose, ambiente local e healthchecks.
 
 ## Contrato aprovado para implementação
 
@@ -78,6 +81,8 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Persistência T09](evidencias/postgres-local.txt): script com exit 0/1, sentinela preservada e SQL/GET antes, durante e após reiniciar a API nativa.
 - [Saúde T08](evidencias/health-local.txt): pause/unpause/stop reais do banco exclusivo, respostas HTTP e limpeza.
 - [Execução T07](evidencias/t07-execucao.txt): falhas esperadas de npm start e limpeza.
+- [Build Docker T10](evidencias/docker-build.txt): duas execuções reais, contexto exportado, digest, instalação e UID 1000.
+- [Execução Docker T10](evidencias/docker-run.txt): PID 1 não-root, PostgreSQL real, health/CRUD/SQL, SIGTERM e limpeza.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -164,10 +169,56 @@ evita inclusão acidental de arquivos locais, mas não protege arquivos já
 rastreados nem substitui a revisão antes de cada commit. Exemplos e evidências
 públicas devem permanecer sem segredos.
 
+## Imagem Docker e teste com banco real
+
+[app/Dockerfile](app/Dockerfile) usa dois estágios: instala somente dependências
+de produção por `npm ci` com lockfile e copia node_modules/manifests/src/sql para
+o runtime. A base oficial Node 24.21.0 bookworm-slim está fixada pelo digest
+`sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6`.
+O runtime executa `node src/server.js` como `node` (UID 1000), com PORT 3000 e
+NODE_ENV production. PostgreSQL permanece em serviço separado.
+[app/.dockerignore](app/.dockerignore) permite somente manifests, src e sql,
+excluindo também .env/PEM/chaves/artefatos dentro dos diretórios permitidos.
+Dockerfile/.dockerignore são lidos pelo builder; não são copiados para a imagem.
+
+Na raiz, pode construir e conferir o usuário:
+
+```bash
+docker build -t prova-reservas:local app
+docker run --rm --entrypoint id prova-reservas:local -u
+```
+
+Para repetir a validação completa de T10:
+
+```bash
+npm --prefix app run test:docker
+```
+
+Depende de Node 24/Python 3 na máquina, Docker com daemon/BuildKit/buildx
+acessíveis e rede para baixar base/imagens/dependências na primeira execução.
+Não precisa instalar dependências Node no host para esse runner. A imagem
+construída fica disponível como `prova-reservas:local`, sem push para registry.
+
+[app/test/run-docker.js](app/test/run-docker.js) exporta um contexto real com
+COPY ., inclui marcadores sem credenciais em .env/PEM e verifica sua exclusão.
+Cria rede e PostgreSQL exclusivos por UUID/labels, sem publicar a porta do banco,
+com dados tmpfs e senha efêmera em memória/ambiente. Aplica schema com a própria
+imagem e inicia API em porta dinâmica de loopback. Confere UID do PID 1,
+/health, verify-api.py e uma linha por SQL, preservando DD-MM-YYYY/DATE.
+Depois limpa as reservas, testa SIGTERM/exit 0 e remove somente seus containers,
+rede e marcadores. Falhas retornam código não zero. Não imprime Docker inspect
+completo nem variáveis contendo senhas. Logs anteriores ficam como evidências
+históricas; executar o runner não altera os logs versionados automaticamente.
+
+O teste Docker é separado dos 51 testes nativos de T09. Rede temporária e tmpfs
+não substituem Compose, healthchecks/dependência ou volume persistente: T11/T12
+farão essas verificações. RDS/TLS continuam futuros.
+
 ## Configuração prevista
 
-Nenhum valor de credencial foi criado nesta tarefa. `.env.example` será preparado
-na tarefa Compose, com placeholders, e `.env` permanecerá ignorado. Nomes de
+As credenciais dos testes são efêmeras e ficam em memória/ambiente; nenhum .env
+foi criado. `.env.example` será preparado na tarefa Compose, com placeholders,
+e `.env` permanecerá ignorado. Nomes de
 variáveis previstos, em acordo com o design:
 
 | Variável | Finalidade futura |

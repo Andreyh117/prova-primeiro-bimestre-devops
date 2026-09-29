@@ -1,0 +1,385 @@
+T10 — execucao real em 2026-09-28T22:17:32-03:00
+Ambiente: Docker local; Node/Python da maquina; sem Compose/AWS.
+Comando: npm --prefix app run test:docker
+stdout desta fase:
+=== T10 runtime/PostgreSQL ===
+Data/hora real: 2026-09-29T01:17:43.587Z; run UUID 56492cc4-cc8a-405a-9430-bdc1a72b97ac; senha somente em memória/ambiente.
+Comando: docker network create --driver bridge --label devops.project=prova-primeiro-bimestre-devops --label devops.test.run=56492cc4-cc8a-405a-9430-bdc1a72b97ac prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac
+stdout:
+585f45bdfa92b9a942bbcea8cc5c1fbe704415ce4e33198e65acc1e8111c08cd
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker run --detach --name prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-db --label devops.project=prova-primeiro-bimestre-devops --label devops.test.run=56492cc4-cc8a-405a-9430-bdc1a72b97ac --network prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac --network-alias db --tmpfs /var/lib/postgresql/data:rw,size=256m --env POSTGRES_PASSWORD --env POSTGRES_USER=reservas_test --env POSTGRES_DB=reservas_test postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+stdout:
+c72c9bda255cf9364971ad9c9aa7c6eedd5a0567bde850daacb828fd1df1b254
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-db postgres --version
+stdout:
+postgres (PostgreSQL) 16.15
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker inspect --format {{json .HostConfig.PortBindings}} prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-db
+stdout:
+{}
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker run --rm --label devops.project=prova-primeiro-bimestre-devops --label devops.test.run=56492cc4-cc8a-405a-9430-bdc1a72b97ac --network prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac --env PGHOST --env PGPORT --env PGDATABASE --env PGUSER --env PGPASSWORD --env PGSSL prova-reservas:local node src/migrate.js
+stdout:
+Schema de reservas aplicado com sucesso.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker run --detach --name prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api --label devops.project=prova-primeiro-bimestre-devops --label devops.test.run=56492cc4-cc8a-405a-9430-bdc1a72b97ac --network prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac --publish 127.0.0.1::3000 --env PGHOST --env PGPORT --env PGDATABASE --env PGUSER --env PGPASSWORD --env PGSSL prova-reservas:local
+stdout:
+9ccdd6193b5c95dadd0db0ec28126ff02dbcac521bb6926b791752991766827b
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker inspect --format {{json .NetworkSettings.Ports}} prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api
+stdout:
+{"3000/tcp":[{"HostIp":"127.0.0.1","HostPort":"32773"}]}
+
+stderr:
+(vazio)
+Exit code real: 0
+GET /health -> HTTP 200; corpo real: {"status":"ok","database":"ok"}
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api id -u
+stdout:
+1000
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api node -e const f=require('node:fs');console.log(f.readFileSync('/proc/1/cmdline','utf8').replaceAll('\0',' '));console.log(f.readFileSync('/proc/1/status','utf8').split('\n').find(l=>l.startsWith('Uid:')));
+stdout:
+node src/server.js
+Uid:	1000	1000	1000	1000
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api node -e const f=require('node:fs'),a=require('node:assert/strict');a.deepEqual(f.readdirSync('/app').sort(),['node_modules','package-lock.json','package.json','sql','src']);a.equal(f.existsSync('/root/.npm/_cacache'),false);console.log('PASSOU: runtime contém somente dependências, manifests, src e sql; sem testes/.env/cache de instalação.');
+stdout:
+PASSOU: runtime contém somente dependências, manifests, src e sql; sem testes/.env/cache de instalação.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: python3 /home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-api.py --base-url http://127.0.0.1:32773
+stdout:
+Marcador exclusivo para conferência/limpeza: Verificacao API 499fc888-fc18-4b43-8399-e055cf2469a8
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/1 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/1 -> 200
+PASSOU: PUT /reservas/1 -> 400
+PASSOU: GET /reservas/1 -> 200
+PASSOU: DELETE /reservas/1 -> 204
+PASSOU: GET /reservas/1 -> 404
+PASSOU: DELETE /reservas/1 -> 404
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+PASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.
+
+stderr:
+(vazio)
+Exit code real: 0
+POST /reservas -> HTTP 201; corpo real: {"id":2,"cliente":"Container T10 56492cc4-cc8a-405a-9430-bdc1a72b97ac","data":"01-10-2026","status":"pendente"}
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-db psql -U reservas_test -d reservas_test -At -v ON_ERROR_STOP=1 -c SELECT json_build_object('id', id, 'cliente', cliente, 'data_iso', to_char(data, 'YYYY-MM-DD'), 'tipo', pg_typeof(data)::text, 'status', status)::text FROM public.reservas WHERE id = 2
+stdout:
+{"id" : 2, "cliente" : "Container T10 56492cc4-cc8a-405a-9430-bdc1a72b97ac", "data_iso" : "2026-10-01", "tipo" : "date", "status" : "pendente"}
+
+stderr:
+(vazio)
+Exit code real: 0
+DELETE /reservas/2 -> HTTP 204; corpo real: (vazio)
+Comando: docker exec prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-db psql -U reservas_test -d reservas_test -At -v ON_ERROR_STOP=1 -c SELECT count(*) FROM public.reservas
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: HTTP/SQL reais no PostgreSQL separado; DATE preservado e zero linhas após limpeza.
+Comando: docker logs prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api
+stdout:
+API de reservas escutando na porta 3000.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker stop --time 5 prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api
+stdout:
+Flag --time has been deprecated, use --timeout instead
+prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker inspect --format {{.State.ExitCode}} prova-reservas-docker-56492cc4-cc8a-405a-9430-bdc1a72b97ac-api
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: servidor em container recebeu SIGTERM e encerrou com exit 0.
+Comando: docker stop --time 5 9ccdd6193b5c
+stdout:
+Flag --time has been deprecated, use --timeout instead
+9ccdd6193b5c
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker rm 9ccdd6193b5c
+stdout:
+9ccdd6193b5c
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker stop --time 5 c72c9bda255c
+stdout:
+Flag --time has been deprecated, use --timeout instead
+c72c9bda255c
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker rm c72c9bda255c
+stdout:
+c72c9bda255c
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker network rm 585f45bdfa92
+stdout:
+585f45bdfa92
+
+stderr:
+(vazio)
+Exit code real: 0
+Limpeza confirmada: zero containers/redes deste teste; marcadores locais removidos. Imagem local preservada.
+PASSOU: T10 build/contexto/UID/health/CRUD/SQL/encerramento/limpeza.
+stderr geral da execucao:
+(vazio)
+Exit code real da execucao completa: 0
+
+T10 — reexecucao real apos ajustes em 2026-09-28T22:19:07-03:00
+Ambiente: Docker local; sem Compose/AWS.
+Comando: npm --prefix app run test:docker
+stdout desta fase:
+=== T10 runtime/PostgreSQL ===
+Data/hora real: 2026-09-29T01:19:09.173Z; run UUID 0443809d-b7e0-4034-9e57-20789f0c1530; senha somente em memória/ambiente.
+Comando: docker 'network' 'create' '--driver' 'bridge' '--label' 'devops.project=prova-primeiro-bimestre-devops' '--label' 'devops.test.run=0443809d-b7e0-4034-9e57-20789f0c1530' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530'
+stdout:
+f31184b009ddb50044259288a4f19ba663e14d4e7eafe40c41f08839df168943
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'run' '--detach' '--name' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-db' '--label' 'devops.project=prova-primeiro-bimestre-devops' '--label' 'devops.test.run=0443809d-b7e0-4034-9e57-20789f0c1530' '--network' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530' '--network-alias' 'db' '--tmpfs' '/var/lib/postgresql/data:rw,size=256m' '--env' 'POSTGRES_PASSWORD' '--env' 'POSTGRES_USER=reservas_test' '--env' 'POSTGRES_DB=reservas_test' 'postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea'
+stdout:
+c3c91c37d050577eba1765e717965c0e93ff585814dae6adbad2c130f7250c6a
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-db' 'postgres' '--version'
+stdout:
+postgres (PostgreSQL) 16.15
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'inspect' '--format' '{{json .HostConfig.PortBindings}}' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-db'
+stdout:
+{}
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'run' '--rm' '--label' 'devops.project=prova-primeiro-bimestre-devops' '--label' 'devops.test.run=0443809d-b7e0-4034-9e57-20789f0c1530' '--network' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530' '--env' 'PGHOST' '--env' 'PGPORT' '--env' 'PGDATABASE' '--env' 'PGUSER' '--env' 'PGPASSWORD' '--env' 'PGSSL' 'prova-reservas:local' 'node' 'src/migrate.js'
+stdout:
+Schema de reservas aplicado com sucesso.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'run' '--detach' '--name' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api' '--label' 'devops.project=prova-primeiro-bimestre-devops' '--label' 'devops.test.run=0443809d-b7e0-4034-9e57-20789f0c1530' '--network' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530' '--publish' '127.0.0.1::3000' '--env' 'PGHOST' '--env' 'PGPORT' '--env' 'PGDATABASE' '--env' 'PGUSER' '--env' 'PGPASSWORD' '--env' 'PGSSL' 'prova-reservas:local'
+stdout:
+7c5b7cf4e9438c0a401dd17174ee3e033bcfc7cfc1980e805e7a4c11f34c95d4
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'inspect' '--format' '{{json .NetworkSettings.Ports}}' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api'
+stdout:
+{"3000/tcp":[{"HostIp":"127.0.0.1","HostPort":"32774"}]}
+
+stderr:
+(vazio)
+Exit code real: 0
+GET /health -> HTTP 200; corpo real: {"status":"ok","database":"ok"}
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api' 'id' '-u'
+stdout:
+1000
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api' 'node' '-e' 'const f=require('"'"'node:fs'"'"'),a=require('"'"'node:assert/strict'"'"'),cmd=f.readFileSync('"'"'/proc/1/cmdline'"'"','"'"'utf8'"'"').split('"'"'\0'"'"').filter(Boolean),uid=f.readFileSync('"'"'/proc/1/status'"'"','"'"'utf8'"'"').split('"'"'\n'"'"').find(l=>l.startsWith('"'"'Uid:'"'"'));a.deepEqual(cmd,['"'"'node'"'"','"'"'src/server.js'"'"']);a.deepEqual(uid.split(/\s+/).slice(1),['"'"'1000'"'"','"'"'1000'"'"','"'"'1000'"'"','"'"'1000'"'"']);console.log(cmd.join('"'"' '"'"'));console.log(uid);'
+stdout:
+node src/server.js
+Uid:	1000	1000	1000	1000
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api' 'node' '-e' 'const f=require('"'"'node:fs'"'"'),a=require('"'"'node:assert/strict'"'"');a.deepEqual(f.readdirSync('"'"'/app'"'"').sort(),['"'"'node_modules'"'"','"'"'package-lock.json'"'"','"'"'package.json'"'"','"'"'sql'"'"','"'"'src'"'"']);console.log('"'"'PASSOU: /app contém somente dependências, manifests, src e sql; sem testes/.env locais.'"'"');'
+stdout:
+PASSOU: /app contém somente dependências, manifests, src e sql; sem testes/.env locais.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-api.py' '--base-url' 'http://127.0.0.1:32774'
+stdout:
+Marcador exclusivo para conferência/limpeza: Verificacao API 65984f8f-df4a-4693-b3c6-196f3ab92128
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/1 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/1 -> 200
+PASSOU: PUT /reservas/1 -> 400
+PASSOU: GET /reservas/1 -> 200
+PASSOU: DELETE /reservas/1 -> 204
+PASSOU: GET /reservas/1 -> 404
+PASSOU: DELETE /reservas/1 -> 404
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+PASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.
+
+stderr:
+(vazio)
+Exit code real: 0
+POST /reservas -> HTTP 201; corpo real: {"id":2,"cliente":"Container T10 0443809d-b7e0-4034-9e57-20789f0c1530","data":"01-10-2026","status":"pendente"}
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT json_build_object('"'"'id'"'"', id, '"'"'cliente'"'"', cliente, '"'"'data_iso'"'"', to_char(data, '"'"'YYYY-MM-DD'"'"'), '"'"'tipo'"'"', pg_typeof(data)::text, '"'"'status'"'"', status)::text FROM public.reservas WHERE id = 2'
+stdout:
+{"id" : 2, "cliente" : "Container T10 0443809d-b7e0-4034-9e57-20789f0c1530", "data_iso" : "2026-10-01", "tipo" : "date", "status" : "pendente"}
+
+stderr:
+(vazio)
+Exit code real: 0
+DELETE /reservas/2 -> HTTP 204; corpo real: (vazio)
+Comando: docker 'exec' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT count(*) FROM public.reservas'
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: HTTP/SQL reais no PostgreSQL separado; DATE preservado e zero linhas após limpeza.
+Comando: docker 'logs' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api'
+stdout:
+API de reservas escutando na porta 3000.
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'stop' '--timeout' '5' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api'
+stdout:
+prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'inspect' '--format' '{{.State.ExitCode}}' 'prova-reservas-docker-0443809d-b7e0-4034-9e57-20789f0c1530-api'
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: servidor em container recebeu SIGTERM e encerrou com exit 0.
+Comando: docker 'stop' '--timeout' '5' '7c5b7cf4e943'
+stdout:
+7c5b7cf4e943
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'rm' '7c5b7cf4e943'
+stdout:
+7c5b7cf4e943
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'stop' '--timeout' '5' 'c3c91c37d050'
+stdout:
+c3c91c37d050
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'rm' 'c3c91c37d050'
+stdout:
+c3c91c37d050
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'network' 'rm' 'f31184b009dd'
+stdout:
+f31184b009dd
+
+stderr:
+(vazio)
+Exit code real: 0
+Limpeza confirmada: zero containers/redes deste teste; marcadores locais removidos. Imagem local preservada.
+PASSOU: T10 build/contexto/UID/health/CRUD/SQL/encerramento/limpeza.
+stderr geral da execucao:
+(vazio)
+Exit code real da execucao completa: 0
+
+Conferência posterior T10 em 2026-09-28T22:22:53-03:00
+Comando: docker ps -aq --filter label=devops.project=prova-primeiro-bimestre-devops
+stdout:
+(vazio; zero recursos)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker network ls -q --filter label=devops.project=prova-primeiro-bimestre-devops
+stdout:
+(vazio; zero recursos)
+stderr:
+(vazio)
+Exit code real: 0
+Imagem local preservada (docker image inspect com campos limitados):
+sha256:3d9833f30a3fdfadfabb5bbfe04c836fc4c68dc1244a03b1aeaea9479dbbc88c / node / linux / amd64
+Exit code real: 0
+
+Nota da revisão T10: removido somente espaço final na linha 66 da saída real
+para git diff --check; conteúdo, avisos e resultados preservados. SHA-256 do log
+antes da normalização: b989abf6f79bd33239fe3b49947a83d5aff1ecedb2d62a541afbcf7a473a74aa.

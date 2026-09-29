@@ -435,3 +435,74 @@ conferidos, matriz com 32 requisitos/34 tarefas e T10 pendente. Sintaxe e
 git diff --check/ignores representativos passaram. Revisão documental corrigiu
 o cabeçalho do design que ainda indicava T09 como futura; não exigiu repetir
 a suíte porque a implementação testada permaneceu intacta.
+
+## 28/09/2026 — T10: imagem Docker não-root
+
+Prompt: após revisar T09, executar a próxima tarefa, implementar, validar,
+corrigir e registrar evidências reais seguindo AGENTS. Estado inicial: HEAD
+93d313c, seis commits reais em feat/api-reservas, worktree limpa; zero merges.
+T10 iniciada, T11 pendente. Docker client/server 29.8.1, buildx 0.37.1, amd64.
+Consulta real docker buildx imagetools inspect confirmou node:24.21.0-bookworm-slim
+com digest sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6.
+Planejado Dockerfile multi-stage, npm ci com lockfile e USER node; teste do
+contexto real com marcadores sem segredos, runtime UID, schema e CRUD usando
+PostgreSQL exclusivo em rede temporária. Não antecipar resultado de build/teste.
+
+Primeira execução test:docker em 22:17:32 -03:00 passou, exit 0: contexto real
+exportado continha somente 10 arquivos permitidos, build concluído, Node 24.21.0
+e UID 1000, migração e health/CRUD com PostgreSQL 16.15 real; SQL DATE/zero linhas
+e encerramento/limpeza confirmados. Houve aviso real de depreciação de --time;
+novo runner corrigido para --timeout. A revisão também adicionou assertions
+explícitas de CMD/UID do PID 1 e citação dos argumentos ao exibir comandos,
+sem usar shell para executá-los. Removido um check de cache em /root, pois
+existsSync sob usuário node não comprova ausência em diretório inacessível.
+Saída inicial preservada; nova execução necessária após essas alterações.
+
+Segunda execução em 22:19:07 -03:00 passou, exit 0, sem o aviso Docker. Contexto
+real via COPY . continha somente 10 arquivos permitidos; .env/PEM de auditoria
+excluídos. Build com cache manteve Node 24.21.0/USER node. PID 1 cmd/UID 1000
+assertados. Schema aplicado pela imagem ao PostgreSQL 16.15 separado; health
+200 e verify-api.py CRUD/inválidos/404/limpeza exit 0. POST ID 2/01-10-2026 foi
+confirmado por psql com DATE/2026-10-01; DELETE 204 e SQL count 0. API encerrou
+SIGTERM/0. Containers/redes UUID exclusivos removidos; conferência Docker
+posterior por label do projeto retornou zero, exit 0. Imagem local preservada:
+sha256:3d9833f30a3fdfadfabb5bbfe04c836fc4c68dc1244a03b1aeaea9479dbbc88c,
+linux/amd64, usuário node. Nenhum recurso AWS/Compose ou publicação.
+
+Logs reais das duas execuções preservados em docker-build.txt e docker-run.txt,
+com stdout/stderr/comandos/exit; primeira saída não foi apagada após a correção.
+Código da API/schema/lockfile e evidências T06–T09 permaneceram intactos. Suíte
+nativa de 51 testes não foi repetida: test:docker validou o novo artefato completo
+com os mesmos códigos. AGENTS/README/design/tasks/matriz sincronizados; R08 local
+verificado, R22 parcial. T10 verificada, próxima T11; sem bloqueio restante.
+Ferramentas reais: Codex, terminal Git/Python/Node/npm/Docker/buildx e navegador.
+Documentação oficial Docker best-practices/context e Node docker-node consultada;
+fontes em design. Nenhum agente auxiliar, apply/destroy, merge/push/PR.
+
+Revisão final T10: 12 arquivos conferidos, scanner delimitado sem achados,
+links/cercas/newlines corretos e manifest/lockfile compatíveis. SHA-256 comprovou
+guia, lockfile, API/script e evidências anteriores intactos; zero marcadores
+remanescentes. Sintaxe Node, git diff --check e ignores representativos passaram.
+Estado T10/R08 verificado e T11–T34 pendentes. Corrigidos resumo de requirements
+que ainda indicava restart/Docker futuros e descrição D08 de estágios propostos.
+Essas correções foram documentais; o artefato Docker testado não mudou.
+
+A revisão do stage identificou dois espaços finais em stdout real: linha 115
+de docker-build.txt (linha em branco emitida por npm/BuildKit) e linha 66 de
+docker-run.txt (cmdline com separador final). git diff --cached --check retornou
+2; o wrapper Python terminou 1. O agente avançou incorretamente para commit
+2d41b6d antes de conferir o retorno da ferramenta. Não considerar essa checagem
+aprovada nem confundir com a suíte Docker, que passou nas duas execuções.
+
+Correção: logs originais íntegros copiados para /tmp e SHA-256 registrados nos
+próprios logs; removido somente o espaço final dessas duas linhas. Todas as
+saídas, avisos, comandos e exit codes foram preservados. Revalidar o stage inteiro
+contra HEAD^, incluindo os 12 arquivos do marco, e corrigir o commit local ainda
+não publicado via amend, preservando parent e um único marco real de T10.
+Nenhuma alteração no artefato Docker testado; não repetir teste por formatação
+do log. O histórico não será aumentado com um commit trivial separado.
+
+Revalidação efetiva do stage inteiro contra HEAD^ passou: diff --cached --check
+exit 0, 12 arquivos com bytes conferidos, scanner delimitado sem achados e
+links/sintaxe válidos. A correção de formatação foi comparada aos logs originais
+e limitou-se aos espaços finais declarados; fonte/artefato testado preservados.

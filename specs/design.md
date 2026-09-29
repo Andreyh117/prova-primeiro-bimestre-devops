@@ -5,8 +5,9 @@ As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas 
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
 data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
 conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
-locais aprovados. T09 verificou script/restart nativo com 51 testes; Dockerfile,
-Compose, persistência de volume e infraestrutura continuam futuros.
+locais aprovados. T09 verificou script/restart nativo com 51 testes. T10 validou
+build/contexto/UID/CRUD/SQL em imagem Docker; Compose, persistência de volume e
+infraestrutura continuam futuros.
 Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
@@ -166,8 +167,10 @@ Referências consultadas para T06: [conexões pg](https://node-postgres.com/feat
 D07: Node 24 LTS e Express 5, cliente `pg`, testes de integração com `node:test`
 e PostgreSQL real. Node 24.21.0 está instalado; a [lista oficial de releases](https://nodejs.org/en/about/previous-releases)
 identifica a linha 24 como LTS. T06 instalou Express 5.2.1 e pg 8.23.0 com versões
-exatas e lockfile; `npm ci` e a integração passaram. A imagem Node será fixada
-na tarefa Dockerfile. O teste local usou PostgreSQL 16.15, imagem oficial fixa
+exatas e lockfile; `npm ci` e a integração passaram. T10 fixou a base oficial
+Node 24.21.0 bookworm-slim pelo digest
+`sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6`,
+resolvido por docker buildx imagetools inspect; runtime validado em linux/amd64. O teste local usou PostgreSQL 16.15, imagem oficial fixa
 por digest em `app/test/postgres-image.txt`; consultar separadamente a engine
 minor disponível no RDS de us-east-1 antes do plano. Não presumir disponibilidade
 no RDS somente porque uma versão Docker foi validada.
@@ -182,9 +185,28 @@ no RDS somente porque uma versão Docker foi validada.
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Serviço PostgreSQL recebe os mesmos valores de conexão do app. | Não iniciar serviço PostgreSQL na EC2. |
 
 D08: container API não-root, cópia somente dos arquivos necessários, `npm ci`
-com lockfile e dependências de produção no runtime; multi-stage proposto pela
-separação build/test/runtime. `.dockerignore` exclui segredos, node_modules,
+com lockfile e dependências de produção no runtime; multi-stage adotado para
+separar instalação de dependências e execução da API. `.dockerignore` exclui segredos, node_modules,
 Git, evidências e testes desnecessários ao runtime. Nada sensível em build args.
+
+T10 implementou dois estágios dependencies/runtime na mesma base fixada. Primeiro
+npm ci --omit=dev --ignore-scripts --no-audit --no-fund; depois COPY seletivo com
+chown node:node, USER node e CMD exec node src/server.js. O entrypoint da base
+executou Node como PID 1/UID 1000, verificado por /proc e id; SIGTERM encerrou/0.
+Não há build args nem senhas na imagem. As recomendações oficiais fundamentam
+[estágios, USER e digest](https://docs.docker.com/build/building/best-practices/) e
+[contexto/.dockerignore](https://docs.docker.com/build/concepts/context/#dockerignore-files).
+
+.dockerignore nega o contexto geral, reabre manifests/src/sql e exclui segredos/
+artefatos também nesses diretórios. Auditoria real exportou COPY . via FROM
+scratch e confirmou 10 arquivos, sem node_modules/testes ou marcadores .env/PEM.
+Esses marcadores não continham credenciais e foram removidos após a conferência.
+run-docker.js cria rede bridge e PostgreSQL separados com UUID/labels conferidos,
+senha em memória e dados tmpfs; somente a API publica loopback. Migração pela
+mesma imagem, verify-api.py, health e SQL/DATE passaram; zero linhas e recursos
+temporários ao final. Imagem local preservada. Esse teste não implementa Compose
+nem comprova volume persistente. O aviso Docker --time da primeira execução foi
+corrigido para --timeout no novo runner; segunda execução passou sem o aviso.
 
 Compose: serviços `api` e `db`, rede bridge `reservas-net`, volume nomeado
 `reservas-data` em `/var/lib/postgresql/data`. Publicar API apenas em
