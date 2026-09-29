@@ -293,15 +293,21 @@ NAT para o CRUD. Uma EC2 em uma pública basta; não propor ALB/NAT Gateway.
 | Módulo | Entradas principais | Saídas / integração |
 |---|---|---|
 | `vpc` | Nome, CIDR, AZs, CIDRs de subnets, tags. | `vpc_id`, `public_subnet_ids`, `private_subnet_ids`; alimenta SG, EC2 e RDS. |
-| `security-group` | `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
+| `security-group` | `name`, `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
 | `ec2` | Primeira pública, SG EC2, AMI, `t2.micro`, key pair existente, user-data sem segredos, profile existente opcional, tags. | ID e IP público; URL API composta no root. |
 | `rds` | Privadas, SG RDS, engine version, `db.t3.micro`, nome do banco, credenciais sensíveis, tags. | Identifier, hostname e porta; alimenta configuração posterior do deploy na EC2. |
 
-D10: SG EC2 restringe SSH ao `<SSH_CIDR>` confirmado (preferir IP atual /32)
-e 3000 a `<API_ALLOWED_CIDRS>` necessários para aluno/professor. Não escolher
-`0.0.0.0/0` automaticamente; consultar acesso da avaliação antes do plan.
-Saída EC2 permite DNS VPC, HTTP/HTTPS para instalação/artefatos/serviços e
-5432 ao SG RDS; revisar regras efetivas. RDS não ganha regra 5432 por CIDR.
+D10: conforme decisão do aluno em T13, SG EC2 restringe SSH e API 3000 somente
+ao seu IP atual IPv4 /32, explícito e revalidado antes do plano. Módulo rejeita
+CIDRs amplos/IPv6/conjunto vazio; mais IPs /32 exigem aprovação do acesso.
+Saída EC2 permite TCP 80/443 para instalação/artefatos/serviços e TCP 5432 ao
+SG RDS. DNS VPC AmazonProvidedDNS não é filtrado por SG (particularidade AWS),
+portanto não criar regra 53 externa nem alegar filtragem do Resolver por SG.
+RDS ganha somente entrada TCP 5432 do SG EC2 e nenhuma saída iniciada;
+respostas das conexões permitidas são stateful. Conferir regras efetivas em T23.
+Sem regras inline nos SGs; recursos de regras separados referenciam ambos os
+IDs após criação dos grupos, evitando ciclos. Outputs aguardam suas regras.
+Provider remove o ALLOW ALL default ao criar SG novo; essa execução ainda futura.
 RDS privado e encriptado, subnet group privado, armazenamento inicial 20 GiB
 e Single-AZ propostos para o Lab; isso não remove a exigência de subnets em
 duas AZs. Disco EC2 encriptado, IMDSv2 e key pair existente. Tags
@@ -640,3 +646,20 @@ root composto/plan AWS/execução T21/T23 futuros. T17 local verificada, próxim
 Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
 para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
 reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.
+
+## Implementação T18 — regras separadas, validada localmente
+
+Em 29/09/2026, módulo security-group adicionou name para nomes/tags distintos,
+sem mudar o contrato ec2_sg_id/rds_sg_id. Inputs explícitos/sem defaults, tags
+obrigatórias e IPv4 /32 por decisão do aluno, não exigência adicional do professor.
+Recursos aws_vpc_security_group_ingress_rule/egress_rule conforme provider fixado;
+grupo sem inline. Regra RDS usa somente SG EC2; saída EC2 PostgreSQL só SG RDS.
+Saída web limitada às portas 80/443; nenhuma regra RDS de saída iniciada.
+D10 esclarecido sobre DNS não filtrado por SG e natureza stateful, conforme
+[fonte AWS](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+e [provider 6.65.0](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/security_group.html.markdown).
+Não introduzir DNS Firewall ou regras inline para aparentar filtragem do Resolver.
+Fmt inicial 2 por teste multilinha corrigido; fmt/init/validate/grafo 0 e
+14 testes mock/command=plan 0. Grafo confirma referências/outputs sem ciclos;
+schema confirma tags. Evidência security-group-validate.txt, sem API AWS ou
+plan principal. R15/R19/R22 parciais até T21/T23; próxima T19, não implementada.

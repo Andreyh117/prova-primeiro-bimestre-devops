@@ -278,3 +278,22 @@ T18 não iniciada.
 Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
 para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
 reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.
+
+## Estado atual — T18 local verificada em 29/09/2026
+
+Substitui próxima T18 dos registros históricos: agora T19. Módulo
+infra/modules/security-group, quatro .tf/teste, cinco inputs/dois outputs.
+Dois SGs na VPC fornecida, sem inline; regras modernas separadas/tagueadas,
+SSH22/API3000 somente IPv4 /32 explícitos, RDS5432 somente SG EC2, saída EC25432
+só SG RDS e webTCP80/443. Sem saída iniciada RDS; respostas stateful. Resolver
+AmazonProvidedDNS não é filtrado por SG; não criar regra 53 nem afirmar DNS
+bloqueado por SG. AWS/provider fixado consultados; não é teste cloud.
+Outputs aguardam regras; grafo nativo0 confirma 12 vínculos e nenhum ciclo.
+Fmt primeiro2 corrigido expressão multilinha no teste, fmt-check/init/validate0,
+14 testes locais mock/command=plan0 e schema0. Evidência security-group-validate.txt,
+lockfile readonly/mirror/cópia exata/sem state/credenciais; não comprovam AWS.
+T01–T18 verificadas em seus ambientes, T19–T34 pendentes; R15/R19/R22 parciais.
+Root/plano real T21/aplicação autorizada T23 futuros. Não repetir suites
+API/Docker/Compose/bootstrap inalteradas; preservar state/plan/tfvars/cache.
+Um commit real/coerente necessário por marco, feature preservada/mergeT32,
+sem push/PR automático. Nenhum módulo RDS/EC2 implementado nesta tarefa.

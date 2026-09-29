@@ -1063,3 +1063,63 @@ conferir prefixo/tmp/sem symlink/ausência de state-plan. Cache original do prov
 no bootstrap preservado por inode/tamanho/mtime; rmtree não seguiu symlink.
 Logs brutos/metadados de verificações e falhas mantidos em /tmp. Nenhum recurso
 AWS/state/plan/tfvars do projeto apagado. Reprodução documentada recria root novo.
+
+## T18 — security groups e regras separadas, 29/09/2026
+
+Prompt do aluno: “Revisei o que foi feito. Execute a próxima tarefa pendente de
+specs/tasks.md, seguindo AGENTS.md. Implemente, valide, corrija e registre evidências
+reais. Explique o conceito aplicado, os arquivos alterados, o teste executado e o
+próximo passo. Se houver bloqueio, registre-o sem simular sucesso.”
+Git inicial 2645a5f, feature limpa/main 21cb5f0 preservada, 13 commits reais/zero
+merges; próxima T18. Codex leu tarefa/R15/R19/D10/instruções e consultou fontes
+primárias AWS/provider 6.65 pelo navegador. Terminal isolado apresenta mountinfo;
+comandos locais fora do isolamento autorizado, sem atribuir isso à aplicação.
+Sem skill/subagentes/soluções de colegas ou experiência pessoal inventada.
+
+Conceito: menor privilégio, SGs stateful; separar grupos e regras evita ciclos
+entre EC2/RDS. Cinco inputs explícitos, incluindo name para nomes/tags distintos;
+outputs liberam consumidores após regras prontas. SSH/API /32 por decisão do
+aluno; API for_each admite somente hosts aprovados, mais IPs exigem revisão.
+PostgreSQL usa SG, não CIDR. Saída EC2 TCP 80/443 e 5432; RDS sem saída iniciada.
+Provider remove ALLOW ALL default ao criar novos SGs. Resolver AWS não é filtrado
+por SG: D10 esclarecido, sem regra 53 externa/DNS Firewall. Fontes e limites em
+security-group-validate.txt; comportamentos ainda não testados na AWS.
+
+Implementados main/variables/outputs/versions.tf e tests/security.tftest.hcl em
+infra/modules/security-group, mantendo Terraform 1.16.2/provider 6.65.0. Root
+/tmp/devops-t18-security-p6zqjwho com cópia exata/lockfile bootstrap readonly/cache
+filesystem, sem state/tfvars/segredos. Ambiente remove AWS_*, TF_VAR_*, CLIargs
+/logs; config AWS=/dev/null/IMDS disabled. Init unauthenticated pelo mirror,
+não novo download assinado. Primeiro fmt 08:07:45/2 Invalid expression por
+multilinha do teste; parênteses corrigiram sem relaxar guardas. Retry fmt
+08:08:01/0; init 08:08:09–12/0, fmt-check 08:08:19/0, validate 08:08:20–24/0,
+grafo 08:08:21–25/0, test 08:08:32–36/0: 14 passed/0 failed, todos mock/plan.
+Schema 08:08:59–08:09:05/0 e revisão 08:10:01/0: tags suportadas, 12 vínculos
+sem ciclo, DB somente SG, outputs aguardam regras, cópias idênticas/sem inline.
+Capturas/hashes preservados, inclusive fmt falhado; nenhuma falha simulada.
+
+README com reprodução/índice e seis documentos de estado/design/matriz/diário
+sincronizados. R15/R19/R22 parciais; T18 local verificada. Nenhuma API AWS,
+plan principal/apply/destroy/backend remoto/deploy; nenhum state/plan no root
+local. API/Docker/Compose/guia/bootstrap e logs anteriores preservados; sem
+repetir suites inalteradas. Próxima T19, RDS privado, não implementada. Sem
+bloqueio; um único commit coerente necessário após revisão de escopo/segredos,
+sem commits vazios/quantidade/push/merge/PR nesta etapa.
+
+Conferência final 2026-09-29T08:13:49-03:00/0: doze arquivos no escopo, 62 anteriores
+intactos por SHA-256, histórico do diário/AGENTS como prefixos. Links/fences/
+newlines/diff-check0; 34 tarefas únicas/T01–T18 verificadas/T19–T34 pendentes,
+32 requisitos únicos e parciais mantidos. Scanner delimitado sem achados; conta
+/IP privados ausentes de arquivos públicos, state/plan/tfvars/preflight ignorados
+/0600. Cópia e lockfile idênticos; fmt inicial e demais capturas por hash.
+Em 2026-09-29T08:14:59-03:00, removido somente root temporário próprio após verificar ausência
+recursiva de state/plan e prefixo/tmp/sem symlink. Cache original preservado por
+inode/tamanho/mtime, sem seguir symlink; logs/metadados mantidos em /tmp.
+Bootstrap e recursos AWS não foram apagados; um commit real/coerente de T18.
+
+A revisão staged apontou falha real não vista pelo diff anterior de arquivos
+rastreados: git diff --cached --check retornou 2, seis espaços finais em linhas
+decorativas da captura fmt (o wrapper Python retornou 1). Rechecagem registrada
+em 2026-09-29T08:16:16-03:00 confirmou 2; normalizados somente esses seis espaços na
+evidência publicada. Log bruto/hash fmt preservados, transformação explicitada,
+sem código/teste Terraform alterado nem reexecução de suites inalteradas.

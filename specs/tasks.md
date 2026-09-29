@@ -43,7 +43,9 @@ preservou bucket/tabela e aplicou três configs S3; consultas AWS e plan posteri
 sem mudanças passaram. Evidência backend.txt, bucket físico fora da criação/
 remoção TF. Após revisão de T16, aluno autorizou T17, agora localmente verificada:
 módulo VPC/testes, fmt/init/validate/grafo 0 e nove testes mock locais 0; sem API
-AWS/provisionamento. Próxima pendente T18. State remoto/locking efetivo T21;
+AWS/provisionamento. Após revisão, T18 local verificada: security-group/regras
+separadas, fmt/init/validate/grafo 0 e 14 testes mock locais 0. Primeiro fmt 2
+corrigido, captura preservada. Próxima pendente T19. State remoto/locking efetivo T21;
 principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
@@ -72,7 +74,7 @@ Cada tarefa recebe entrada no diário.
 | T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | backend-revisao.txt: plano/identidade/custo revisados e autorização explícita recebida em 29/09; plano local ignorado. | verificado |
 | T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt: falha SCP parcial, recuperação sem exclusão, apply/8 consultas AWS/plan No changes; principal pendente. | verificado |
 | T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | vpc-validate.txt/diário: fmt/init/validate/grafo 0, duas falhas corrigidas e 9 testes locais mock aprovados; AWS futura. | verificado |
-| T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | Diário/checklist de SG; execução efetiva ainda pendente. | pendente |
+| T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | security-group-validate.txt: fmt inicial 2 corrigido; fmt/init/validate/grafo 0, 14 testes locais mock 0, referências/outputs/schema conferidos; AWS futura. | verificado |
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | Diário/checklist do RDS. | pendente |
 | T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | Diário/checklist EC2. | pendente |
 | T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init real/validate/plan; outputs alimentam inputs; confirmar state remoto/locking e tags. | terraform-validate.txt, terraform-plan.txt, backend-locking.txt; commit módulos. | pendente |
@@ -593,3 +595,22 @@ merge/publicação futura.
 Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
 para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
 reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.
+
+### T18 — security-group verificada localmente em 29/09/2026
+
+Aluno revisou T17 e autorizou próxima tarefa, início HEAD2645a5f/13 commits
+reais, feat/api-reservas limpa/main preservada, zero merges. Quatro .tf e teste
+security.tftest.hcl, cinco inputs/dois outputs. Dois SGs/grupos sem regras inline;
+entradas SSH22/API3000 IPv4 /32 explícitos, RDS5432 somente SG EC2; saídas EC2
+TCP80/443 e 5432 apenas SG RDS. RDS sem saída iniciada, respostas stateful.
+Tags comuns/Name em grupos/regras; output depende de regras, sem ciclos.
+Fmt inicial 2: Invalid expression no teste multilinha; parênteses corrigiram,
+retry0, falha preservada. Init mirror/lockfile readonly0, validate0,fmt-check0,
+grafo0/12 vínculos e schema0; 14 testes LOCAIS mock/command=plan0. Cópias idênticas,
+nenhum state/plan no root /tmp, sem credenciais/chamadas AWS/backend principal.
+Fontes AWS/provider 6.65 esclarecem DNS Resolver não filtrado por SG/defaultegress
+removido na criação; execução/conectividade reais ainda T23/T24. Evidências em
+security-group-validate.txt. R15/R19/R22 parciais; T18 local verificada, próxima
+T19 não iniciada. Sem bloqueio; sem repetir suites inalteradas/API/Docker/Compose/
+bootstrap. Commit único coerente de implementação/evidência, sem quantidade,
+sem push/merge/PR. Aplicação principal exige plano/autorização próprios T21/T22.

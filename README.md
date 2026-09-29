@@ -58,10 +58,12 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T18, security-group. T17 implementou VPC/quatro subnets/IGW/tabelas e
+pendente: T19, RDS privado. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usam provider mock, sem chamadas AWS: rede não implantada. State remoto/locking
-principal são T21; EC2/RDS/CRUD na nuvem e limpeza permanecem pendentes.
+principal são T21. T18 implementou grupos EC2/RDS e regras separadas, com
+14 testes mock locais, fmt/init/validate/grafo aprovados. EC2/RDS/CRUD na nuvem
+e limpeza permanecem pendentes; os security groups ainda não foram aplicados.
 
 ## Contrato aprovado para implementação
 
@@ -117,6 +119,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Revisão bootstrap T15](evidencias/backend-revisao.txt): plano preservado, consultas AWS, tarifas/premissas/cálculo e autorização explícita.
 - [Bootstrap aplicado T16](evidencias/backend.txt): falha SCP parcial, recuperação sem exclusão, apply/consultas reais e plano posterior sem mudanças.
 - [Módulo VPC T17](evidencias/vpc-validate.txt): fmt/init/validate/grafo reais, duas falhas de testes corrigidas e nove casos locais aprovados; sem execução AWS.
+- [Security groups T18](evidencias/security-group-validate.txt): fmt inicial corrigido, fmt/init/validate/grafo e 14 testes locais aprovados; sem execução AWS.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -414,7 +417,8 @@ A key pair retornada não comprova posse da chave privada ou conexão SSH.
 opções locais em 0600, ignorado; não deve ser publicado. Não contém credenciais
 nem chave privada e não é arquivo Terraform de variáveis/state. O aluno confirmou
 no painel US$0 usados de US$50; esse saldo não foi medido pela API. Os CIDRs definidos para SSH/API
-são o IP atual /32 por decisão dele; as regras serão implementadas em T18.
+são o IP atual /32 por decisão dele; as regras foram implementadas localmente
+em T18, ainda sem aplicação AWS. Revalidar IP/identidade antes do plano real.
 Reconsultar IP, STS e opções
 antes de plan/apply: validade observada agora não garante token válido depois.
 
@@ -567,7 +571,7 @@ recuperação apresentada antes do apply: três configs S3, bucket preservado,
 tabela sem mudança, zero exclusões. Hash do plano de recuperação:
 8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2.
 [AGENTS, regra 10](AGENTS.md) mantém revisão/autorização para novos escopos,
-principal e teardown. Ao concluir T16 a próxima era T17; agora T18.
+principal e teardown. Ao concluir T16 a próxima era T17; agora T19.
 
 
 ### Módulo VPC — T17 verificada localmente
@@ -627,7 +631,73 @@ externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois
 reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
 comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
 cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
-Root composto/plan real T21, aplicação T23. Próxima tarefa: T18.
+Root composto/plan real T21, aplicação T23. T18 local concluída abaixo; próxima T19.
+
+### Security groups — T18 verificada localmente
+
+[infra/modules/security-group](infra/modules/security-group/main.tf) recebe cinco
+inputs obrigatórios: name, vpc_id, ssh_cidr, api_allowed_cidrs e tags. Não possui
+provider/backend ou lockfile próprio. Terraform 1.16.2/AWS 6.65.0 preservados.
+Dois SGs na VPC fornecida; regras separadas evitam ciclos e conflitos com inline.
+Outputs ec2_sg_id/rds_sg_id aguardam regras antes de liberar consumidores.
+
+| Grupo / direção | Protocolo / porta | Origem ou destino |
+|---|---|---|
+| EC2 / entrada | TCP 22 | IP aluno IPv4 /32 explícito |
+| EC2 / entrada | TCP 3000 | IPv4s /32 aprovados; atualmente somente aluno |
+| EC2 / saída | TCP 80 e 443 | 0.0.0.0/0 para instalação/artefatos |
+| EC2 / saída | TCP 5432 | SG do RDS |
+| RDS / entrada | TCP 5432 | SG da EC2, sem CIDR |
+| RDS / saída iniciada | nenhuma | Respostas permitidas por estado da conexão |
+
+SGs são stateful: respostas a tráfego permitido não precisam de regra inversa.
+O DNS AmazonProvidedDNS/Resolver da VPC não é filtrado por SG; não foi criada
+regra 53 para DNS externo. Esses comportamentos constam na
+[documentação AWS](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html);
+ainda não foram testados em recursos desta prova. O
+[provider fixado](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/security_group.html.markdown)
+remove ALLOW ALL ao criar SG novo e recomenda regras separadas; não misturá-las
+com ingress/egress inline. Tags Project/Environment/Owner/Name em grupos/regras.
+
+Para conferir localmente, usar o mesmo cache/lockfile inicializado do bootstrap.
+O bloco para na falha e preserva root; não copiar state/tfvars nem executar
+plan/apply real nele. Tests/security usa mock_provider e todos os runs plan.
+IPs de documentação RFC 5737 e ID VPC fictício são exclusivos dos testes;
+no plano real, revalidar conta/us-east-1/IP atual e fornecer valores privados.
+
+```bash
+(
+  set -eu
+  umask 077
+  repo_dir=$(pwd)
+  sg_validation_root=$(mktemp -d /tmp/prova-sg-XXXXXX)
+  cp infra/modules/security-group/*.tf "$sg_validation_root/"
+  cp -R infra/modules/security-group/tests "$sg_validation_root/"
+  cp infra/backend/.terraform.lock.hcl "$sg_validation_root/.terraform.lock.hcl"
+  printf 'provider_installation {\n  filesystem_mirror {\n    path = "%s/infra/backend/.terraform/providers"\n    include = ["registry.terraform.io/hashicorp/aws"]\n  }\n}\n' "$repo_dir" > "$sg_validation_root/provider-mirror.tfrc"
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
+  unset TF_CLI_ARGS TF_CLI_ARGS_init TF_CLI_ARGS_validate TF_CLI_ARGS_test TF_CLI_ARGS_graph TF_LOG TF_LOG_PATH
+  export TF_CLI_CONFIG_FILE="$sg_validation_root/provider-mirror.tfrc"
+  export AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_EC2_METADATA_DISABLED=true
+  printf 'Root temporário: %s\n' "$sg_validation_root"
+  terraform fmt -check -recursive infra
+  terraform -chdir="$sg_validation_root" init -backend=false -input=false -no-color -lockfile=readonly
+  terraform -chdir="$sg_validation_root" validate -no-color
+  terraform -chdir="$sg_validation_root" test -no-color
+  terraform -chdir="$sg_validation_root" graph -type=plan > "$sg_validation_root/dependencies.dot"
+)
+```
+
+Resultados reais em [security-group-validate.txt](evidencias/security-group-validate.txt):
+14 casos aprovados, incluindo contrato/hosts múltiplos e rejeição de VPC inválida,
+SSH/API amplos/IPv6/malformados, API vazia, nome reservado e Owner ausente.
+Primeiro fmt retornou 2 por expressão multilinha do teste, corrigida com
+parênteses; falha preservada. Fmt/init/validate/grafo finais retornaram 0.
+Schema confirmou tagging; grafo nativo conferiu 12 vínculos e ausência de ciclo.
+Init filesystem informa unauthenticated; lockfile readonly/hashes preservados.
+Após conferir, remover somente o root temporário mostrado; logs reais preservados.
+Não comprova conectividade, SGs efetivos, deploy ou state remoto. R15/R19/R22
+continuam em andamento; próxima tarefa T19 (RDS privado), root/plano T21/AWS T23.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega
