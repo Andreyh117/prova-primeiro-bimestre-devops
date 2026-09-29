@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T11 foram concluídas. O commit inicial `21cb5f0` está em
+Em 28/09/2026, T01–T12 foram concluídas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -40,7 +40,12 @@ bootstrap SQL, dependência de saúde e CRUD/SQL reais. .env.example está dispo
 config sem senha retornou 1 esperado. Fixture/ambiente de teste foram limpos.
 T10 foi o sétimo commit real (49dbd5e); merge continua em T32. Infraestrutura AWS
 e relatório permanecem pendentes.
-Próxima tarefa: T12, comprovar persistência após recriar containers sem apagar volume.
+T12 comprovou a reserva após recriar api/db, com novos IDs e mesmo volume;
+HTTP/SQL preservaram 01-10-2026/DATE 2026-10-01. Verificador retornou 0 no caso
+válido e 1 nos negativos, limpando apenas seus dados e mantendo a sentinela.
+A primeira execução falhou antes do Docker por uso incorreto de Path.open;
+foi corrigida e as saídas anteriores foram preservadas.
+Próxima tarefa: T13, preflight AWS somente com consultas e decisões verificáveis.
 
 ## Contrato aprovado para implementação
 
@@ -89,6 +94,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Execução Docker T10](evidencias/docker-run.txt): PID 1 não-root, PostgreSQL real, health/CRUD/SQL, SIGTERM e limpeza.
 - [Compose ps T11](evidencias/compose-ps.txt): config, caso negativo sem senha, build/subida e serviços healthy.
 - [Compose rede/saúde T11](evidencias/compose-rede-saude.txt): ordem real, rede/volume/portas, CRUD/SQL, defaults do exemplo e limpeza.
+- [Persistência Compose T12](evidencias/compose-persistencia.txt): falha inicial/correção, HTTP/SQL antes/depois, IDs/volume, negativos, checkpoint e limpeza reais.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -168,7 +174,7 @@ próprio de teste e confira a URL antes de executar.
 A persistência nativa é reproduzida por `npm --prefix app test`: POST, consulta
 SQL, SIGTERM/exit 0, consulta SQL enquanto a API está parada, novo PID na mesma
 porta e GET/SQL idênticos. O banco permanece ativo. A persistência de volume
-após recriar containers será verificada em T12; RDS será validado na etapa AWS.
+após recriar containers foi verificada em T12; RDS será validado na etapa AWS.
 
 `git status --short --branch` permite conferir o trabalho local. `.gitignore`
 evita inclusão acidental de arquivos locais, mas não protege arquivos já
@@ -217,8 +223,8 @@ completo nem variáveis contendo senhas. Logs anteriores ficam como evidências
 históricas; executar o runner não altera os logs versionados automaticamente.
 
 O teste Docker é separado dos 51 testes nativos de T09 e do Compose T11 abaixo.
-A prova de persistência ao recriar containers/volume será T12. RDS/TLS continuam
-futuros.
+T12 comprovou persistência ao recriar containers mantendo o volume. RDS/TLS
+continuam futuros.
 
 ## Executar API e PostgreSQL com Compose
 
@@ -260,9 +266,9 @@ parar/remover containers e rede mantendo o volume do seu projeto:
 docker compose down
 ```
 
-A criação e o mount desse volume foram verificados em T11; a prova de retenção
-de uma reserva após recriar containers ainda será T12. Não usar down -v nesse
-teste. Em volume existente, mudança de schema exige migração explícita; alterar
+A criação e o mount desse volume foram verificados em T11; a retenção de uma
+reserva após recriar api/db foi comprovada em T12. Não usar down -v nesse teste.
+Em volume existente, mudança de schema exige migração explícita; alterar
 POSTGRES_* no .env não reinicializa nem troca a senha do banco já criado.
 
 Para repetir o teste isolado de T11, sem preparar/alterar seu .env:
@@ -280,6 +286,74 @@ CRUD/SQL. Após remover as linhas, encerra seu projeto sem down -v e remove
 separadamente somente o volume novo/exclusivo com labels conferidos. Limpa env
 privado; mantém .env e volumes de outros projetos. Falhas retornam não zero;
 o runner não atualiza evidências versionadas nem realiza AWS/recriação T12.
+
+## Verificar persistência do Compose
+
+O volume nomeado guarda dados fora do ciclo de vida do container. T12 conferiu
+IDs diferentes para api/db, mesmo nome/data de criação do volume e reserva
+idêntica por GET e SQL. JSON permaneceu DD-MM-YYYY e PostgreSQL manteve DATE.
+[Documentação Docker sobre volumes](https://docs.docker.com/engine/storage/volumes/).
+
+Para reproduzir o teste isolado, sem configurar ou alterar seu .env:
+
+```bash
+npm --prefix app run test:persistence
+```
+
+[run-persistence.py](app/test/run-persistence.py) usa Python 3 stdlib, Docker,
+BuildKit e Compose (validado 3.12.3/v5.5.1), além de npm para esse atalho. Não
+requer pip nem dependências Node no host. Cria projeto UUID e env privado 0600
+em /tmp, publica porta dinâmica em loopback e usa as imagens fixadas existentes.
+Confere SQL/HTTP, recria somente api/db desse projeto com --force-recreate,
+retendo o volume, verifica um negativo com status alterado somente na linha
+própria, rejeita prova sem recriação e confere checkpoint/cancelamento. Uma
+sentinela de outro marcador deve sobreviver a todas as limpezas do verificador.
+
+Ao final, o runner remove sua sentinela, confirma SQL total 0, confere labels,
+encerra seu projeto sem -v e remove separadamente o volume novo/exclusivo vazio.
+Env/checkpoints temporários são removidos. Se a limpeza não puder ser comprovada,
+retorna 1 e mantém fixture/env/checkpoint para recuperação. A imagem local fica
+disponível; volumes e .env de outros projetos são preservados. Executar o teste
+não atualiza evidências versionadas automaticamente nem acessa AWS.
+
+[verify-persistence.py](scripts/verify-persistence.py) verifica um Compose já
+iniciado. Ele não executa up/down nem remove containers/volumes; o aluno ou
+runner controla a recriação. Reutiliza o cliente HTTP de verify-api.py e executa
+SQL por psql já presente no db. Descobre a porta atual em loopback, inclusive
+se mudar após recriação. Usa o env-file explícito, removendo só as variáveis
+herdadas do shell que alterariam a configuração Compose desse projeto.
+
+Exemplo manual na raiz, depois de preparar .env conforme a seção anterior:
+
+```bash
+persist_project=prova-reservas-persistencia-manual
+persist_checkpoint_dir=$(mktemp -d /tmp/prova-reservas-check-XXXXXX)
+docker compose --project-name "$persist_project" --env-file .env up --build --wait
+python3 scripts/verify-persistence.py prepare --project-name "$persist_project" --env-file .env --checkpoint "$persist_checkpoint_dir/reserva.json"
+docker compose --project-name "$persist_project" --env-file .env up --no-build --force-recreate --wait
+python3 scripts/verify-persistence.py check --project-name "$persist_project" --env-file .env --checkpoint "$persist_checkpoint_dir/reserva.json"
+rmdir "$persist_checkpoint_dir"
+```
+
+Prepare cria marcador/ID próprios e checkpoint exclusivo 0600, registra SQL e
+IDs/volume; exit 0 nessa fase significa apenas que a linha está pronta para a
+recriação. Não sobrescreve checkpoint existente. Check exige novos IDs de ambos
+os containers e mesmo volume, compara GET/SQL e limpa seu ID em finally, após
+confirmar o marcador por GET; SQL deve contar zero linhas próprias antes de
+remover checkpoint. Retorna 0 somente com verificação/limpeza completas, 1 na
+falha e 2 para CLI inválida. Não excluir o checkpoint entre prepare e check.
+
+Para cancelar depois de prepare, sem afirmar persistência:
+
+```bash
+python3 scripts/verify-persistence.py cleanup --project-name "$persist_project" --env-file .env --checkpoint "$persist_checkpoint_dir/reserva.json"
+```
+
+Cleanup remove só a reserva/checkpoint próprios; mantém Compose e volume. Se
+HTTP/SQL impedir a limpeza, o script informa marcador/IDs pendentes e retém o
+checkpoint. POST com resposta incerta requer conferir o marcador no banco;
+nenhuma exclusão geral é feita. As três fases têm comandos limitados por prazo
+(HTTP 5s, Docker 30s, SQL 5s), sem imprimir credenciais/config expandida.
 
 ## Configuração do ambiente
 

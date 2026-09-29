@@ -20,8 +20,8 @@ POST/GET HTTP reais, validação e leitura SQL independente, com limpeza complet
 T08 passou 48 testes com CRUD completo, health/503 e falhas reais do banco.
 Restart da API nativa foi verificado em T09; Dockerfile/contexto/runtime em T10.
 Compose/ambiente/healthchecks foram verificados em T11 com CRUD/SQL reais.
-Persistência após recriar containers mantendo o volume e Terraform/AWS continuam
-pendentes.
+T12 comprovou persistência após recriar containers mantendo o volume.
+Terraform/AWS continuam pendentes.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. Seis commits reais foram confirmados em T09;
 R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
@@ -40,7 +40,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R07 / P | GET `/health` implementado e usado pelo healthcheck da API no Compose. | Inspecionar healthcheck e resposta HTTP; para a decisão D05, testar também indisponibilidade do banco. | `evidencias/health-local.txt`, `evidencias/health-aws.txt`, Compose. | em andamento |
 | R08 / P | `app/Dockerfile` funcional, usuário não-root e `app/.dockerignore`; build e execução comprovados. Multi-stage é recomendado, não obrigatório. | Build real, UID não zero, API executada em container e banco real acessível. | `evidencias/docker-build.txt`, `evidencias/docker-run.txt` (T10 real, UID 1000 e HTTP/SQL). | verificado |
 | R09 / P | `docker-compose.yml` inicia API + PostgreSQL com um comando após configurar o ambiente. | `docker compose up --build --wait`; ambos saudáveis e CRUD funcional. | `evidencias/compose-ps.txt`, `evidencias/api-local.txt` (T11 real). | verificado |
-| R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | pendente |
+| R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | verificado |
 | R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt` (T11 real). | verificado |
 | R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore` e compose-rede-saude.txt (config/mapeamentos/ignores reais). | verificado |
 | R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-seguranca.txt`, plano sanitizado. | pendente |
@@ -59,7 +59,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R26 / P | No fork da disciplina, PR altera apenas `entregas/provaPrimeiroBi/6325231/entrega.md`, com link do projeto e evidências; modelo traz aluno, RA, data, IA e checklist. | Conferir diff contra base correta; links funcionais e somente o arquivo de entrega no PR. | Arquivo no fork separado e diff de submissão. | pendente |
 | R27 / P | Apenas um PR por aluno, aberto presencialmente no dia da prova; nenhum commit posterior no PR. | Confirmar data com aluno/professor antes da abertura e revisar submissão completa; registrar URL/base/head/commit final. | PR e `evidencias/entrega-checklist.txt`; abertura fora desta etapa. | pendente |
 | R28 / U | Primeiro inspecionar sem sobrescrever, produzir AGENTS e três specs, separar exigências/decisões e obter revisão antes de código; tarefas pequenas e matriz sincronizada. | Conferência documental T01/T02; aprovação do aluno T03. | Os quatro documentos e registro da etapa em tasks. | verificado |
-| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | scripts/verify-api.py e api-local/postgres-local.txt (T09); demais scripts/logs futuros. | em andamento |
+| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | scripts/verify-api.py (T09), verify-persistence.py/compose-persistencia.txt (T12); scripts AWS/entrega futuros. | em andamento |
 | R30 / U | Diário registra prompts, decisões, correções e resultados reais; nunca inventar identidade, experiência, evidências ou histórico. | Confrontar diário/relatório com comandos, Git e relato do aluno; usar placeholders enquanto faltarem informações. | `docs/diario-ia.md`, specs e relatório. | em andamento |
 | R31 / U | Antes de provisionar/destruir, apresentar plano e obter autorização específica; sem auto-approve ou apagamento antecipado de state/dados. | Diário registra revisão, escopo e autorização antes de cada operação; scripts só verificam. | Diário, planos locais ignorados e evidências sanitizadas. | pendente |
 | R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | app/test/api.test.js e api-local.txt (POST/GET/PUT local); AWS futuro. | em andamento |
@@ -180,3 +180,18 @@ R22 continua parcial até Terraform/AWS. R10 permanece pendente da prova T12:
 volume nomeado declarado/montado em T11 não equivale a testar recriação.
 T10 commitada em 49dbd5e/sete commits; T11 prepara novo marco real; merge T32
 continua pendente, mantendo R02 parcial. Sem bloqueio local/AWS executada.
+
+## Evidência T12 — R10 e avanço parcial R06/R22/R29
+
+R10 verificado localmente: reserva ID 2 e SQL antes/depois de novos containers
+api/db, mesmo volume nomeado e CreatedAt. GET 200/01-10-2026/confirmada;
+SQL DATE 2026-10-01/id/campos preservados. Dois runners após corrigir TypeError
+inicial passaram/0; execução final 23:10:29 -03:00, Compose v5.5.1/PostgreSQL16.15.
+Negativo status próprio alterado para cancelada por SQL retornou check 1;
+sem recriação também retornou 1. Sobrescrita de checkpoint recusada/1 sem
+alterar bytes/linha; cleanup/cancelamento retornou 0. Sentinela ID 1 permaneceu
+intacta por GET/SQL enquanto o verificador limpou seus próprios IDs/marcadores.
+Cleanup final comprovou total SQL 0, labels e zero recursos UUID. Logs de falha
+inicial/correção/reexecuções em compose-persistencia.txt; fontes e comandos README.
+R06/R22/R29 continuam em andamento até RDS/execução AWS/demais scripts, sem
+transformar comprovação local em implantação na nuvem. T13 continua pendente.

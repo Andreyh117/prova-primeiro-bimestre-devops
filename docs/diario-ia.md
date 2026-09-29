@@ -574,3 +574,87 @@ ignores corretos. SHA-256 comprovou guia/Dockerfile/schema/lockfile/API e logs
 anteriores intactos; api-local manteve o prefixo integral. Matriz com 32
 requisitos/34 tarefas: T11/R09/R11/R12 verificados; T12/R10 continuam pendentes.
 Não repetir execução Docker por correções apenas documentais/lexicais.
+
+## 28/09/2026 — T12: persistência ao recriar containers
+
+Prompt: após revisar T11, executar a próxima tarefa de tasks seguindo AGENTS;
+implementar, validar, corrigir e registrar evidências reais. Estado inicial:
+HEAD 534f484, oito commits reais, feat/api-reservas limpa, zero merges. T12
+iniciada; T13/AWS continuam pendentes. Planejado: verify-persistence.py em duas
+fases, HTTP/SQL antes/depois, IDs de api/db diferentes e mesmo volume nomeado.
+O verificador não inicia/remove containers nem volumes; runner isolado controla
+up/recriação local, negativo com divergência real e limpeza só do fixture UUID.
+Sentinela comprova preservação de outro registro. Nunca usar down -v; volume
+exclusivo só pode ser removido no cleanup após comprovar ausência de linhas.
+Documentação primária Docker de up/down/volumes consultada; fontes no design.
+
+O helper de apply_patch falhou ao atualizar o arquivo novo com
+mountinfo path is not absolute; nenhuma mudança daquele patch foi aplicada.
+Atualização realizada por Python fora do isolamento, autorizada pelo ambiente.
+Revisão pré-teste ajustou psql -qAt para suprimir status SET na leitura JSON e
+rastreou checkpoint reservado para tratar POST com resposta incerta. Isso é
+revisão de código antes da primeira execução, não falha simulada de aplicação.
+
+Primeira execução real de npm --prefix app run test:persistence falhou, exit 1,
+antes de criar containers: TypeError, Path.open() não aceita opener. Corrigidas
+as duas reservas de arquivo para open(..., opener=...) da biblioteca padrão,
+que permite criação exclusiva em 0600. Saída original preservada em
+/tmp/devops-t12-test-1.txt; não considerar esta execução aprovada. Nenhuma API
+ou recurso Docker foi criado nela; conferir e limpar o diretório vazio próprio
+antes de repetir o teste completo.
+
+Segunda execução real em 23:09:02 -03:00 passou, exit 0, projeto
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa. Registro ID 2
+preservado, novos IDs de api/db, mesmo volume/data de criação. GET devolveu
+01-10-2026 e SQL DATE 2026-10-01/confirmada. Negativo ID 3 alterado por SQL
+somente no próprio marcador devolveu cancelada e check exit 1 esperado; outro
+negativo ID 4 sem recriar containers foi recusado/1. Limpezas contaram zero
+linhas próprias e mantiveram sentinela ID 1 por HTTP/SQL. Cleanup final removeu
+sentinela, confirmou total 0 e zero recursos UUID; env privado removido.
+
+Revisão pós-execução: adicionar verificação real de recusa a sobrescrever
+checkpoint existente e do subcomando cleanup para cancelamento manual. Apenas
+runner alterado; reexecutar para cobrir esses efeitos de segurança/recuperação,
+sem repetir suítes nativa/T10/T11 cujos códigos/configs não mudaram. Logs das
+duas execuções anteriores preservados; primeiro TypeError não foi omitido.
+
+Execução final da versão revisada em 23:10:29 -03:00 passou/0: projeto
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff, PostgreSQL 16.15,
+Compose v5.5.1, Python 3.12.3. ID 2/campos/DATE preservados após api/db novos;
+mesmo volume e CreatedAt 23:10:30 -03:00. ID 3 negativo cancelada por SQL -> 1;
+ID 4 sem recriar -> 1. Prepare repetido devolveu 1 e preservou checkpoint/linha;
+cleanup de cancelamento ID 5 passou/0. Sentinela ID 1 preservada em todos os
+casos, removida só pelo runner no final. Total SQL 0, down sem -v, volume vazio
+exclusivo removido após labels, zero recursos e arquivos privados temporários.
+Sem defeito API ou bloqueio restante; negativos são falhas controladas esperadas.
+
+Atualizador documental abortou exit 1 por esperar título inexistente no README
+(Ambiente e segredos). Os replace anteriores desse comando já tinham sido
+aplicados; título real Configuração do ambiente conferido e continuação feita
+sem repetir substituições. Falha auxiliar registrada; não é falha do runtime.
+README/AGENTS/specs sincronizados com resultados reais e efeitos dos scripts.
+R10/T12 verificados; R06/R22/R29 continuam parciais até AWS/outros scripts;
+próximo T13, sem iniciar consultas AWS agora. Ferramentas: Codex, terminal
+Git/Python/npm/Docker/Compose e navegador; sem agentes auxiliares nem skill.
+Fonte primária Docker up/down/volumes no design. Nenhuma vivência pessoal foi
+inventada. Evidências anteriores preservadas; saída de cada teste registrada
+com normalização explícita só de trailing whitespace e hash do original /tmp.
+
+Primeira checagem estática pós-teste passou preservação/sintaxe/scanner/links,
+mas abortou exit 1 na contagem de tasks: regex incluiu 34 linhas da tabela
+principal e 6 referências na tabela de planejamento Git (40 ocorrências).
+Conferência mostrou IDs principais únicos/ordenados; corrigido somente o
+checker para exigir a coluna de dependência da tabela principal. Nenhuma tarefa
+ou código da aplicação foi alterado para satisfazer a contagem. Reexecutar a
+validação completa antes de stage/commit; falha auxiliar não representa aceite.
+
+Revalidação estática completa passou exit 0: dez arquivos de escopo, AST Python,
+links/cercas/newlines, manifest/lockfile compatíveis e scanner delimitado sem
+achados. Guia/API/schema/Compose/Dockerfile/lockfile/script T09 e todas evidências
+T04–T11 intactos por SHA-256; transcrições das três execuções conferidas contra
+os originais/hash/exit codes. Matriz 32 requisitos/34 tarefas; T01–T12/R10
+verificados, T13–T34 pendentes. .env ausente, ignores/fonte versionável corretos,
+git diff --check 0. Nenhuma fonte testada foi alterada após a execução final;
+não repetir teste runtime por correções documentais/checker estático.
+Stage terá somente os dez arquivos revisados; conferir bytes e diff --cached
+--check antes de criar o marco Conventional, sem merge/push/commit vazio.

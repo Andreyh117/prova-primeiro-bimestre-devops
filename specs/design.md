@@ -7,8 +7,8 @@ data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
 conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
 locais aprovados. T09 verificou script/restart nativo com 51 testes. T10 validou
 build/contexto/UID/CRUD/SQL em imagem Docker. T11 validou Compose, saúde/ordem,
-rede/volume/ambiente e CRUD/SQL. Persistência após recriar containers (T12) e
-infraestrutura continuam futuros.
+rede/volume/ambiente e CRUD/SQL. T12 comprovou persistência após recriar api/db
+mantendo o volume nomeado, com HTTP/SQL e negativos reais. Infraestrutura é futura.
 Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
@@ -248,6 +248,38 @@ Persistência: criar linha, conferir SQL, recriar API/banco preservando o volume
 buscar novamente e limpar somente o registro criado pelo teste. Nunca `down -v`
 para testar persistência. Testes de erro exercitam ausentes, vazios, tipos errados,
 datas impossíveis, status desconhecido, IDs inválidos e 404.
+
+### T12 — decisão e implementação da verificação
+
+verify-persistence.py usa duas fases para manter verificação e recriação local
+separadas: prepare grava linha via HTTP, confere SQL e salva checkpoint 0600
+exclusivo; check exige IDs diferentes de api/db, mesmo nome/data de criação do
+volume e linha idêntica por GET/SQL. Reutiliza Verifier de verify-api.py, stdlib
+Python e psql do db. Inspects limitados a IDs/labels/state/mounts/CreatedAt;
+nenhum ambiente/senha/config expandido é publicado. ID inteiro e marcador UUID
+validados limitam as consultas SQL; cleanup HTTP confere marcador antes de DELETE.
+Check limpa a linha própria em finally mesmo na divergência, confirma SQL count
+0 e remove checkpoint. Cleanup separado permite cancelar prepare; não declara
+persistência. Falha de limpeza mantém checkpoint e informa IDs/marcador; POST
+sem resposta exige conferência. Nunca faz up/down nem remoção de volumes.
+
+run-persistence.py/test:persistence cria fixture local UUID e env 0600 fora do
+repo. Mantém sentinela para comprovar que limpezas do verificador não excluem
+outro registro. Recria api/db via up --no-build --force-recreate --wait, retendo
+volume; IDs/CreatedAt e HTTP/SQL são reais. Negativo altera somente status da
+linha própria por SQL e deve retornar 1; outro negativo sem recriação também
+retorna 1. Proteção contra sobrescrita e cancelamento são verificados. Ao final,
+remove sentinela, exige total SQL 0 e labels próprias antes de down sem -v e
+remoção separada do volume novo vazio. Em falha de cleanup, preserva fixture/env
+para recuperação. Não usa recurso AWS nem dados/volumes de outros projetos.
+
+Fontes primárias consultadas em 28/09/2026:
+[up/force-recreate preserva volumes montados](https://docs.docker.com/reference/cli/docker/compose/up/),
+[down sem --volumes](https://docs.docker.com/reference/cli/docker/compose/down/),
+[ciclo de vida de volumes](https://docs.docker.com/engine/storage/volumes/).
+A primeira execução falhou por Path.open(opener=...), corrigida para open da
+stdlib; resultados de cada execução em compose-persistencia.txt/diário.
+R10 local comprovado; não estender esse aceite a RDS/execução AWS.
 
 ## Rede AWS e contratos dos módulos
 

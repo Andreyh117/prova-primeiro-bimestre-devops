@@ -16,33 +16,35 @@ Fontes consultadas em 27/09/2026:
   decisões propostas e acompanhamento. Não transformar escolhas do design em
   critérios que o professor teria exigido.
 
-Em 28/09/2026, o aluno revisou T10 e autorizou T11. T01–T11 estão verificadas em
-`feat/api-reservas`. T10 foi commitada em 49dbd5e, sete commits reais; merge em T32
-continua pendente. Código da API/schema/Dockerfile/lockfile e evidências T06–T10
-preservados. Suíte nativa de 51 testes (T09) e test:docker (T10) não repetidos:
-T11 verificou o Compose com healthchecks e os mesmos códigos.
+Em 28/09/2026, o aluno revisou T11 e autorizou T12, verificada localmente.
+T01–T12 estão verificadas em feat/api-reservas. HEAD inicial de T12 era 534f484,
+oito commits reais; merge permanece T32. Código API/schema/Dockerfile/Compose/
+lockfile e evidências anteriores preservados; o novo npm script não muda deps.
 
-`npm --prefix app run test:compose` passou com Compose v5.5.1, exit 0. Config
-sem senha retornou 1 esperado; config válido/JSON privado conferiu mapeamento
-POSTGRES_* -> PG*. Containers partiram parados: db saudável às 22:41:56.797
--03:00, API iniciou às 22:41:57.175 -03:00; ps mostrou ambos healthy. Rede bridge
-reservas-net por projeto, banco sem porta publicada, API loopback 32775 no teste
-(padrão 3000), volume nomeado reservas-data e SQL bootstrap read-only confirmados.
-/health, seis rotas e SQL reais com PostgreSQL 16.15/UID API 1000. JSON 01-10-2026,
-SQL DATE 2026-10-01; zero linhas ao final. Fixture UUID foi encerrado, volume
-novo/exclusivo removido separadamente após conferir labels; zero recursos do teste.
-Ambiente temporário 0600 em /tmp removido; nenhum .env do usuário criado/alterado.
+verify-persistence.py tem fases prepare/check/cleanup: HTTP/SQL em Compose já
+iniciado, checkpoint exclusivo 0600 fora do repo, IDs novos de api/db e mesmo
+nome/CreatedAt do volume. Não executa up/down nem remove containers/volumes.
+Check compara DD-MM-YYYY/DATE e limpa somente marcador/ID próprios em finally;
+SQL count 0 precede remover checkpoint. Cleanup permite cancelar sem afirmar
+persistência. Se a limpeza falhar, retém checkpoint e informa IDs/marcador.
 
-Evidências reais em compose-ps.txt e compose-rede-saude.txt; trecho HTTP/SQL
-anexado a api-local.txt mantendo integralmente seu histórico. .env.example com
-quatro variáveis/placeholders conferido por config --quiet; valores padrão e variáveis derivadas
-conferidos só em memória. Espaços finais das novas transcrições normalizados de modo
-explícito, sem apagar avisos/resultados. Sem falha inesperada ou bloqueio local.
-R09/R11/R12 verificados; R10 permanece pendente da prova de persistência ao recriar containers.
-Próxima tarefa: T12, verify-persistence.py e persistência ao recriar containers.
-Não avançar para T12 no encerramento de T11. Terraform, AWS, merge e publicação
-seguem futuros. Nunca usar down -v para testar persistência ou descartar dados
-do usuário; a limpeza T11 remove somente volume novo do fixture UUID conferido.
+npm --prefix app run test:persistence passou em duas execuções após corrigir
+TypeError real inicial (Path.open não aceita opener; usar open). A final em
+23:10:29 -03:00 confirmou PostgreSQL 16.15/Compose v5.5.1, reserva ID 2 idêntica
+após recriar ambos containers mantendo volume; ID 3 com status alterado por SQL
+retornou 1 esperado; ID 4 sem recriação retornou 1 esperado. Sobrescrita de
+checkpoint recusada/1, bytes/linha preservados; cancelamento cleanup ID 5/0.
+Sentinela ID 1 mantida por GET/SQL entre todos os casos; final limpou sentinela,
+total SQL 0, down sem -v e remoção separada só do volume novo/vazio UUID após
+conferir labels. Zero recursos UUID, env/checkpoints em /tmp removidos; .env do
+usuário ausente/preservado. Falha inicial e duas execuções reais preservadas em
+compose-persistencia.txt, normalizando explicitamente só espaços finais.
+
+R10 agora verificado local; R06/R22/R29 continuam parciais até AWS/demais scripts.
+T13 é a próxima tarefa, preflight AWS read-only; não avançar ao encerrar T12.
+Sem bloqueio restante. Não repetir suíte nativa/T10/T11 sem novas mudanças ou
+falhas nesses componentes. Preservar logs anteriores e nunca usar down -v como
+prova de persistência ou apagar volumes/dados de outros projetos.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
@@ -125,7 +127,7 @@ git ls-files
 rg --files --hidden -g '!.git/**' -g '!node_modules/**'
 ```
 
-A validação PostgreSQL/HTTP/script/restart/Docker e Compose está disponível até T11;
+A validação PostgreSQL/HTTP/script/restart/Docker e Compose está disponível até T12;
 os demais comandos dependem
 das respectivas tarefas. Não anunciar sucesso quando arquivos/dependências não
 existirem. Scripts devem ter saída clara e exit code não zero na falha.
@@ -141,7 +143,7 @@ existirem. Scripts devem ter saída clara e exit code não zero na falha.
 | Teste Compose isolado (T11 disponível) | `npm --prefix app run test:compose`; Node 24/Python 3/Docker/Compose. Usa env privado/projeto UUID, parte de containers parados e confere saúde/ordem/rede/volume/CRUD/SQL. Limpa só seus recursos e o volume novo exclusivo; não toca .env/volumes do usuário nem testa recriação T12. |
 | Saúde local (T08 disponível) | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, com API nativa ou Compose configurado em execução; PORT publicado pode variar. |
 | CRUD local (T09 disponível) | `python3 scripts/verify-api.py --base-url http://127.0.0.1:3000`; Python stdlib, API/banco já iniciados; cria marcador/IDs próprios, confere HTTP/JSON e limpa em finally. Código 1 na falha; configuração CLI inválida retorna 2. |
-| Persistência Compose | `python3 scripts/verify-persistence.py`; script futuro recria containers preservando o volume e confere dados no banco real; nunca usa `down -v`. |
+| Persistência Compose T12 | `npm --prefix app run test:persistence`; Python 3/npm/Docker/Compose/BuildKit. Fixture UUID testa prepare/check/cleanup, recria api/db com volume preservado, HTTP/SQL, negativos/checkpoint/sentinela e cleanup. Verificador separado não recria recursos; fases/argumentos no README. Nunca usar down -v. |
 | Formatação Terraform | `terraform fmt -check -recursive infra`. |
 | Bootstrap | `terraform -chdir=infra/backend init`; `terraform -chdir=infra/backend validate`; `terraform -chdir=infra/backend plan -out=backend.tfplan`; variáveis locais e credenciais válidas. Plano binário ignorado. |
 | Infra, revisão estática | `terraform -chdir=infra init -backend=false`; `terraform -chdir=infra validate`; baixa providers, mas não provisiona nem valida recursos na AWS. |

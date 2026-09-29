@@ -1,0 +1,697 @@
+T12 — persistência local ao recriar containers mantendo volume
+Requisitos R06/R10/R22/R29; verificador em duas fases e fixture UUID exclusivo.
+Comando real nas três execuções: npm --prefix app run test:persistence
+Não representa deploy/validação AWS. Sem down -v durante prova ou cleanup.
+Transcrições completas capturadas abaixo; normalizado somente espaço final por
+linha para git diff --check. Originais integrais em /tmp, SHA-256 em cada seção.
+Exit codes externos conferidos nos arquivos *-result.json.
+
+=== EXECUÇÃO 1; exit code real 1 ===
+Original: /tmp/devops-t12-test-1.txt
+SHA-256 original: 4e05b2187a6cc0a0b33ebea4f54bd4b0eb604388c5ab9786ea44bf23e86edc6f
+
+> prova-primeiro-bimestre-devops@0.1.0 test:persistence
+> python3 test/run-persistence.py
+
+Traceback (most recent call last):
+  File "/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/app/test/run-persistence.py", line 193, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/app/test/run-persistence.py", line 169, in main
+    fixture = Fixture()
+              ^^^^^^^^^
+  File "/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/app/test/run-persistence.py", line 33, in __init__
+    with self.env_file.open("x", opener=lambda name, flags: os.open(name, flags, 0o600)) as stream:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Path.open() got an unexpected keyword argument 'opener'
+
+=== EXECUÇÃO 2; exit code real 0 ===
+Original: /tmp/devops-t12-test-2.txt
+SHA-256 original: 08e7e8bd364f55c0e012ca4a9fbb845a60168ff6d2c09502afc8774dbc3adf0f
+
+> prova-primeiro-bimestre-devops@0.1.0 test:persistence
+> python3 test/run-persistence.py
+
+Data/hora real: 2026-09-28T23:09:02.428607-03:00
+Projeto novo/exclusivo: prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa; somente Docker local, sem AWS.
+Comando: docker compose version
+stdout:
+Docker Compose version v5.5.1
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 --version
+stdout:
+Python 3.12.3
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env up --wait --wait-timeout 60 --timeout 5 --build
+stdout:
+#1 [internal] load local bake definitions
+#1 reading from stdin 649B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 688B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#3 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 406B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 972B done
+#5 DONE 0.0s
+
+#6 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#6 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#6 DONE 0.0s
+
+#7 [dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [dependencies 3/4] COPY package.json package-lock.json ./
+#8 DONE 0.0s
+
+#9 [dependencies 4/4] RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+#9 2.156
+#9 2.156 added 82 packages in 2s
+#9 2.161 npm notice
+#9 2.161 npm notice New major version of npm available! 11.19.0 -> 12.1.0
+#9 2.161 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0
+#9 2.161 npm notice To update run: npm install -g npm@12.1.0
+#9 2.161 npm notice
+#9 DONE 2.3s
+
+#10 [runtime 3/6] COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+#10 CACHED
+
+#11 [runtime 4/6] COPY --chown=node:node package.json package-lock.json ./
+#11 DONE 0.0s
+
+#12 [runtime 5/6] COPY --chown=node:node src ./src
+#12 DONE 0.0s
+
+#13 [runtime 6/6] COPY --chown=node:node sql ./sql
+#13 DONE 0.0s
+
+#14 exporting to image
+#14 exporting layers 0.1s done
+#14 exporting manifest sha256:2e280d7326a57f7f76ea9879abcdbdfc9e54567a53236989dc70c7d396171da5 done
+#14 exporting config sha256:f55566403465bca75aaf60200fac2bba409b063440e6acda4f5484ada0a0a3ba done
+#14 exporting attestation manifest sha256:e77ef44d0b911a27a73eacdbaaf2f62f9532819cd74b38150a58914a23c1c65b done
+#14 exporting manifest list sha256:db4bd13cef49af7f0eb197aee3111914d01baf96ac845ab02846faeb10101d54 done
+#14 naming to docker.io/library/prova-reservas:local done
+#14 unpacking to docker.io/library/prova-reservas:local 0.0s done
+#14 DONE 0.2s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+stderr:
+ Image prova-reservas:local Building
+ Image prova-reservas:local Built
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Creating
+ Volume prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data Creating
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Creating
+ Volume prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data Creating
+ Volume prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data Created
+ Volume prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data Created
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Created
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Created
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Creating
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Created
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Creating
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Created
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       4 seconds ago   Up 1 second (healthy)    127.0.0.1:32776->3000/tcp
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        4 seconds ago   Up 4 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Snapshot inicial real: {"containers": {"api": "d2eb559b1e241fb1276ab72d83906c6919a663069e8bf29a4543fa3a509934a2", "db": "d2cf35540944424d16bf1a4b4426f80c4b062a654d6dc3663b5c28e006923223"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env exec -T db postgres --version
+stdout:
+postgres (PostgreSQL) 16.15
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose 3a8465ce-f4cc-4d10-9a77-99242f27e47d", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+=== Caso positivo: persistência ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/positivo.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose ced99c0a-b3e0-495a-80a3-dffbac3d7630
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 2, "cliente": "Persistencia Compose ced99c0a-b3e0-495a-80a3-dffbac3d7630", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "d2eb559b1e241fb1276ab72d83906c6919a663069e8bf29a4543fa3a509934a2", "db": "d2cf35540944424d16bf1a4b4426f80c4b062a654d6dc3663b5c28e006923223"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env up --wait --wait-timeout 60 --timeout 5 --no-build --force-recreate
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Recreate
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Recreated
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Recreate
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Recreated
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       4 seconds ago   Up 1 second (healthy)    127.0.0.1:32777->3000/tcp
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        4 seconds ago   Up 3 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/positivo.json
+stdout:
+Snapshot depois: {"containers": {"api": "e701eb886fcb87199d5b7c1afe55f159a0771dcdce39618741b7ccd23feb8831", "db": "7d880d96f69a46d52e9fbab8cd8a10ea19251deceb8d7fd405b42cf1975244fa"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+GET depois: HTTP 200; {"id": 2, "cliente": "Persistencia Compose ced99c0a-b3e0-495a-80a3-dffbac3d7630", "data": "01-10-2026", "status": "confirmada"}
+SQL real: {"id": 2, "cliente": "Persistencia Compose ced99c0a-b3e0-495a-80a3-dffbac3d7630", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+PASSOU: novos containers, mesmo volume e reserva idêntica por HTTP/SQL.
+PASSOU: DELETE /reservas/2 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+PASSOU: verificação/limpeza concluída; containers e volume preservados.
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose 3a8465ce-f4cc-4d10-9a77-99242f27e47d", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: caso positivo retornou 0; marcador limpo, sentinela preservada.
+=== Caso negativo: divergência real controlada ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/negativo.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose 43843d98-47f9-4162-9884-c5875189bcf3
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 3, "cliente": "Persistencia Compose 43843d98-47f9-4162-9884-c5875189bcf3", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "e701eb886fcb87199d5b7c1afe55f159a0771dcdce39618741b7ccd23feb8831", "db": "7d880d96f69a46d52e9fbab8cd8a10ea19251deceb8d7fd405b42cf1975244fa"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Falha controlada, SQL próprio: UPDATE public.reservas SET status='cancelada' WHERE id=3 AND cliente='Persistencia Compose 43843d98-47f9-4162-9884-c5875189bcf3' RETURNING id
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env up --wait --wait-timeout 60 --timeout 5 --no-build --force-recreate
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Recreate
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Recreated
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Recreate
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Recreated
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Starting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Started
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Waiting
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Healthy
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       4 seconds ago   Up 1 second (healthy)    127.0.0.1:32778->3000/tcp
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        4 seconds ago   Up 3 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/negativo.json
+stdout:
+Snapshot depois: {"containers": {"api": "5e63aacb4dab3015e908285af3ec523b99538319d3be4ff3769558ecd59b6f4c", "db": "f079021cb6e380a76d2ff09a92cd917cd8d007da1483cfd80e2791f6f56a992c"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+GET depois: HTTP 200; {"id": 3, "cliente": "Persistencia Compose 43843d98-47f9-4162-9884-c5875189bcf3", "data": "01-10-2026", "status": "cancelada"}
+SQL real: {"id": 3, "cliente": "Persistencia Compose 43843d98-47f9-4162-9884-c5875189bcf3", "data_iso": "2026-10-01", "tipo": "date", "status": "cancelada"}
+PASSOU: DELETE /reservas/3 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+stderr:
+FALHOU: Reserva por HTTP diverge do registro anterior à recriação.
+Exit code real: 1
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose 3a8465ce-f4cc-4d10-9a77-99242f27e47d", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: caso negativo retornou 1 esperado; marcador limpo, sentinela preservada.
+=== Caso negativo: containers não recriados ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/sem-recriacao.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose 31b08c2f-a32e-40cb-a5f7-b2a1bf46c60e
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 4, "cliente": "Persistencia Compose 31b08c2f-a32e-40cb-a5f7-b2a1bf46c60e", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "5e63aacb4dab3015e908285af3ec523b99538319d3be4ff3769558ecd59b6f4c", "db": "f079021cb6e380a76d2ff09a92cd917cd8d007da1483cfd80e2791f6f56a992c"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env --checkpoint /tmp/prova-reservas-persistencia-1_9eidex/sem-recriacao.json
+stdout:
+Snapshot depois: {"containers": {"api": "5e63aacb4dab3015e908285af3ec523b99538319d3be4ff3769558ecd59b6f4c", "db": "f079021cb6e380a76d2ff09a92cd917cd8d007da1483cfd80e2791f6f56a992c"}, "volume": "prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data", "volume_created_at": "2026-09-28T23:09:07-03:00"}
+PASSOU: DELETE /reservas/4 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+stderr:
+FALHOU: api/db devem ter novos IDs, não apenas restart.
+Exit code real: 1
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose 3a8465ce-f4cc-4d10-9a77-99242f27e47d", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: DELETE /reservas/1 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL antes de encerrar fixture: total de linhas = 0
+Comando: docker compose --project-name prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-1_9eidex/.env down --timeout 5
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Stopping
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Stopped
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Removing
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-api-1 Removed
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Stopping
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Stopped
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Removing
+ Container prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa-db-1 Removed
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Removing
+ Network prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-net Removed
+Exit code real: 0
+Comando: docker volume rm prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data
+stdout:
+prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa_reservas-data
+stderr:
+(vazio)
+Exit code real: 0
+Recursos próprios depois do cleanup: {"container": [], "network": [], "volume": []}
+Limpeza confirmada: zero recursos UUID; env/checkpoints temporários removidos; .env/volumes do usuário preservados.
+PASSOU: T12 persistência HTTP/SQL, novos IDs, mesmo volume, dois negativos e limpeza própria.
+
+=== EXECUÇÃO 3; exit code real 0 ===
+Original: /tmp/devops-t12-test-3.txt
+SHA-256 original: c40243f63414aeb817e60fd0cc5faf8105614f01f430dc2d8bb5b58afbe3766a
+
+> prova-primeiro-bimestre-devops@0.1.0 test:persistence
+> python3 test/run-persistence.py
+
+Data/hora real: 2026-09-28T23:10:29.615753-03:00
+Projeto novo/exclusivo: prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff; somente Docker local, sem AWS.
+Comando: docker compose version
+stdout:
+Docker Compose version v5.5.1
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 --version
+stdout:
+Python 3.12.3
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env up --wait --wait-timeout 60 --timeout 5 --build
+stdout:
+#1 [internal] load local bake definitions
+#1 reading from stdin 649B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 688B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 406B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 387B done
+#5 DONE 0.0s
+
+#6 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#6 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#6 DONE 0.0s
+
+#7 [dependencies 3/4] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [dependencies 4/4] RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+#8 CACHED
+
+#9 [runtime 4/6] COPY --chown=node:node package.json package-lock.json ./
+#9 CACHED
+
+#10 [runtime 5/6] COPY --chown=node:node src ./src
+#10 CACHED
+
+#11 [dependencies 2/4] WORKDIR /app
+#11 CACHED
+
+#12 [runtime 3/6] COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+#12 CACHED
+
+#13 [runtime 6/6] COPY --chown=node:node sql ./sql
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:79421a49d823c41b20fa91a079e3028529c7592ad850abb41e8c428e879aeec4 done
+#14 exporting config sha256:70c02cbc2fbdd095b23c9dbd82df2853287d35fc844fc1ca5386699b979acada done
+#14 exporting attestation manifest sha256:76fe34b4b439830060cd151a2580c2c9ae2e32eb2f944940d920f677384a84ff 0.0s done
+#14 exporting manifest list sha256:62c0ebb953a2b66fd7eb6e8b702c5b71219ac1f951ebf805b841f56ae358595a done
+#14 naming to docker.io/library/prova-reservas:local done
+#14 unpacking to docker.io/library/prova-reservas:local 0.0s done
+#14 DONE 0.1s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+stderr:
+ Image prova-reservas:local Building
+ Image prova-reservas:local Built
+ Volume prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data Creating
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Creating
+ Volume prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data Creating
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Creating
+ Volume prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data Created
+ Volume prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data Created
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Created
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Created
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Creating
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Created
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Creating
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Created
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       5 seconds ago   Up 1 second (healthy)    127.0.0.1:32779->3000/tcp
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        5 seconds ago   Up 4 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Snapshot inicial real: {"containers": {"api": "6942024f156da8f647651bdcdf4c6536fef45300a82d9d3baa6104737479a825", "db": "6df8bc24893719a802119d9ad4fd12468b017aab7d4919a5af5bbf136a17fe07"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env exec -T db postgres --version
+stdout:
+postgres (PostgreSQL) 16.15
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose aa81557c-21d9-4320-a127-2b9b9635599e", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+=== Caso positivo: persistência ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/positivo.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose d7728360-f08b-4172-9de8-7e1984a27e12
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 2, "cliente": "Persistencia Compose d7728360-f08b-4172-9de8-7e1984a27e12", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "6942024f156da8f647651bdcdf4c6536fef45300a82d9d3baa6104737479a825", "db": "6df8bc24893719a802119d9ad4fd12468b017aab7d4919a5af5bbf136a17fe07"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env up --wait --wait-timeout 60 --timeout 5 --no-build --force-recreate
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Recreate
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Recreated
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Recreate
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Recreated
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       4 seconds ago   Up 1 second (healthy)    127.0.0.1:32780->3000/tcp
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        4 seconds ago   Up 3 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/positivo.json
+stdout:
+Snapshot depois: {"containers": {"api": "732f3a833fd3930a9b7ac5b8c0ae80b5b88fd174abb94a9ed2229e3ec0a1ce09", "db": "3734a9a6ab05b9131de19adf696567786a1029a67c479dd9a3d5ac2e7ec49103"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+GET depois: HTTP 200; {"id": 2, "cliente": "Persistencia Compose d7728360-f08b-4172-9de8-7e1984a27e12", "data": "01-10-2026", "status": "confirmada"}
+SQL real: {"id": 2, "cliente": "Persistencia Compose d7728360-f08b-4172-9de8-7e1984a27e12", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+PASSOU: novos containers, mesmo volume e reserva idêntica por HTTP/SQL.
+PASSOU: DELETE /reservas/2 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+PASSOU: verificação/limpeza concluída; containers e volume preservados.
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose aa81557c-21d9-4320-a127-2b9b9635599e", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: caso positivo retornou 0; marcador limpo, sentinela preservada.
+=== Caso negativo: divergência real controlada ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/negativo.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose 08312938-5b7f-4ad7-b9f3-66982c780cdb
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 3, "cliente": "Persistencia Compose 08312938-5b7f-4ad7-b9f3-66982c780cdb", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "732f3a833fd3930a9b7ac5b8c0ae80b5b88fd174abb94a9ed2229e3ec0a1ce09", "db": "3734a9a6ab05b9131de19adf696567786a1029a67c479dd9a3d5ac2e7ec49103"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Falha controlada, SQL próprio: UPDATE public.reservas SET status='cancelada' WHERE id=3 AND cliente='Persistencia Compose 08312938-5b7f-4ad7-b9f3-66982c780cdb' RETURNING id
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env up --wait --wait-timeout 60 --timeout 5 --no-build --force-recreate
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Recreate
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Recreated
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Recreate
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Recreated
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Starting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Started
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Waiting
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Healthy
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Healthy
+Exit code real: 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env ps
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1   prova-reservas:local                                                               "docker-entrypoint.s…"   api       4 seconds ago   Up 1 second (healthy)    127.0.0.1:32781->3000/tcp
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        4 seconds ago   Up 3 seconds (healthy)   5432/tcp
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/negativo.json
+stdout:
+Snapshot depois: {"containers": {"api": "a1d1a5b0b1c1bc4a25e673f58702b8f5f3572ef8c51c5c4ef3f9560ac856ed6c", "db": "e6b8224e2939aadae01f65140181fb88ac7bba4b3132ba889b48037c18262dad"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+GET depois: HTTP 200; {"id": 3, "cliente": "Persistencia Compose 08312938-5b7f-4ad7-b9f3-66982c780cdb", "data": "01-10-2026", "status": "cancelada"}
+SQL real: {"id": 3, "cliente": "Persistencia Compose 08312938-5b7f-4ad7-b9f3-66982c780cdb", "data_iso": "2026-10-01", "tipo": "date", "status": "cancelada"}
+PASSOU: DELETE /reservas/3 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+stderr:
+FALHOU: Reserva por HTTP diverge do registro anterior à recriação.
+Exit code real: 1
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose aa81557c-21d9-4320-a127-2b9b9635599e", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: caso negativo retornou 1 esperado; marcador limpo, sentinela preservada.
+=== Caso negativo: containers não recriados ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/sem-recriacao.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose cd396090-cf79-43eb-a0ee-a89b02a5875b
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 4, "cliente": "Persistencia Compose cd396090-cf79-43eb-a0ee-a89b02a5875b", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "a1d1a5b0b1c1bc4a25e673f58702b8f5f3572ef8c51c5c4ef3f9560ac856ed6c", "db": "e6b8224e2939aadae01f65140181fb88ac7bba4b3132ba889b48037c18262dad"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/sem-recriacao.json
+stdout:
+PASSOU: GET /health -> 200
+stderr:
+FALHOU: Arquivo/configuração inválida ou execução interrompida.
+Exit code real: 1
+PASSOU: checkpoint existente recusado, bytes/registro preservados.
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' check --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/sem-recriacao.json
+stdout:
+Snapshot depois: {"containers": {"api": "a1d1a5b0b1c1bc4a25e673f58702b8f5f3572ef8c51c5c4ef3f9560ac856ed6c", "db": "e6b8224e2939aadae01f65140181fb88ac7bba4b3132ba889b48037c18262dad"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+PASSOU: DELETE /reservas/4 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+stderr:
+FALHOU: api/db devem ter novos IDs, não apenas restart.
+Exit code real: 1
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose aa81557c-21d9-4320-a127-2b9b9635599e", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+=== Cancelamento: fase cleanup sem recriação ===
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' prepare --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/cancelamento.json
+stdout:
+PASSOU: GET /health -> 200
+Marcador exclusivo: Persistencia Compose e368c22b-128e-4ef1-88a3-3ef76d15bd62
+PASSOU: POST /reservas -> 201
+SQL real: {"id": 5, "cliente": "Persistencia Compose e368c22b-128e-4ef1-88a3-3ef76d15bd62", "data_iso": "2026-10-01", "tipo": "date", "status": "confirmada"}
+Snapshot antes: {"containers": {"api": "a1d1a5b0b1c1bc4a25e673f58702b8f5f3572ef8c51c5c4ef3f9560ac856ed6c", "db": "e6b8224e2939aadae01f65140181fb88ac7bba4b3132ba889b48037c18262dad"}, "volume": "prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data", "volume_created_at": "2026-09-28T23:10:30-03:00"}
+PASSOU: prepare; linha/checkpoint mantidos para recriação externa dos containers.
+stderr:
+(vazio)
+Exit code real: 0
+Comando: /usr/bin/python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-persistence.py' cleanup --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env --checkpoint /tmp/prova-reservas-persistencia-2c9mpnk4/cancelamento.json
+stdout:
+PASSOU: DELETE /reservas/5 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL limpeza: count do marcador próprio = 0.
+Checkpoint removido após confirmar limpeza própria por HTTP e SQL.
+PASSOU: verificação/limpeza concluída; containers e volume preservados.
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: GET /reservas/1 -> 200
+SQL real: {"id": 1, "cliente": "Sentinela Compose aa81557c-21d9-4320-a127-2b9b9635599e", "data_iso": "2024-02-29", "tipo": "date", "status": "pendente"}
+PASSOU: sentinela de outro marcador preservada por HTTP/SQL.
+PASSOU: DELETE /reservas/1 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL antes de encerrar fixture: total de linhas = 0
+Comando: docker compose --project-name prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff --file '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' --env-file /tmp/prova-reservas-persistencia-2c9mpnk4/.env down --timeout 5
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Stopping
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Stopped
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Removing
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-api-1 Removed
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Stopping
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Stopped
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Removing
+ Container prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff-db-1 Removed
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Removing
+ Network prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-net Removed
+Exit code real: 0
+Comando: docker volume rm prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data
+stdout:
+prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff_reservas-data
+stderr:
+(vazio)
+Exit code real: 0
+Recursos próprios depois do cleanup: {"container": [], "network": [], "volume": []}
+Limpeza confirmada: zero recursos UUID; env/checkpoints temporários removidos; .env/volumes do usuário preservados.
+PASSOU: T12 persistência HTTP/SQL, novos IDs, mesmo volume, dois negativos e limpeza própria.
+
+=== Conferência read-only posterior ===
+Data/hora real: 2026-09-28T23:15:23.030575-03:00
+Comando: docker ps -aq --filter label=com.docker.compose.project=prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker network ls -q --filter label=com.docker.compose.project=prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker volume ls -q --filter label=com.docker.compose.project=prova-reservas-t12-f120991a-89b4-4185-badf-cc8c916bedaa
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker ps -aq --filter label=com.docker.compose.project=prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker network ls -q --filter label=com.docker.compose.project=prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker volume ls -q --filter label=com.docker.compose.project=prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+Conferência filesystem real: /tmp/prova-reservas-persistencia-txnkjnzd ausente.
+Conferência filesystem real: /tmp/prova-reservas-persistencia-1_9eidex ausente.
+Conferência filesystem real: /tmp/prova-reservas-persistencia-2c9mpnk4 ausente.
+Conferência filesystem real: .env da raiz ausente/preservado.
+Comando: python3 scripts/verify-persistence.py (argumentos ausentes, negativo CLI)
+stdout:
+(vazio)
+stderr:
+usage: verify-persistence.py [-h] --project-name PROJECT_NAME --env-file
+                             ENV_FILE --checkpoint CHECKPOINT
+                             {prepare,check,cleanup}
+verify-persistence.py: error: the following arguments are required: phase, --project-name, --env-file, --checkpoint
+Exit code real: 2 (esperado).

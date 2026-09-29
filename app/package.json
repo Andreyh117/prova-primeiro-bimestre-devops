@@ -12,7 +12,8 @@
     "db:migrate": "node src/migrate.js",
     "start": "node src/server.js",
     "test:docker": "node test/run-docker.js",
-    "test:compose": "node test/run-compose.js"
+    "test:compose": "node test/run-compose.js",
+    "test:persistence": "python3 test/run-persistence.py"
   },
   "dependencies": {
     "express": "5.2.1",

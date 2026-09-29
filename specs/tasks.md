@@ -28,7 +28,10 @@ com duas execuções Docker/UID/contexto/HTTP/SQL reais, exit 0 e limpeza confir
 T10 foi commitada em 49dbd5e. Após revisão, o aluno autorizou T11: Compose/API/db
 saudáveis, ordem de início, rede/volume/ambiente e CRUD/SQL reais verificados,
 exit 0 e limpeza confirmada; config sem senha retornou 1 esperado.
-Próxima tarefa pendente: T12, persistência ao recriar containers sem apagar volume.
+Após revisão, o aluno autorizou T12: persistência HTTP/SQL depois de recriar
+api/db, mesmo volume, negativos/checkpoint/sentinela/cleanup reais. Primeiro
+TypeError corrigido; duas reexecuções passaram/0, com falha inicial preservada.
+Próxima tarefa pendente: T13, preflight AWS read-only e decisões de versões/Lab.
 
 ## Plano de tarefas pequenas
 
@@ -50,7 +53,7 @@ Cada tarefa recebe entrada no diário.
 | T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt (51 testes); script exit 0/1, SQL e restart nativo reais. | verificado |
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt e docker-run.txt: duas execuções reais, UID 1000, HTTP/SQL e limpeza. | verificado |
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt e trecho api-local.txt: config/up/ps/ordem/rede/CRUD/SQL reais. | verificado |
-| T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt e README atualizado. | pendente |
+| T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt: falha inicial/correção, duas reexecuções, HTTP/SQL/IDs/volume, negativos/checkpoint/limpeza; README. | verificado |
 | T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | Decisões no diário e aws-preflight.txt; variáveis locais ignoradas. | pendente |
 | T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt e plano sanitizado; commit backend. | pendente |
 | T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | Decisão no diário; plano binário local ignorado. | pendente |
@@ -422,3 +425,38 @@ Arquivos: docker-compose.yml, .env.example, app/test/run-compose.js e package.js
 AGENTS/README/specs/diário/evidências. Commit real proposto:
 `feat(compose): configura API e PostgreSQL com healthchecks`. Próximo T12;
 sem teste de recriação, AWS, merge/push/PR nesta tarefa.
+
+### T12 — resultado verificado em 28/09/2026
+
+verify-persistence.py criado em Python stdlib, reutilizando cliente HTTP T09;
+fases prepare/check/cleanup sobre Compose já iniciado, sem up/down/volume rm.
+Checkpoint exclusivo 0600 fora do repo, projeto/UUID/ID validados, porta loopback
+redescoberta após recriação. SQL via psql no db, credenciais só no ambiente do
+container. Check exige IDs novos de ambos e volume/CreatedAt iguais, compara
+HTTP/SQL e limpa somente seu marcador/ID em finally; SQL count 0 antes de apagar
+checkpoint. Cleanup permite cancelar, sem alegar persistência. Em falha de
+limpeza, retém checkpoint e informa marcador/IDs para conferência.
+
+Runner run-persistence.py/test:persistence cria fixture/env UUID exclusivos;
+recria api/db mantendo volume, valida negativos e preservação de sentinela.
+Primeira execução exit 1 antes de qualquer recurso Docker: Path.open não aceita
+opener. Corrigido para open com O_EXCL/0600; diretório próprio vazio removido.
+Segunda execução 23:09:02 -03:00 e final 23:10:29 -03:00 passaram, exit 0.
+Final projeto prova-reservas-t12-ad5e3af6-0128-48f3-aeca-1829b6603bff:
+ID 2 permaneceu por SQL/GET 200 após novos IDs de api/db; volume/CreatedAt
+23:10:30 -03:00 iguais; JSON 01-10-2026/SQL DATE 2026-10-01/confirmada.
+ID 3 status alterado por SQL somente no próprio marcador -> check 1 esperado;
+ID 4 sem recriação -> check 1 esperado; prepare repetido recusou sobrescrever
+checkpoint/1 e preservou bytes/linha; cancelamento ID 5 cleanup/0. Sentinela
+ID 1 permaneceu por GET/SQL entre cada limpeza; final a removeu, confirmou total
+SQL 0 e labels, encerrou fixture sem -v e removeu só volume novo/vazio exclusivo.
+Zero recursos UUID/env/checkpoints remanescentes; .env do usuário preservado.
+
+Falha inicial e ambas saídas reais preservadas em compose-persistencia.txt com
+exit codes e hashes dos originais em /tmp; normalização declarada só de espaços
+finais. R10 verificado local, R06/R22/R29 parciais até AWS/outros scripts.
+Arquivos: scripts/verify-persistence.py, app/test/run-persistence.py, package.json,
+README/AGENTS/specs/diário e evidência nova. API/schema/Compose/Dockerfile/lockfile/
+logs anteriores preservados; testes nativos/T10/T11 não repetidos sem mudanças.
+Commit real proposto test(compose): verifica persistencia ao recriar containers.
+Próximo T13; sem bloqueio local, merge/publicação/provisionamento nesta tarefa.
