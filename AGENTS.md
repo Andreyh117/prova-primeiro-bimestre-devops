@@ -517,3 +517,37 @@ Evidências ec2-deploy.txt/health-aws.txt; app/infra/estados/evidências anterio
 preservados. Sem bloqueio; recursos ativos/faturáveis. Sem apply/destroy/push/
 merge/PR; autorização deploy vigente, teardown futuro com revisão própria.
 Um commit coerente real, nunca por quantidade; mergeT32 pendente.
+
+## Estado atual — T25 bloqueada por acesso AWS em29/09/2026
+
+Aluno renovouLab, mas perfildefault ainda retornou EC2DescribeInstances254/
+UnauthorizedOperation/explicitdeny/voc-cancel-cred; STS0 na mesma conta não
+prova acesso. Pausa anterior respeitada. verify-aws.py/test_verify_aws.py
+implementados, dez testes locais0/CLIhelp0, execução real exit1 antes de HTTP/
+SQL/SSH/restart ou criar registros. Evidências api-aws.txt/rds-crud.txt eadendo
+aws-seguranca.txt. T25 bloqueada, não verificada. Atualizar credenciais locais
+access/secret/sessiontoken da sessão renovada, sem enviar valores ao chat;
+revalidar conta/default/voclabs/us-east-1/IP/acesso e retomar mesmaT25.
+Não alterar IAM/SCP/roles para contornar; não inferir status/saldo atuais.
+App/infra/T24/helpers/logs anteriores preservados; nenhum dado/recurso alterado.
+T26 só após aceite T25; R04/05/06/16/17/22/29 ainda parciais; sem push/merge/PR.
+
+## Estado atual — T25 verificada após retomada em29/09/2026
+
+Substitui bloqueio acima, preservando história. Credenciais atualizadas pelo aluno,
+conta/default/voclabs/us-east1 revalidada. EC2stopped corrigida start da mesma
+instância/novoIP54.234.84.228/serviço automático; RDSprivadoavailable. S3/DDB/
+state23managed/lock revalidados. Plano2 sóoutputs/metadata, refresh-only revisado
+aplicado0/zeroaçõesrecursos/stateS3versionado atualizado; plano posterior0Nochanges.
+HostkeymesmaT24/consolenovo semfingerprint: pinT24confiável reutilizado/strictcheckyes.
+Auxiliaresestadoinitializing/fingerprintfalharam eforamcorrigidos, evi preservadas.
+Scriptverify-aws.py/test_verify_aws.py:10testeslocais0, SQLTLS préCRUD/préDELETE,
+positivoAWS0/6rotas/400/404/ID2criadoatualizadoexcluído. ID3 persistiu HTTP/SQL
+apósrestartcontainerIDnovo/mesmaimagem. Negativo1 esperado/statusdivergente;
+finally limpousóUUID/ID4, sentinelaID1 preservada e depoiscleanupsóprópria.
+Fixture0/semregistros de teste remanescentes, nenhumPostgreSQLcontainer/UID1000.
+Eviapi-aws/rds-crud/aws-retomada-t25/adendoaws-seguranca. T25verificada, próximaT26.
+R04/05/06/16/17/22/32verificados; R29T31/R02mergeT32 parciais. Sem bloqueioatual/
+provisionamento/destroy/push/merge/PR; recursosativos ecréditosvariáveis.
+App/infra/helpers/locks/evidências anteriores preservados. Não repetir suites
+inalteradas; relatório exige contribuição do aluno, sem escrever vivências dele.

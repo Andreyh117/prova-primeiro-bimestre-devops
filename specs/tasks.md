@@ -58,8 +58,9 @@ T22 verificada: aluno autorizou explicitamente o plano principal revisado.
 T23 verificada na AWS: apply0/23add/0change/0destroy, EC2 running/ok/ok, RDS
 available/private/encrypted, state S3 real/versionado e lock liberado; plano
 posterior0/No changes. T24 agora verificada: deploy repetido/SQL TLS/serviço e
-reboot reais, evidências ec2-deploy.txt/health-aws.txt. Próxima T25 CRUD/persistência
-EC2/RDS; teardown exige revisão/autorização própria futura.
+reboot reais, evidências ec2-deploy.txt/health-aws.txt. T25 agora verificada:
+CRUD/SQLTLS/restart/limpeza reais após recuperar sessão/EC2. PróximaT26 relatório;
+teardown exige revisão/autorização própria futura.
 
 ## Plano de tarefas pequenas
 
@@ -94,7 +95,7 @@ Cada tarefa recebe entrada no diário.
 | T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist concreto executado; aluno autorizou explicitamente em29/09 após revisão. | infra-revisao.txt/diário: consultas/cálculo reais e decisão recebida; aprovação não comprova deploy. | verificado |
 | T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt/aws-rds.txt/aws-seguranca.txt/terraform-outputs.txt: apply0, consultas/assertivas reais, S3 state e plano posterior0/No changes; sem deploy/CRUD. | verificado |
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt/health-aws.txt: build/11 testes/SSH/TLS/schema/repetição/reboot e três HTTP200 reais; falhas corrigidas preservadas. | verificado |
-| T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt, rds-crud.txt, aws-seguranca.txt. | pendente |
+| T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt/rds-crud.txt/aws-retomada-t25.txt:10testes0, positivoAWS0/SQLTLS/restartID3, negativo1/limpeza/sentinela reais; backend/EC2/state recuperados, bloqueio histórico preservado. | verificado |
 | T26 | T25 | R24, R25, R30 | Redigir relatório com contribuição do aluno, a partir do diário/evidências. | Quatro respostas dissertativas de dez linhas cada; IA e ferramentas reais; aluno revisa sua experiência. | relatorio.md, diário; limitações honestas, sem inventar desafios. | pendente |
 | T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | Diário, checklist e plano de destroy sanitizado. | pendente |
 | T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
@@ -828,3 +829,24 @@ T25 próxima, ainda pendente: seis rotas/CRUD/SQL e persistência de reserva RDS
 Sem bloqueio; nenhum dado inserido/apagado T24. App/infra/estados/evidências
 anteriores preservados. Sem apply/destroy/push/merge/PR; recursos ativos/faturáveis.
 Commit único coerente real, mergeT32 futuro; saldo atual não inferido.
+
+## Registro T25 — implementação local, aceite AWS bloqueado
+
+Verificador/testes implementados; dez testes locais0/CLIhelp0. Após usuário
+renovarLab, STS0 reconheceu conta, EC2DescribeInstances254/voc-cancel-cred
+impediu execução; script exit1 antes de HTTP/SQL/restart/dados. api-aws.txt/
+rds-crud.txt/aws-seguranca.txt e diário registram bloqueio real. Atualizar
+credenciais temporárias default (sem chat), revalidar e retomar T25; T26 futura.
+Nenhum CRUD/persistênciaAWS novo comprovado; estados dos requisitos preservados.
+
+## Atualização T25 — verificada em29/09/2026
+
+Após credenciais atualizadas, auditoria/recuperação anteriores reais e T25
+concluídas. EC2stopped ->running da mesma instância, novoIP54.234.84.228;
+S3/DDB/state/locking íntegros, refresh-only0/stateoutputs novos/plano posterior0.
+APIvoltouautomaticamente. Script10testes0/positivoAWS0:CRUD+SQLTLS/400/404,
+ID3 persistiu apósrestart/containernovo/mesmaimagem. Negativo1detectouSQLstatus
+incompatível ecleanupsóUUID/ID4; sentinelaID1 preservada e depoislimpa. Fixture0.
+Bloqueio e auxiliares/correções reais anteriores preservados nas evidências,
+sem inventarsucesso/dificuldade. PróximaT26, relatório com contribuição do aluno.
+Sem bloqueioatual/destroy/push/merge/PR; recursosativos/faturáveis.

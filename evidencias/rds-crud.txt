@@ -1,0 +1,157 @@
+T25 — SQL/CRUD/persistência AWS NÃO EXECUTADOS.
+29/09/2026: preflight impediu acesso por EC2 DescribeInstances254/
+UnauthorizedOperation/explicit deny/voc-cancel-cred, mesmo com STS0.
+Tentativa verificador exit1, capturas reais em api-aws.txt.
+Não inserir output HTTP/SQL/restart fictício. Nenhuma reserva de teste criada.
+Schema/TLS/health T24 históricos ficam em ec2-deploy.txt/health-aws.txt, não
+substituem aceite T25. Novo script/testes locais implementados (dez testes0).
+Retomar após atualizar perfil default com credenciais temporárias da sessão
+renovada, revalidar conta/região/acesso e executar script. Senhas/chaves/token
+não entram em logs/chat/Git. Não alterar políticas/IAM ou infraestrutura.
+
+## Atualização — T25 verificada na AWS após credenciais/EC2 recuperadas
+
+Normalização declarada: removidas apenas linhas vazias extras no fim do arquivo
+versionado; capturas brutas e hashes originais foram preservados.
+
+Bloqueio anterior acima é histórico, não estado atual. Auditoria/recuperação
+em aws-retomada-t25.txt. Scriptvalidou conta/IP32/EC2/RDS/SGs/privadas/UID1000,
+SQLTLS ehostname ANTES do CRUD; reforço implementado também antes de DELETE SQL.
+Dez testes locais0. PositivoAWS0: seis rotas,POST201/GET200/PUT200/DELETE204,
+obrigatórios/dataimpossível/PUTparcial400 eIDausente404 reais. SQL confirma ID2
+criado29-02-2024/DATE2024-02-29 e atualizado01-10-2026/DATE2026-10-01/statusconfirmada.
+Persistência ID3: GET/SQL idênticos após restart sóAPI, containerID diferente e
+imagemsha256bd97...igual. TLSv1.3/CA/rejectUnauthorizedtrue, sem PostgreSQLcontainer.
+Negativo deliberado: expectativa cancelada paraPOSTpendente, SQL real intacto,
+sem simular resposta. Divergência detectada/exit1; finallySQL limpou sóUUID/ID4.
+SentinelaID1 com UUIDdistinto foi preservada por HTTP/SQL apóspositivo/negativo,
+e ao final limpeza sósentinela confirmada; nenhum registro de teste remanescente.
+Fixture integradaexit0. Não confundir falha controlada com defeito na API.
+Sem provisionamento/destroy/push/merge/PR; refresh-only de state descrito na
+auditoria. Recursos ativos, custo variável com tempo/carga.
+
+### aws-success
+started: "2026-09-29T13:03:01-03:00"
+finished: "2026-09-29T13:04:30-03:00"
+command: ["python3", "-B", "scripts/verify-aws.py", "--instance-id", "i-0f4b59a8181537b78", "--identity-file", "/tmp/devops-t24-access.key", "--known-hosts", "/tmp/devops-t24-known-hosts", "--instance-connect"]
+exit_code: 0
+sha256: "bd6ae831ce4046687a7eea2a2e12629a1fe4cf9120cee2ca376594d359effe3c"
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+RUNTIME: {"container_id": "085e18d4d46f7725beecfd0c883c77bf48fc55f1f429b5da54c1b3e5cb9f9bec", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+Marcador exclusivo para conferência/limpeza: Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 2, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2024-02-29", "status": "pendente"}], "removed": []}
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/2 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/2 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 2, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PASSOU: PUT /reservas/2 -> 400
+PASSOU: GET /reservas/2 -> 200
+PASSOU: DELETE /reservas/2 -> 204
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+PASSOU: GET /reservas/2 -> 404
+PASSOU: DELETE /reservas/2 -> 404
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PASSOU: GET /health -> 200
+PASSOU: GET /reservas/3 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PERSISTÊNCIA: {"before": {"container_id": "085e18d4d46f7725beecfd0c883c77bf48fc55f1f429b5da54c1b3e5cb9f9bec", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}, "after": {"container_id": "7fe3b08aaf5af6ca62faf594728ea6bd163665ea6a432ace8a7b846b72554dfa", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}, "reservation": {"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "01-10-2026", "status": "confirmada"}}
+PASSOU: DELETE /reservas/3 -> 204
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+LIMPEZA: SQL confirmou zero linhas do marcador exclusivo; outros registros preservados.
+PASSOU: CRUD HTTP/SQL TLS, segurança AWS, restart/persistência e limpeza reais.
+
+
+### aws-negative
+started: "2026-09-29T13:04:36-03:00"
+finished: "2026-09-29T13:05:08-03:00"
+command: ["python3", "-B", "/tmp/devops-t25-negative.py"]
+exit_code: 1
+sha256: "8c0f074a641274b76af1ad36528bf5c3ca6934fc06b88cdb9603fc4bc76bec02"
+injection: "expectativa statuscancelada para POSTpendente; leitura SQL real preservada"
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+RUNTIME: {"container_id": "7fe3b08aaf5af6ca62faf594728ea6bd163665ea6a432ace8a7b846b72554dfa", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+Marcador exclusivo para conferência/limpeza: Verificacao API b60e5132-4583-484d-9106-bd694050b46e
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 4, "cliente": "Verificacao API b60e5132-4583-484d-9106-bd694050b46e", "data": "2024-02-29", "status": "pendente"}], "removed": []}
+FALHOU: Linha SQL não corresponde ao HTTP/DATE/status esperados.
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": [{"id": 4}]}
+LIMPEZA: SQL confirmou zero linhas do marcador exclusivo; outros registros preservados.
+
+
+### fixture
+started: "2026-09-29T13:02:33-03:00"
+finished: "2026-09-29T13:05:20-03:00"
+command: ["python3", "-B", "/tmp/devops-t25-fixture.py"]
+exit_code: 0
+sha256: "4f281beb63d4cd45cbc5ae24881ad6e10e4b1f7d175364a3088771c1a93accb0"
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 1, "cliente": "Verificacao API 6f4bd56d-2f23-482e-90b8-48f994521c9c", "data": "2026-10-01", "status": "pendente"}], "removed": []}
+SENTINELA: {"id": 1, "cliente": "Verificacao API 6f4bd56d-2f23-482e-90b8-48f994521c9c", "data": "01-10-2026", "status": "pendente"}
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+RUNTIME: {"container_id": "085e18d4d46f7725beecfd0c883c77bf48fc55f1f429b5da54c1b3e5cb9f9bec", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+Marcador exclusivo para conferência/limpeza: Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 2, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2024-02-29", "status": "pendente"}], "removed": []}
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/2 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/2 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 2, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PASSOU: PUT /reservas/2 -> 400
+PASSOU: GET /reservas/2 -> 200
+PASSOU: DELETE /reservas/2 -> 204
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+PASSOU: GET /reservas/2 -> 404
+PASSOU: DELETE /reservas/2 -> 404
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PASSOU: GET /health -> 200
+PASSOU: GET /reservas/3 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "2026-10-01", "status": "confirmada"}], "removed": []}
+PERSISTÊNCIA: {"before": {"container_id": "085e18d4d46f7725beecfd0c883c77bf48fc55f1f429b5da54c1b3e5cb9f9bec", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}, "after": {"container_id": "7fe3b08aaf5af6ca62faf594728ea6bd163665ea6a432ace8a7b846b72554dfa", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}, "reservation": {"id": 3, "cliente": "Verificacao API e9916b41-fe88-4dd0-b93e-453efe0273c1", "data": "01-10-2026", "status": "confirmada"}}
+PASSOU: DELETE /reservas/3 -> 204
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+LIMPEZA: SQL confirmou zero linhas do marcador exclusivo; outros registros preservados.
+PASSOU: CRUD HTTP/SQL TLS, segurança AWS, restart/persistência e limpeza reais.
+
+exit 0
+PASSOU: GET /reservas/1 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 1, "cliente": "Verificacao API 6f4bd56d-2f23-482e-90b8-48f994521c9c", "data": "2026-10-01", "status": "pendente"}], "removed": []}
+SENTINELA preservada após positivo HTTP/SQL.
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+RUNTIME: {"container_id": "7fe3b08aaf5af6ca62faf594728ea6bd163665ea6a432ace8a7b846b72554dfa", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+Marcador exclusivo para conferência/limpeza: Verificacao API b60e5132-4583-484d-9106-bd694050b46e
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 4, "cliente": "Verificacao API b60e5132-4583-484d-9106-bd694050b46e", "data": "2024-02-29", "status": "pendente"}], "removed": []}
+FALHOU: Linha SQL não corresponde ao HTTP/DATE/status esperados.
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": [{"id": 4}]}
+LIMPEZA: SQL confirmou zero linhas do marcador exclusivo; outros registros preservados.
+
+PASSOU: GET /reservas/1 -> 200
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [{"id": 1, "cliente": "Verificacao API 6f4bd56d-2f23-482e-90b8-48f994521c9c", "data": "2026-10-01", "status": "pendente"}], "removed": []}
+SENTINELA preservada após negativo HTTP/SQL; negativoexit1 esperado.
+PASSOU: DELETE /reservas/1 -> 204
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+SENTINELA cleanup HTTP/SQL confirmado, somente própria.

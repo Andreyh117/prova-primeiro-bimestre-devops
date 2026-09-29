@@ -884,3 +884,25 @@ verificados ec2-deploy.txt/health-aws.txt. Passo4 (CRUD/persistência) aindaT25.
 Fontes: https://docs.docker.com/engine/storage/containerd/ e
 https://github.com/opencontainers/image-spec/blob/main/config.md;
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html.
+
+## Verificador AWS T25 — implementado, execução bloqueada
+
+Reutiliza VerifierHTTP e helpers protegidos T24. Consultas AWS preflight antes
+de qualquer mutação, guardas SG exatas, SQL parametrizado sómarkerUUID, comparação
+DATEISO/JSONDD-MM-YYYY, TLS pg_stat_ssl/CA/rejecttrue. Reinicia somente serviçoAPI
+próprio para comparar containerID/imagem/HTTP/SQL; não provisiona/destrói infra.
+Finally limpa markerUUID/IDs exclusivos inclusive POST incerto, informa pendência
+se SQL não confirmar ausência. Testes locais guardas10pass0; EC2deny254 bloqueou
+execução real. Desenho não é prova de CRUD/persistência; T25 ainda bloqueada.
+
+## T25 executada — correções e aceite real
+
+Apósrenewal, iniciar EC2existente corrigiu runtimeparado; IPnovo vem da AWSCLI,
+pinhostkeyT24 conhecido permaneceu confiável. Guardas TLS/hostname agora precedem
+HTTPCRUD e SQLDELETE; SQL vincula markerUUID/IDs porparâmetros. Fixture real com
+sentinela confirmou segurança da limpeza em positivo0 e negativo1/statusesperado
+errado sem simularSQL. ID3 persistiu após trocarcontainer/mesmaimagem, JSONDD-MM-YYYY
+mantido frenteDATEISO. StateoutputsIPURL sincronizados porrefresh-only revisado,
+sem ação de recursos; plano posterior0Nochanges. Evidências/falhas anteriores não
+substituídas; detalhes eexecuções em aws-retomada-t25/api-aws/rds-crud. T25verificada,
+T26relatório próximo; R29 aindaaguardaverify-delivery. Sem novo provisionamento.

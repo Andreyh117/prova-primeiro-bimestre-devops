@@ -58,7 +58,7 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T25, CRUD/persistência na EC2/RDS. Deploy T24 concluído abaixo.
+pendente: T26, relatório com contribuição do aluno. Deploy T24 e CRUD T25 concluídos abaixo.
 T22 foi autorizada e T23 provisionou/conferiu a infraestrutura AWS real. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usaram provider mock, sem chamadas AWS em T17; a rede foi implantada/conferida em T23. Backend S3/locking
@@ -1090,3 +1090,77 @@ arquivoSHA25659f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518.
 T24 verificada, sem bloqueio. **T25 é a próxima**: seis rotas/CRUD/persistência
 real de uma reserva e verify-aws.py. Tabela vazia nesta etapa não comprova isso.
 Recursos continuam ativos/faturáveis; sem teardown/push/merge/PR nesta execução.
+
+## Verificação AWS T25 — execução e histórico de retomada
+
+`scripts/verify-aws.py` usa Python3 stdlib, AWS CLI e OpenSSH; depende da API T24,
+RDS e Docker já existentes. Requer perfil default renovado/us-east-1/voclabs,
+contexto `infra/terraform.tfvars.json` privado0600, chaveSSH e known_hosts0600
+com fingerprint validada conforme T24. Não executa Terraform/provisionamento/
+destruição ou mudança IAM/SG. Reinicia somente a API própria para testar
+persistência; usa marcadorUUID/IDs exclusivos e limpeza SQL em finally.
+
+```bash
+python3 -B scripts/tests/test_verify_aws.py
+python3 -B scripts/verify-aws.py \
+  --instance-id i-0f4b59a8181537b78 \
+  --identity-file "$SSH_ACCESS_KEY" --known-hosts "$SSH_KNOWN_HOSTS" \
+  --aws-context infra/terraform.tfvars.json --instance-connect
+```
+
+Com chave vockey existente, retire `--instance-connect`. O script usa IP público
+atual obtido da EC2, valida IP de origem/SGs/RDS e compara CRUDHTTP com SQLTLS.
+JSON mantém DD-MM-YYYY, SQL usa DATEISO. Saída0 exige todos os aceites e limpeza;
+falha1 mostra etapa e, se necessário, marcador/IDs para recuperar limpeza.
+Não imprime senha/ambiente/ARN nem stderr arbitrário de AWS/SSH.
+
+Em29/09/2026: dez testes locais0 e CLIhelp0. Execução real retornou1 na consulta
+EC2(254), UnauthorizedOperation/explicitdeny/voc-cancel-cred. STS0 reconheceu
+conta, mas não provou permissãoEC2. Nenhum HTTP/SQL/restart/reserva foi executado.
+[api-aws.txt](evidencias/api-aws.txt), [rds-crud.txt](evidencias/rds-crud.txt) e
+adendo [aws-seguranca.txt](evidencias/aws-seguranca.txt) registram bloqueio real.
+T25 está bloqueada: atualizar as três credenciais temporárias locais do perfil
+default com a sessão renovada, sem enviar valores pelo chat; revalidar e executar.
+Não alterar IAM/SCP/roles para contornar. Próximo passo é retomar T25; T26 ainda
+aguarda esse aceite e a contribuição do aluno para o relatório. Resultados T24
+são históricos, não validação T25. Sem push/merge/PR/teardown nesta etapa.
+
+### Estado atual T25 — verificada após recuperar credenciais e EC2
+
+O bloqueio anterior foi resolvido. A auditoria conferiu EC2/RDS, S3/DynamoDB,
+state e locking. A EC2 estava parada; iniciei a mesma instância, sem recriação
+ou mudança de IAM/SG. A API voltou automaticamente com a mesma imagem.
+IP atual: **54.234.84.228**; URL: **http://54.234.84.228:3000**, restrita ao seu
+IP /32 aprovado. `13.220.113.41` nas capturas T23/T24 é o endereço histórico.
+O stop/start pode mudar o IPv4 público, conforme a [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html).
+
+O console atual omitiu a fingerprint. Comparei a chave com aquela autenticada
+pelo console em T24 e mantive `StrictHostKeyChecking=yes`. O arquivo privado
+known_hosts recebeu apenas a associação ao IP novo. O plano refresh-only
+revisado sincronizou state e outputs sem ações sobre recursos: apply 0, nova
+versão S3 AES256 e lock liberado. O plano posterior passou com `No changes`.
+O verificador consulta o IP e o endpoint RDS atuais pela AWS CLI.
+
+Dez testes locais passaram. A execução AWS retornou 0 e confirmou as seis
+rotas, erros 400/404 e SQL no RDS PostgreSQL 16.15 com TLS 1.3 e certificado
+verificado. Datas JSON `29-02-2024` e `01-10-2026` foram comparadas com
+`DATE` SQL `2024-02-29` e `2026-10-01`. A reserva ID 3 permaneceu igual após
+reiniciar somente a API: novo container, mesma imagem e registro idêntico.
+
+O negativo controlado retornou 1 ao detectar um status SQL diferente da
+expectativa deliberadamente errada. A limpeza removeu somente seu UUID/ID 4.
+A sentinela ID 1 foi preservada por HTTP/SQL após ambos os testes e depois
+removida pelo próprio teste. A fixture integrada retornou 0 e confirmou que
+nenhum registro próprio de teste permaneceu.
+
+[Auditoria e recuperação](evidencias/aws-retomada-t25.txt),
+[CRUD HTTP](evidencias/api-aws.txt), [SQL e persistência](evidencias/rds-crud.txt)
+e [segurança](evidencias/aws-seguranca.txt) preservam bloqueios, falhas e correções.
+Para conferir uma rejeição sem tocar AWS, execute o comando T25 com um caminho
+inexistente em `--known-hosts`: retorna 1 antes de consultar a conta ou criar
+registros. Os testes locais cobrem regras SG inseguras, datas divergentes e
+limpeza incompleta. Não envie credenciais pelo chat.
+
+Próxima tarefa: **T26**, relatório com suas observações sobre o processo.
+Sem bloqueio atual, destroy, push, merge ou PR nesta etapa. Os recursos
+continuam ativos e podem consumir créditos.

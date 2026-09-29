@@ -174,3 +174,23 @@ EC2running/t2micro/AMIfixada/public0/IPoutput/SGEC2único;IMDSv2required/hop1;
 root8GiBgp3/encrypted/deleteOnTermination,in-use;CPUstandard/keyvockey/Profile
 LabInstanceProfile comLabRole existentes.Tagsem19recursos+rootvolume conferidas.
 StatuschecksEC2capturados;estadoinstance/runningnão provaDocker/serviçoAPI.
+
+### T25 — revalidação bloqueada, 29/09/2026
+
+Consulta STS0: mesma conta aprovada/default/voclabs/us-east-1. ConsultaEC2
+exit254: UnauthorizedOperation/explicit deny/voc-cancel-cred. Não foi possível
+revalidar SG/RDS na tentativa atual; consultas T23 acima são históricas.
+Verificador exit1 antes de HTTP/SQL/restart/mutação. Capturas em api-aws.txt.
+Renovar perfil local default; sem alterar IAM/SCP/roles/SG para contornar.
+
+### T25 — bloqueio resolvido e segurança revalidada, 29/09/2026
+
+Credenciais atualizadas/default/voclabs/mesma conta/us-east-1. EC2parada foi
+iniciada sem recriar, agora running/okok/novoIP54.234.84.228. RDS available/
+PG16.15/dbt3micro/private/encrypted, mesmaVPC/duasprivadas/duasAZs. SGEC2
+22/3000 sóIPaluno32/egress80e4430/0 e5432sóSGRDS; SGRDS5432sóSGEC2/sem egress.
+Guardas exactas passaram antes de HTTP/SQL/restart. UID1000/sóAPIcontainer,
+CA/rejectUnauthorizedtrue/TLSv1.3/endpointRDSreal. Auditoria/state23managed/
+DDBlockliberado e recuperação em aws-retomada-t25.txt. Positivo0/negativo1
+esperado/limpeza e sentinela preservadas em api-aws.txt/rds-crud.txt. SemnovoIAM/
+SG/keypair/provisionamento/destroy; IPorigem/segredos ocultados, perfilLabpreservado.

@@ -1519,3 +1519,96 @@ Revisão final: git diff --cached --check retornou2 por um espaço final na saí
 BuildKit de ec2-deploy.txt. Normalizado somente esse espaço no texto versionado,
 com declaração na evidência; captura bruta/hash preservados. Checagem repetida
 antes do commit, sem alterar código ou simular saída da ferramenta.
+
+## T25 — implementação local e bloqueio AWS, 29/09/2026
+
+Aluno pediu próxima tarefa, avisou expiração e pediu esperar; pausa respeitada.
+Ao informar sessão renovada, retomada autorizada. InícioHEAD f3ec791/19commits/
+feature limpa/main preservada/zero merges. STS renewed0 confirmou mesma conta/
+default/voclabs/us-east-1. EC2 DescribeInstances254: UnauthorizedOperation com
+explicit deny na política voc-cancel-cred. Conta reconhecida não significa
+permissão EC2; não inferir saldo/duração/status atualAWS. Pergunta assíncrona
+solicitou confirmar atualização das três credenciais temporárias locais, sem
+valores por chat. A implementação/testes locais continuaram enquanto AWS bloqueada.
+
+Implementados scripts/verify-aws.py e scripts/tests/test_verify_aws.py. Reuse
+helpers deploy-api.py/VerifierHTTP anterior sem alterá-los. Preflight conferirá
+conta/role/IP32/EC2/RDS/SGs/privadas antes dos testes. SQL parametrizado por
+markerUUID compara campos/DATE com DD-MM-YYYY, TLS ativo/CA/rejecttrue e endpoint.
+Restart sóAPI deve trocar containerID mantendoimagem/registro; finally limpa
+somente markerUUID/IDs próprios. Não executa apply/destroy/IAM/SG/deploy.
+
+Oito testes locais iniciais0; cobertura ampliada para CIDRsvazios/todasportas,
+dez finais0. Nenhuma falha de teste local observada, não inventar correção.
+CLIhelp0. Execução real do script exit1 ao consultarEC2(254), antes de criar
+reserva/SSH/SQL/restart. Capturas reais api-aws.txt, limitação explícita em
+rds-crud.txt e adendo aws-seguranca.txt; brutos0600 e redação de dados privados.
+App/infra/deploy/helpers/evidências anteriores preservados. T25 BLOQUEADA;
+R04/R05/R06/R16/R17/R22/R29 permanecem parciais, R07 mantém aceiteT24 histórico.
+Retomar T25 após atualizar perfildefault com accesskey/secretkey/sessiontoken
+renovados e revalidar acesso; depois T26 relatório com contribuição do aluno.
+Sem novo CRUD/persistênciaAWS comprovado, sem recursos/dados alterados, sem
+contornar políticas. Sem push/merge/PR/teardown. Commit coerente de verificador/
+testes/bloqueio somente após revisão; sem vazio/quantidade, mergeT32 pendente.
+
+## T25 — retomada, auditoria anterior e aceite AWS concluído
+
+Aluno pediu atualizar credenciais, conferir/reparar tarefas anteriores e seguir
+T25; pausa anterior respeitada. HEAD f3ec791/19commits reais, alterações locais
+T25 anteriores preservadas. STS/EC2 atuais passaram após atualização do perfil
+pelo aluno; bloqueio voc-cancel-cred inicial permanece documentado, não apagado.
+Auditoria achou EC2stopped, AWSreasonUserinitiated15:46:58GMT; causa/autoria não
+comprovadas. RDSavailable/private/encrypted. Start/waitrunning/waitstatusok0 da
+MESMA instância; novoIP54.234.84.228. API voltou automaticamente, imagemT24/
+manifesto/envroot0600/dir0700/CA0644/UID1000/TLSv1.3/health200 preservados.
+
+Auxiliaresassert1 iniciais exigiramrunning da EC2stopped e checksok ainda
+initializing, embora consultasAWS0; wait explícito resolveu. ConsoleAWS0 novo
+omitiu fingerprint; auxiliarassert1 recusou atualizarpin. Reutilizada mesma
+hostkey já autenticada no consoleT24, comparada bitabit com ssh-keyscan atual;
+known_hosts privado0600 só acrescentou IPnovo, StrictHostKeyChecking=yes.
+Falhas históricas T16SCP/ObjectLock/T24CRLF/digestOCI continuam nas evidências,
+sem alegar que nunca houve problemas. CredenciaisAWS não lidas/imprimidas.
+
+S3Enabled/AES256/BPA4true/us-east1/stateVersionId/nãovazio, DDBACTIVE/on-demand/
+LockIDString/lockausente e23managed revalidados. Planoauditoria2: resourceactions
+no-op, outputsIPURLupdate; driftcomputadoEC2ipdns/RDScamposvazios/SGsinline
+observados, guardas de regrasmanaged AWSexatas passaram. Após revisão concreta
+refresh-only/hash44452c91203ddaa5513b10947d6521273ad8d657c1d15c41f3161d5edea921b2/
+conta/região/custo, aplicada só atualização de state conforme autorização de
+reparar tarefas anteriores. Applyrefresh0/zeroaçõesrecursos/nova versãoAES256/
+outputsIPURLcorrentes/lockliberado. Plano posterior0Nochanges/state23managed.
+Custo adicional limitado a requests/versão do backend existente; cenárioT22
+~US$0.01/mês não é saldo/teto/fatura. Nenhum recurso criado/excluído/reconfigurado.
+
+verify-aws.py reforçado: hostname/banco/certificado/TLS validados também ANTES
+de CRUD e DELETE SQL; parâmetros pg vinculam markerUUID. Dez testes locais0.
+PositivoAWS0: seisrotas, obrigatórios/dataimpossível/PUTparcial400 e404; ID2
+29-02-2024/DATE2024-02-29, PUT01-10-2026/DATE2026-10-01/confirmada, delete204 eSQLzero.
+PersistênciaID3: container085e... ->7fe3..., mesmaimagembd97..., GET/SQLidênticos
+01-10-2026/confirmada após restart sóserviçoAPI. NodeUID1000/nenhumPGcontainer.
+Negativoexpectativa deliberadamente cancelada paraPOSTpendente: SQL real retornou
+pendente, scriptdetectoudivergência/exit1; finallyremoveu somenteUUID/ID4.
+SentinelaID1/UUIDdistinto preservada HTTP/SQL apóspositivo/negativo; cleanupfinal
+sósentinela confirmado. Fixtureexit0/zero registros de teste remanescentes.
+Harnesses próprios executados em/tmp, sem simulação de HTTP/SQL e sem colegas.
+
+Evidências api-aws.txt/rds-crud.txt/aws-retomada-t25.txt eadendoaws-seguranca.txt
+registram comandos/horários/exit/hash/redação. State/showJSON brutos contêmsegredos,
+sómetadados/resumos entram emGit; brutos/planos próprios0600em/tmp preservados.
+T25 verificada, sem bloqueio atual. R04/R05/R06/R16/R17/R22/R32verificados;
+R29parcial atéverify-delivery/T31, R02parcial atémergeT32. PróximaT26 relatório
+com contribuição do aluno, não atribuir vivências pessoais sem relato.
+App/infra/deploy/helpers/lockfiles/evidências anteriores preservados; sem
+provisionamento/destroy/push/merge/PR. Recursosativos/faturáveis. Um commit
+coerente real após revisão, sem quantidade/vazio, merge eentrega futura preservados.
+
+Auxiliar de atualização documental inicialmente teve SyntaxError unmatched
+parenthesis antes de executar/escrever documentos. Corrigido o parêntese e
+reexecutado com sucesso; AWS/testes/evidências já concluídos não foram afetados.
+A cadeia inicial shell terminou0 pelo git status final, não pelo Python; saída
+da falha observada e corrigida, sem interpretar esse código como êxito do auxiliar.
+
+Revisão staged: git diff --cached --check2 detectou linhas vazias extras no fim
+de api-aws.txt/rds-crud.txt. Removidas só no texto versionado, com declaração
+nessas evidências; brutos/hashes originais preservados. Nova checagem antes do commit.
