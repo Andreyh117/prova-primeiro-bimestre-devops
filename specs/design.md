@@ -312,11 +312,51 @@ RDS security group e egress EC2 que o referencia precisam de ordem de criação
 sem ciclo: criar SGs primeiro e regras separadas; não referenciar mutuamente
 os SGs em regras inline. Tags em subnet group, tabela e bucket também contam.
 
+### T13 — preflight observado e decisões
+
+Consultas AWS read-only em 28/09/2026: default/us-east-1/assumed-role voclabs,
+conta completa mantida privada; aluno confirmou Learner Lab da prova e painel
+US$0 usados de US$50. Orçamento é relato do painel, não teste automatizado.
+AZs us-east-1a/use1-az4 e us-east-1b/use1-az6 available/t2.micro ofertada.
+RDS PostgreSQL16.15 disponível com db.t3.micro/gp3/VPC/mínimo20GiB/encriptação e
+ambas AZs. Seleção Single-AZ encriptada/privada proposta; funcionamento e SGs
+serão conferidos na AWS depois de apply autorizado. Única key pair no retorno
+vockey/RSA; LabInstanceProfile já contém LabRole, sem criar IAM. Posse da chave
+privada e SSH não testados; são pré-condições futuras do deploy.
+
+IP IPv4 HTTPS observado, SSH e API limitados a esse /32 conforme resposta do
+aluno. Não adicionar acesso público geral ou CIDR de professor não informado.
+Conta/IP/opções em infra/preflight.local.json 0600, ignorado antes de criar,
+sem credenciais/chave privada; não é tfvars/state/plan nem aprovação de apply.
+Reconsultar token/identidade/IP/opções antes dos planos. T13 não criou recurso.
+
+Primeiro init provider6.65.0 falhou apesar de Registry HTTPS listar a versão;
+segunda tentativa direct isolada passou na mesma versão, causa inicial não
+comprovada. Validate passou com sonda contendo dynamodb_table e tabela LockID S.
+Leitura de schema exigiu backend S3 inicializado; corrigida só sonda em /tmp para
+usar root sem declaração remota, mantendo S3 real pendente até bootstrap.
+Schemas DynamoDB/RDS e lockfile passaram; caches temporários próprios removidos.
+Fonte oficial Terraform1.16.2 mantém dynamodb_table String/depreciado e seu uso;
+locking ativo será conferido T21, não inferido desses testes.
+
+Evidências reais em aws-preflight.txt e diário, incluindo tentativas/erros,
+redigindo conta/IP. Fontes primárias:
+[release provider6.65.0](https://github.com/hashicorp/terraform-provider-aws/releases/tag/v6.65.0),
+[catálogo Registry](https://registry.terraform.io/v1/providers/hashicorp/aws/versions),
+[código backend Terraform1.16.2](https://github.com/hashicorp/terraform/blob/v1.16.2/internal/backend/remote-state/s3/backend.go),
+[AZs](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-availability-zones.html),
+[opções RDS](https://docs.aws.amazon.com/cli/latest/reference/rds/describe-orderable-db-instance-options.html),
+[identidade STS](https://docs.aws.amazon.com/cli/latest/reference/sts/get-caller-identity.html),
+[key pairs](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-key-pairs.html),
+[instance profile existente](https://docs.aws.amazon.com/cli/latest/reference/iam/get-instance-profile.html).
+
 ## Terraform, bootstrap e state
 
-D11: Terraform instalado 1.16.2, proposto como versão fixa inicial após validar
-compatibilidade na tarefa correspondente; selecionar release estável do provider
-AWS compatível e versioná-lo em `.terraform.lock.hcl` em ambos os roots.
+D11: T13 validou Terraform `= 1.16.2` e provider hashicorp/aws `= 6.65.0` em
+sonda isolada, init/validate/schema reais sem credenciais/backend remoto. Fixar
+essas versões e versionar `.terraform.lock.hcl` em ambos os roots quando criados.
+Não atualizar sem necessidade/revisão de compatibilidade. A sonda tem lockfile
+real em /tmp/devops-t13-provider.lock.hcl; a configuração final gera seu próprio.
 `infra/backend` começa com state local ignorado e protegido; `infra` tem backend
 S3 parcial em providers, configurado por `backend.local.hcl` ignorado.
 

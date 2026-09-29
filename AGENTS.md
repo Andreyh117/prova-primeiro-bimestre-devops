@@ -40,11 +40,40 @@ conferir labels. Zero recursos UUID, env/checkpoints em /tmp removidos; .env do
 usuário ausente/preservado. Falha inicial e duas execuções reais preservadas em
 compose-persistencia.txt, normalizando explicitamente só espaços finais.
 
-R10 agora verificado local; R06/R22/R29 continuam parciais até AWS/demais scripts.
-T13 é a próxima tarefa, preflight AWS read-only; não avançar ao encerrar T12.
-Sem bloqueio restante. Não repetir suíte nativa/T10/T11 sem novas mudanças ou
+R10 foi verificado localmente em T12; R06/R22/R29 continuam parciais até AWS/
+demais scripts. Ao encerrar T12, T13 era a próxima; atualização atual abaixo.
+Não repetir suíte nativa/T10/T11 sem novas mudanças ou
 falhas nesses componentes. Preservar logs anteriores e nunca usar down -v como
 prova de persistência ou apagar volumes/dados de outros projetos.
+
+Atualização T13, após revisão do aluno em 28/09/2026: T01–T13 verificadas;
+HEAD inicial 30a2dac/nove commits, merge T32 pendente. T13 somente consultas AWS
+read-only e sonda Terraform em /tmp. STS default/us-east-1/voclabs válido naquele
+momento, conta mascarada; aluno confirmou Learner Lab correto, US$0 usados de
+US$50 no painel e API somente IP atual /32. .gitignore preparado antes de
+infra/preflight.local.json 0600 com conta/IP/CIDRs/opções; não é tfvars/state/
+plan nem autorização de apply, não contém credenciais ou chave privada.
+
+AZs escolhidas us-east-1a/use1-az4 e us-east-1b/use1-az6 reais, t2.micro ofertada;
+RDS16.15/db.t3.micro/gp3/20GiB/encriptação possível em ambas. Key existente vockey
+única no retorno; LabInstanceProfile contém LabRole. Posse da chave privada/SSH
+não testados; não inferir duração restante do token. Revalidar identidade/região/
+IP/opções antes dos planos, restringir SSH/API ao /32 confirmado pelo aluno.
+
+D11 agora fixa Terraform=1.16.2 e hashicorp/aws=6.65.0: init/validate e schema
+DynamoDB/RDS passaram em sonda sem credenciais/backend remoto. Primeiro init
+falhou apesar de versão listada; repetição direct passou na mesma versão, causa
+não comprovada. Schema com declaração S3 não inicializada falhou; corrigida
+somente sonda local retirando essa declaração. Logs completos/correções em
+aws-preflight.txt; fonte oficial v1.16.2 mantém dynamodb_table depreciado.
+Locking ativo ainda T21, não comprovado aqui. .terraform.lock.hcl da sonda em
+/tmp/devops-t13-provider.lock.hcl; criar/versionar lockfiles dos roots quando
+implementá-los em T14/T21. Caches/sondas próprias removidos; zero recursos criados.
+
+Próxima tarefa T14, implementar/bootstrap validate/plan; apply só depois da
+revisão/autorização T15. R13 em andamento, SG/RDS/S3/DynamoDB efetivos futuros.
+Sem bloqueio T13. Commits apenas por marcos reais necessários, um único commit
+para o conjunto coerente de preflight/documentação, nunca por quantidade.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de

@@ -21,7 +21,8 @@ T08 passou 48 testes com CRUD completo, health/503 e falhas reais do banco.
 Restart da API nativa foi verificado em T09; Dockerfile/contexto/runtime em T10.
 Compose/ambiente/healthchecks foram verificados em T11 com CRUD/SQL reais.
 T12 comprovou persistência após recriar containers mantendo o volume.
-Terraform/AWS continuam pendentes.
+Módulos Terraform/deploy AWS continuam pendentes; T13 verificou preflight por
+consultas de leitura e sonda local, sem criação de recursos.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. Seis commits reais foram confirmados em T09;
 R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
@@ -43,7 +44,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R10 / P | Volume nomeado mantém os dados PostgreSQL. | Criar reserva, recriar containers sem remover volume e confirmar linha por API e SQL. | `evidencias/compose-persistencia.txt`. | verificado |
 | R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt` (T11 real). | verificado |
 | R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore` e compose-rede-saude.txt (config/mapeamentos/ignores reais). | verificado |
-| R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-seguranca.txt`, plano sanitizado. | pendente |
+| R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-preflight.txt` (T13 leitura/Lab/profile); aws-seguranca/plano futuros. | em andamento |
 | R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | Módulo e `evidencias/aws-rede.txt`. | pendente |
 | R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | `evidencias/aws-seguranca.txt`. | pendente |
 | R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | `evidencias/ec2-deploy.txt`, `evidencias/api-aws.txt`. | pendente |
@@ -195,3 +196,19 @@ Cleanup final comprovou total SQL 0, labels e zero recursos UUID. Logs de falha
 inicial/correção/reexecuções em compose-persistencia.txt; fontes e comandos README.
 R06/R22/R29 continuam em andamento até RDS/execução AWS/demais scripts, sem
 transformar comprovação local em implantação na nuvem. T13 continua pendente.
+
+## Evidência T13 — avanço R13 e preparação R15/R20/R31
+
+STS read-only/default/us-east-1/voclabs exit0 e token temporário configurado;
+aluno confirmou Learner Lab correto/painel US$0 usados de US$50. LabInstanceProfile
+contém LabRole; key pair existente vockey; AZs/t2.micro e RDS16.15/db.t3.micro/
+gp3/20GiB/encriptação/duas AZs realmente consultados. IP atual /32 para SSH/API
+confirmado pelo aluno, valores e conta privados em arquivo 0600 ignorado.
+R13 em andamento até revisar configuração IAM/perfil e execução efetiva.
+R15/R20/R31 seguem pendentes do aceite de regras/backend e aprovações dos planos;
+consulta/saldo/CIDR não equivalem a SG aplicado, locking ativo ou apply aprovado.
+Terraform1.16.2/providerAWS6.65.0 validados em sonda isolada init/validate/schema,
+sem backend remoto e sem credenciais; erros e correções reais em aws-preflight.
+DynamoDB depreciado ainda suportado pelo core, preservado como exigência.
+Sondas/cache próprias removidos; nenhuma mudança/criação na nuvem/plan/apply.
+T13 verificado, próximo T14; não validar módulos inexistentes como aprovados.

@@ -31,7 +31,12 @@ exit 0 e limpeza confirmada; config sem senha retornou 1 esperado.
 Após revisão, o aluno autorizou T12: persistência HTTP/SQL depois de recriar
 api/db, mesmo volume, negativos/checkpoint/sentinela/cleanup reais. Primeiro
 TypeError corrigido; duas reexecuções passaram/0, com falha inicial preservada.
-Próxima tarefa pendente: T13, preflight AWS read-only e decisões de versões/Lab.
+Após revisão, o aluno autorizou T13 e reforçou commits somente por mudanças
+necessárias/coerentes. T13 verificada: consultas AWS read-only, Lab/saldo/CIDRs
+confirmados pelo aluno, opções EC2/RDS/AZ/key/profile reais, versões/schema
+validados em sonda local sem backend remoto. Falhas/correções preservadas.
+Próxima tarefa pendente: T14, bootstrap S3/DynamoDB; plan exige revisão e apply
+continua dependente da autorização específica T15.
 
 ## Plano de tarefas pequenas
 
@@ -54,7 +59,7 @@ Cada tarefa recebe entrada no diário.
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt e docker-run.txt: duas execuções reais, UID 1000, HTTP/SQL e limpeza. | verificado |
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt e trecho api-local.txt: config/up/ps/ordem/rede/CRUD/SQL reais. | verificado |
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt: falha inicial/correção, duas reexecuções, HTTP/SQL/IDs/volume, negativos/checkpoint/limpeza; README. | verificado |
-| T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | Decisões no diário e aws-preflight.txt; variáveis locais ignoradas. | pendente |
+| T13 | T12 | R13, R15, R20, R31 | Preparar AWS: versões/provider, região/conta/Lab/saldo, AZs, engine RDS, IP/CIDRs e key pair. | Consultas oficiais/read-only; confirmar engine/classe e DynamoDB na versão fixa; sem credenciais em logs. | aws-preflight.txt: consultas reais/compatibilidade/erros; decisões humanas no diário; preflight.local.json 0600 ignorado. | verificado |
 | T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt e plano sanitizado; commit backend. | pendente |
 | T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | Decisão no diário; plano binário local ignorado. | pendente |
 | T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt; sem marcar infraestrutura principal implantada. | pendente |
@@ -460,3 +465,38 @@ README/AGENTS/specs/diário e evidência nova. API/schema/Compose/Dockerfile/loc
 logs anteriores preservados; testes nativos/T10/T11 não repetidos sem mudanças.
 Commit real proposto test(compose): verifica persistencia ao recriar containers.
 Próximo T13; sem bloqueio local, merge/publicação/provisionamento nesta tarefa.
+
+### T13 — resultado verificado em 28/09/2026
+
+Ferramentas atuais Terraform 1.16.2/AWS CLI 2.35.6/Python 3.12.3. STS read-only
+na região explícita us-east-1 passou/0: perfil default, assumed-role voclabs,
+conta mascarada no log, token temporário presente sem exposição. Aluno confirmou
+Learner Lab da prova e painel com US$ 0 usados de US$ 50; saldo é fonte humana,
+não retorno de API. Confirmou API somente no IP atual /32, também usado para SSH.
+IP por HTTPS, conta/CIDRs mantidos apenas em infra/preflight.local.json 0600,
+.gitignore conferido antes de criar. Sem credenciais/chave privada no arquivo.
+
+Consultas reais todas exit 0: AZs disponíveis e t2.micro ofertada; escolhidas
+us-east-1a/use1-az4 e us-east-1b/use1-az6. PostgreSQL16.15 disponível e opção
+específica db.t3.micro/gp3/VPC, mínimo20GiB/encriptação, ambas AZs conferida.
+Única key pair retornada vockey/RSA; LabInstanceProfile existente com LabRole.
+Não comprovar posse da chave privada, conexão SSH, segurança SG ou deploy aqui.
+
+Selecionadas versões exatas Terraform1.16.2/providerAWS6.65.0. Primeiro init
+em sonda isolada/backend=false/sem credenciais falhou/1, embora o Registry HTTPS
+liste a release; segunda instalação direct temporária na mesma versão passou
+init/validate/0. Causa inicial não comprovada. Providers schema com declaração
+S3 não inicializada falhou/1; corrigida somente a sonda de leitura removendo essa
+declaração, mantendo backend remoto futuro. Init/validate/schema reais passaram/0,
+campos DynamoDB/RDS e lockfile conferidos. Fonte oficial v1.16.2 contém
+argumento dynamodb_table String/depreciado e seu uso; não trocar por S3 exclusivo.
+Locking efetivo é futuro T21. Sondas/cache próprias removidas; lockfile da sonda
+preservado em /tmp para origem das versões, roots/lockfiles versionados só depois.
+
+aws-preflight.txt contém capturas reais, hashes, erros/correções, redigindo conta/
+IP e removendo explicitamente só ANSI/espaços finais. R13 parcialmente avançado,
+R15/R20/R31/infra efetiva ainda pendentes; requisitos locais T01–T12 preservados.
+README/AGENTS/design/matriz/diário sincronizados, sem simular infraestrutura.
+Nenhum recurso criado, plan/apply/destroy/merge/push/PR; sem bloqueio restante.
+Um único marco documental/configuração será revisado para commit, sem aumentar
+histórico por cada tentativa. Próximo T14; autorização T13 não autoriza apply.

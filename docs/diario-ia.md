@@ -658,3 +658,85 @@ git diff --check 0. Nenhuma fonte testada foi alterada após a execução final;
 não repetir teste runtime por correções documentais/checker estático.
 Stage terá somente os dez arquivos revisados; conferir bytes e diff --cached
 --check antes de criar o marco Conventional, sem merge/push/commit vazio.
+
+## 28/09/2026 — T13: preflight AWS e versões Terraform
+
+Prompt: aluno revisou T12 e pediu próxima tarefa, reforçando commits somente
+quando necessários, coerentes, sem inventar nada. Estado inicial: HEAD 30a2dac,
+nove commits reais, feat/api-reservas limpa; nenhum merge/publicação. Escopo
+T13: versões/provider/backend DynamoDB, região/identidade/Lab/saldo, AZs,
+engine/classe RDS, IP/CIDRs e key pair, somente leitura e configuração privada.
+Não executar bootstrap T14, plan/apply/destroy nem acessar entregas de colegas.
+Preservar fontes e evidências anteriores por hashes; registrar bloqueios reais.
+
+Primeiro comando auxiliar de inspeção de ferramentas abortou por SyntaxError
+no dict Python antes de executar qualquer consulta AWS. Corrigido o comando
+em script temporário para inspecionar flags/presença, sem imprimir credenciais.
+Não representa falha AWS nem verificação aprovada; fontes do projeto intactas.
+
+STS get-caller-identity em us-east-1 passou/0, perfil default, conta terminada
+em 5811, assumed-role voclabs; token de sessão existe no perfil, não impresso.
+Aluno confirmou textualmente: "Sim, é o learner lab da prova, o saldo tem 0$
+usados de 50$" e "Somente meu IP atual (/32)". Saldo é informação humana do
+painel, não medida pela API AWS; registrar fonte e não estimar custos executados.
+Consultas AWS read-only passaram: 6 AZs regionais available; EC2 t2.micro
+ofertada; RDS PostgreSQL 16.15/db.t3.micro/gp3, mínimo 20 GiB/encriptação e AZs
+us-east-1a/us-east-1b conferidos; key pair existente vockey/RSA; profile existente
+LabInstanceProfile contém LabRole. Nenhum IAM novo ou mudança de recurso.
+IP IPv4 por HTTPS checkip.amazonaws.com, mantido privado; SSH/API só esse /32
+conforme aluno. .gitignore preparado antes de infra/preflight.local.json 0600
+com contexto conta/IP/CIDRs/Lab/versões/opções, sem credenciais/chave privada.
+Este arquivo não é tfvars/plan/state nem concede autorização de apply.
+
+Terraform 1.16.2 e AWS CLI 2.35.6/Python 3.12.3 observados. Selecionado provider
+AWS 6.65.0 estável, release oficial e catálogo Registry conferidos. Primeiro
+init na sonda temporária/sem credenciais/backend=false falhou/1 dizendo não
+haver release compatível; catálogo HTTPS real incluiu 6.65.0 e 6.66.0. Segunda
+sonda com instalação direct temporária passou init/validate/0 na mesma 6.65.0.
+Config global não existia/não foi alterada; causa da primeira divergência não
+comprovada, não atribuir a cache/permissão ou trocar versão sem necessidade.
+
+providers schema -json na sonda com declaração de backend S3 ainda não
+inicializado falhou/1: Backend initialization required. Isso é limite da sonda,
+não falha do deploy. Corrigir só o root temporário de leitura de schema removendo
+a declaração S3; não inicializar backend remoto antes do bootstrap T16.
+Preservar stdout/stderr de todas tentativas e registrar o resultado final.
+
+Sonda corrigida sem declaração de backend S3 passou fmt-check/init-backend=false/
+validate/schema, todos0. JSON schema efetivamente lido em memória confirmou
+aws_dynamodb_table name/billing_mode/hash_key/attribute(name,type) e RDS
+engine_version/instance_class/storage_encrypted/publicly_accessible. Lockfile
+real do provider6.65.0 preservado em /tmp; caches/diretórios das duas sondas
+removidos só depois de conferência. Fonte oficial Terraform1.16.2 baixada por
+HTTPS confirmou dynamodb_table String/depreciado e usado por ddbTable; hash e
+snippet na evidência. Locking efetivo e init S3 real continuam T21/pós-bootstrap.
+
+aws-preflight.txt construído das capturas reais com stdout/stderr/exit códigos,
+hashes e normalização explícita de ANSI/espaços finais; respostas extensas RDS
+omissas no trecho publicado, originais em /tmp e consulta específica íntegra.
+Logger da tentativa2 escreveu JSON conferido em memória antes de conferir
+schema exit1; anotado explicitamente que não houve JSON/conferência naquele
+ponto. Conferência só ocorreu na execução final corrigida, exit0. Não tratar a
+linha prematura como sucesso. As falhas foram de sondas locais e comandos, não
+de implantação AWS; nenhuma implantação ocorreu. Sem bloqueio restante T13.
+
+README/AGENTS/design/tasks/matriz sincronizados; T13 verificado/R13 parcial,
+R15/R20/R31/recursos efetivos pendentes. Próximo T14. Nenhum recurso criado,
+plan/apply/destroy/push/merge/PR nem mudança de código API/testes/versões locais.
+Ferramentas reais: Codex, terminal Git/Python/AWS CLI/Terraform e navegador;
+sem agentes auxiliares/skill. Commits somente para conjuntos reais necessários:
+um único marco de preflight/documentação/config privada protegida, não um por
+sonda/tentativa nem para preencher quantidade. Revisar escopo/segredos/stage.
+
+Revisão final estática passou exit0: oito arquivos de escopo, preservação por
+SHA-256 de guia/API/testes/Compose/Dockerfile/lockfile/evidências anteriores,
+scanner delimitado sem achados, conta completa/IP ausentes nos versionáveis,
+Markdown/links/newlines corretos. Capturas e hashes de todas tentativas reais
+conferidos; STS/seis consultas/schema final 0, sonda/cache próprios removidos.
+Preflight local 0600/ignorado/não rastreado, nenhum módulo/state criado no
+projeto. 34 tarefas/32 requisitos consistentes, T13 verificado/T14–T34 pendentes,
+R13 parcial e R15/R20/R31 ainda sem aceite efetivo. git diff --check 0.
+Corrigida redação README que poderia sugerir CIDRs/EC2/RDS já aplicados: são
+decisões futuras, não implantação. API/suites anteriores não repetidas porque
+não houve alteração nesses componentes. Um único commit necessário preservará
+o conjunto coerente de preflight após stage/bytes/diff --cached --check.

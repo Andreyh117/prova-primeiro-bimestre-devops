@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T12 foram concluídas. O commit inicial `21cb5f0` está em
+Em 28/09/2026, T01–T13 foram concluídas. O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -45,7 +45,11 @@ HTTP/SQL preservaram 01-10-2026/DATE 2026-10-01. Verificador retornou 0 no caso
 válido e 1 nos negativos, limpando apenas seus dados e mantendo a sentinela.
 A primeira execução falhou antes do Docker por uso incorreto de Path.open;
 foi corrigida e as saídas anteriores foram preservadas.
-Próxima tarefa: T13, preflight AWS somente com consultas e decisões verificáveis.
+T13 confirmou identidade/região e opções AWS por consultas de leitura. O aluno
+confirmou Learner Lab, US$0 usados de US$50 e acesso API só do seu IP /32.
+Terraform1.16.2/providerAWS6.65.0 passaram init/validate/schema em sonda isolada;
+backend S3 e recursos do projeto ainda não existem. Falhas/correções registradas.
+Próxima tarefa: T14, bootstrap S3/DynamoDB; apply requer aprovação específica T15.
 
 ## Contrato aprovado para implementação
 
@@ -95,6 +99,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Compose ps T11](evidencias/compose-ps.txt): config, caso negativo sem senha, build/subida e serviços healthy.
 - [Compose rede/saúde T11](evidencias/compose-rede-saude.txt): ordem real, rede/volume/portas, CRUD/SQL, defaults do exemplo e limpeza.
 - [Persistência Compose T12](evidencias/compose-persistencia.txt): falha inicial/correção, HTTP/SQL antes/depois, IDs/volume, negativos, checkpoint e limpeza reais.
+- [Preflight AWS T13](evidencias/aws-preflight.txt): consultas reais, versões/schema isolados, falhas/correções e decisões humanas; sem criação de recursos.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -370,15 +375,51 @@ no ambiente do processo; Node não carrega .env automaticamente.
 | PGSSL, PGSSLROOTCERT | Compose local: false, sem CA; RDS futuro: true com CA oficial. |
 
 Node 24.21.0, Express 5.2.1, pg 8.23.0 e PostgreSQL 16.15 foram validados
-localmente em T06. A versão minor disponível no RDS e a compatibilidade do
-Terraform/provider serão conferidas nas respectivas tarefas. AWS: somente Learner Lab, `us-east-1`, credenciais
+localmente em T06. T13 confirmou RDS 16.15 com db.t3.micro/gp3 e validou a compatibilidade local de
+Terraform 1.16.2/provider AWS 6.65.0. AWS: somente Learner Lab, `us-east-1`, credenciais
 temporárias com token e LabRole/LabInstanceProfile existentes, sem IAM próprio.
 
 ## AWS e entrega
 
 Provisionamento e destruição exigem plano revisado e autorização específica.
-RDS privado/encriptado é o banco real da API na EC2; a limpeza principal acontece
-antes da limpeza do backend. Não há execução AWS nesta etapa.
+A implantação futura usará RDS privado/encriptado para a API na EC2; a limpeza
+principal acontecerá
+antes da limpeza do backend. T13 realizou consultas de leitura AWS; não há implantação do projeto.
+
+Preflight consulta identidade, disponibilidade e parâmetros antes de escrever
+um plano. Assim os módulos usam opções realmente ofertadas pela conta/região.
+T13 selecionou AZs us-east-1a/us-east-1b, EC2 t2.micro, RDS PostgreSQL 16.15/
+db.t3.micro/gp3/20GiB, key pair existente vockey e LabInstanceProfile/LabRole.
+Encriptação é suportada; RDS privado/SG/locking só serão comprovados depois.
+A key pair retornada não comprova posse da chave privada ou conexão SSH.
+
+`infra/preflight.local.json` guarda conta/IP/CIDRs e
+opções locais em 0600, ignorado; não deve ser publicado. Não contém credenciais
+nem chave privada e não é arquivo Terraform de variáveis/state. O aluno confirmou
+no painel US$0 usados de US$50; esse saldo não foi medido pela API. Os CIDRs definidos para SSH/API
+são o IP atual /32 por decisão dele; as regras serão implementadas em T18.
+Reconsultar IP, STS e opções
+antes de plan/apply: validade observada agora não garante token válido depois.
+
+Com credenciais temporárias do Lab já configuradas, pode conferir sem criar:
+
+```bash
+aws sts get-caller-identity --region us-east-1 --query Account --output text
+aws ec2 describe-availability-zones --region us-east-1 --query 'AvailabilityZones[].ZoneName' --output json
+aws rds describe-orderable-db-instance-options --engine postgres --engine-version 16.15 --db-instance-class db.t3.micro --vpc --region us-east-1 --query 'OrderableDBInstanceOptions[].{version:EngineVersion,class:DBInstanceClass,storage:StorageType,encryption:SupportsStorageEncryption}' --output json
+aws ec2 describe-key-pairs --region us-east-1 --query 'KeyPairs[].KeyName' --output json
+aws iam get-instance-profile --instance-profile-name LabInstanceProfile --region us-east-1 --query 'InstanceProfile.Roles[].RoleName' --output json
+```
+
+A saída de conta fica no seu terminal privado; evidências versionadas a mascaram.
+Não imprimir arquivo de credenciais nem dumps de ambiente. Sonda T13 em /tmp
+usou init -backend=false/validate/schema com provider fixo e sem credenciais;
+logs/lockfile real estão em aws-preflight.txt. Isso não é validate dos módulos
+infra futuros nem teste de locking. O argumento dynamodb_table permanece
+suportado/depreciado no Terraform 1.16.2 e será usado conforme a prova.
+[Backend S3 oficial](https://developer.hashicorp.com/terraform/language/backend/s3).
+Lockfiles dos dois roots serão versionados quando criados; nenhuma atualização
+de ferramenta/provider foi feita para acrescentar commits.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega
