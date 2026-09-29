@@ -21,8 +21,9 @@ T06, agora verificada: dependências, schema/conexão e 18 testes com PostgreSQL
 16.15 real. O aluno revisou T06 e autorizou T07, agora verificada com 35 testes,
 POST/GET HTTP reais e SQL independente. O aluno aprovou a regra de commits,
 revisou T07 e autorizou T08, agora verificada com CRUD completo, saúde/503 e
-48 testes reais. Próxima tarefa pendente: T09, script verify-api.py e
-persistência ao reiniciar a API nativa.
+48 testes reais. Após revisão de T08, o aluno autorizou T09, verificada com 51
+testes: script exit 0/1 e reserva mantida por SQL/GET ao reiniciar a API nativa.
+Próxima tarefa pendente: T10, Dockerfile não-root e execução com banco real.
 
 ## Plano de tarefas pequenas
 
@@ -41,7 +42,7 @@ Cada tarefa recebe entrada no diário.
 | T06 | T05 | R04–R06, R12, R32 | Selecionar/fixar dependências, implementar schema e conexão parametrizada; configurar PostgreSQL real de teste. | Instalação/lockfile; schema no banco isolado e consulta real; não mockar integração. | app/sql, package/lockfile e evidencias/t06-*.txt: instalação, 18 testes e falha controlada. | verificado |
 | T07 | T06 | R04–R07, R32 | Implementar POST/GET lista/GET por ID com obrigatórios e 404. | Testes de integração no PostgreSQL: criar, listar, consultar, datas DD-MM-YYYY válidas/impossíveis/bissextas, ausentes/inválidos e 404; conferir SQL. | app/test/api.test.js, api-local.txt (35 testes) e t07-execucao.txt. | verificado |
 | T08 | T07 | R04–R07, R32 | Implementar PUT completo, DELETE e /health com erros uniformes. | Banco real: atualizar mesma linha preservando DD-MM-YYYY, rejeitar parcial/data inválida, excluir, segundo DELETE 404 e banco indisponível 503. | api.test.js, z-unavailable.test.js, api-local.txt e health-local.txt (48 testes). | verificado |
-| T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt; commit real de API/testes. | pendente |
+| T09 | T08 | R06, R22, R29 | Criar verify-api.py e validar persistência ao reiniciar API nativa; documentar dependências. | Script passa, falha controlada retorna não zero e linha sobrevive ao restart; SQL real confirma. | api-local.txt e postgres-local.txt (51 testes); script exit 0/1, SQL e restart nativo reais. | verificado |
 | T10 | T09 | R08, R22 | Criar Dockerfile não-root e .dockerignore; build e execução da API com banco real de teste. | Build, UID não zero, container servindo /health e CRUD; confirmar exclusão de segredos no contexto. | docker-build.txt, docker-run.txt; commit real Docker. | pendente |
 | T11 | T10 | R09, R11, R12 | Criar Compose API/db, env.example, bridge, healthchecks e dependência condicionada. | Configuração sem imprimir segredos; up --build --wait e ps; seis rotas funcionais. | compose-ps.txt, compose-rede-saude.txt; commit real Compose. | pendente |
 | T12 | T11 | R06, R10, R22, R29 | Criar verify-persistence.py; testar recriação sem apagar volume. | Registro e SQL antes/depois da recriação; falha controlada; limpeza só de dados de teste. | compose-persistencia.txt e README atualizado. | pendente |
@@ -97,7 +98,9 @@ histórico inventado. A auditoria local foi executada em HEAD `dbcd6a1`:
 3 exclusivos; merges encontrados: 0. Saídas reais em
 [git-auditoria.txt](../evidencias/git-auditoria.txt). R02 continua em andamento.
 
-As mensagens abaixo são propostas para tarefas futuras, não commits existentes.
+A tabela abaixo preserva o plano da auditoria. T08 já foi commitada como
+cbf2410; T09 passou o aceite e aguarda revisão de stage/commit neste marco.
+T10 e seguintes permanecem propostas futuras.
 Executar uma tarefa autorizada por vez, incluir implementação, testes/evidências
 e documentação correspondente, revisar o diff e só então criar o commit.
 Não separar uma alteração trivial em vários commits para aumentar a contagem.
@@ -127,9 +130,10 @@ As mensagens propostas seguem
 Naquela auditoria, os registros ficaram pendentes de versionamento para
 acompanhar T08, sem commit extra só para contar. Nenhum commit, merge, rebase,
 amend ou push foi realizado naquela conferência; T08–T34 estavam pendentes.
-Atualização: o aluno aprovou o plano e autorizou T08; o aceite passou com 48
-testes reais e os registros da auditoria serão versionados nesse marco funcional.
-T09 continua pendente; a mensagem de T08 será usada somente após revisão do stage.
+Atualização: T08 foi verificada com 48 testes e commitada em cbf2410, incluindo
+os registros da auditoria no marco funcional. Depois da revisão do aluno, T09
+foi verificada com 51 testes; resultado ao final deste documento. O log original
+da auditoria continua sendo o snapshot de quatro commits, sem inventar histórico.
 
 ## Registro real desta primeira etapa
 
@@ -318,3 +322,32 @@ Registros aprovados da auditoria Git serão incluídos no mesmo marco funcional;
 a evidência da auditoria/guia permaneceram intactos. Mensagem prevista:
 feat(api): completa CRUD e verificacao de saude. Próximo: T09; sem restart,
 Dockerfile/Compose, Terraform, AWS, merge ou push nesta tarefa.
+
+### T09 — resultado verificado em 28/09/2026
+
+verify-api.py implementado com Python 3.12.3 stdlib, sem pip; URL e timeout
+validados. Confere saúde, CRUD, campos obrigatórios, data impossível, PUT parcial
+e 404. Cria marcador UUID e rastreia somente IDs próprios; limpeza em finally
+confere propriedade por GET, exclui por ID e verifica 404; falhas retornam 1.
+
+`npm --prefix app test`: 51 testes passaram, 0 falharam, exit 0. Três casos T09:
+script exit 0/CRUD completo com sentinela ID 37 preservada; CHECK temporário no
+banco exclusivo provocou PUT 500 e script exit 1, limpeza SQL confirmada com
+sentinela ID 39 intacta; reserva ID 41 sobreviveu ao restart real da API.
+PID 562767 encerrou SIGTERM/0, SQL com API parada confirmou DATE 2026-10-01;
+PID 562783 na mesma porta 44701 devolveu GET 200 com 01-10-2026 e mesmos campos.
+PostgreSQL não reiniciou; SQL final confirmou zero linhas T09. Processo final
+encerrou/0 e Docker posterior confirmou zero containers de teste.
+
+Saída integral acrescentada a api-local.txt, mantendo T07/T08. postgres-local.txt
+contém os trechos exatos do TAP e a consulta posterior Docker; não são outputs
+simulados. Health/auditoria/lockfile/guia anteriores preservados. Sintaxe Python/JS
+e ajuda CLI verificadas; sem falha inesperada da suíte ou bloqueio restante.
+O PUT 500 foi negativo planejado; não houve defeito de aplicação a corrigir.
+
+Arquivos: scripts/verify-api.py, app/test/persistence.test.js e helper native-api.js;
+duas evidências e AGENTS/README/specs/diário sincronizados. Marco preparado para
+`test(api): verifica persistencia apos reiniciar a API`, sexto commit real após
+cbf2410, sem commit vazio. R02 permanece parcial até merge em T32; auditoria
+anterior com 4 commits permanece histórica. Próximo passo: T10. Não houve
+Dockerfile/Compose da API, volume persistente, AWS, merge, push ou PR nesta tarefa.

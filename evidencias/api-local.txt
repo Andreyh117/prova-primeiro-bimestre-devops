@@ -818,3 +818,374 @@ ok 48 - banco encerrado de verdade retorna 503 uniforme no CRUD; entradas invál
 Limpeza confirmada: container de teste removido; dados temporários descartados.
 
 EXIT CODE: 0
+
+=== T09: execucao real em 2026-09-28T22:04:28-03:00 ===
+Ambiente: Node nativo/Python stdlib, PostgreSQL Docker isolado; sem AWS/Compose.
+Comando: npm --prefix app test
+stdout:
+
+> prova-primeiro-bimestre-devops@0.1.0 test
+> node test/run-postgres.js
+
+Imagem PostgreSQL fixada: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+Banco real: postgres (PostgreSQL) 16.15; acesso em 127.0.0.1:32772; senha não exibida.
+Schema de reservas aplicado com sucesso.
+TAP version 13
+# Subtest: GET lista vazia devolve 200 e array vazio
+ok 1 - GET lista vazia devolve 200 e array vazio
+  ---
+  duration_ms: 341.269124
+  type: 'test'
+  ...
+# Subtest: POST cria 201, Location e quatro campos; GET e SQL confirmam mesma linha
+ok 2 - POST cria 201, Location e quatro campos; GET e SQL confirmam mesma linha
+  ---
+  duration_ms: 39.238443
+  type: 'test'
+  ...
+# POST /reservas -> 201; Location /reservas/1; JSON {"id":1,"cliente":"D'Ávila T07","data":"15-10-2026","status":"pendente"}
+# GET por ID -> 200; SQL por conexão independente -> {"id":1,"cliente":"D'Ávila T07","data":"2026-10-15","tipo":"date","status":"pendente"}
+# Subtest: GET lista todos os status em ordem crescente de ID
+ok 3 - GET lista todos os status em ordem crescente de ID
+  ---
+  duration_ms: 34.809625
+  type: 'test'
+  ...
+# Subtest: GET consulta estado atual do PostgreSQL, incluindo alteração feita diretamente por SQL
+ok 4 - GET consulta estado atual do PostgreSQL, incluindo alteração feita diretamente por SQL
+  ---
+  duration_ms: 27.968572
+  type: 'test'
+  ...
+# Subtest: GET de ID válido ausente retorna 404, inclusive limite INTEGER
+ok 5 - GET de ID válido ausente retorna 404, inclusive limite INTEGER
+  ---
+  duration_ms: 17.145807
+  type: 'test'
+  ...
+# GET de ID ausente -> 404 RESERVA_NAO_ENCONTRADA.
+# Subtest: GET rejeita IDs inválidos com 400 sem confundir com 404
+ok 6 - GET rejeita IDs inválidos com 400 sem confundir com 404
+  ---
+  duration_ms: 37.9477
+  type: 'test'
+  ...
+# Subtest: datas válidas, extremos e anos bissextos mantêm DD-MM-YYYY em POST, GET e lista
+ok 7 - datas válidas, extremos e anos bissextos mantêm DD-MM-YYYY em POST, GET e lista
+  ---
+  duration_ms: 54.439615
+  type: 'test'
+  ...
+# Subtest: datas impossíveis, formatos alternativos, espaços e tipos incorretos retornam 400 sem gravar
+ok 8 - datas impossíveis, formatos alternativos, espaços e tipos incorretos retornam 400 sem gravar
+  ---
+  duration_ms: 96.658244
+  type: 'test'
+  ...
+# 19 datas inválidas -> 400; quantidade de linhas permaneceu 0.
+# Subtest: cada campo obrigatório ausente retorna 400
+ok 9 - cada campo obrigatório ausente retorna 400
+  ---
+  duration_ms: 18.511685
+  type: 'test'
+  ...
+# Subtest: cliente vazio, tipos errados, NUL e Unicode inválido retornam 400
+ok 10 - cliente vazio, tipos errados, NUL e Unicode inválido retornam 400
+  ---
+  duration_ms: 47.30057
+  type: 'test'
+  ...
+# Subtest: cliente aceita 120 caracteres Unicode e rejeita 121 após trim
+ok 11 - cliente aceita 120 caracteres Unicode e rejeita 121 após trim
+  ---
+  duration_ms: 18.267343
+  type: 'test'
+  ...
+# Subtest: status exige um dos três valores exatos, sem valor padrão
+ok 12 - status exige um dos três valores exatos, sem valor padrão
+  ---
+  duration_ms: 44.511181
+  type: 'test'
+  ...
+# Subtest: POST exige objeto com os três campos exatos, rejeitando id e campos desconhecidos
+ok 13 - POST exige objeto com os três campos exatos, rejeitando id e campos desconhecidos
+  ---
+  duration_ms: 45.947716
+  type: 'test'
+  ...
+# Subtest: JSON malformado e corpo vazio retornam 400 sem HTML ou stack trace
+ok 14 - JSON malformado e corpo vazio retornam 400 sem HTML ou stack trace
+  ---
+  duration_ms: 11.139928
+  type: 'test'
+  ...
+# Subtest: Content-Type inadequado ou ausente retorna 415 sem inserir
+ok 15 - Content-Type inadequado ou ausente retorna 415 sem inserir
+  ---
+  duration_ms: 14.218592
+  type: 'test'
+  ...
+# Subtest: limite de corpo aceita 16 KiB e rejeita 16 KiB + 1 byte com 413 sem inserir
+ok 16 - limite de corpo aceita 16 KiB e rejeita 16 KiB + 1 byte com 413 sem inserir
+  ---
+  duration_ms: 14.25092
+  type: 'test'
+  ...
+# 16 KiB -> 201; 16385 bytes -> 413; nenhuma linha extra.
+# Subtest: texto contendo SQL é preservado como dado por POST e GET, sem executar comandos
+ok 17 - texto contendo SQL é preservado como dado por POST e GET, sem executar comandos
+  ---
+  duration_ms: 12.726422
+  type: 'test'
+  ...
+# Subtest: PUT completo preserva ID, altera os três campos e mantém a outra reserva intacta
+ok 18 - PUT completo preserva ID, altera os três campos e mantém a outra reserva intacta
+  ---
+  duration_ms: 32.162494
+  type: 'test'
+  ...
+# PUT -> 200, mesmo ID 15; JSON {"id":15,"cliente":"D'Ávila atualizado T08","data":"29-02-2024","status":"confirmada"}; SQL DATE 2024-02-29.
+# Subtest: PUT repetido é idempotente e aceita datas extremas, bissextas e todos os status
+ok 19 - PUT repetido é idempotente e aceita datas extremas, bissextas e todos os status
+  ---
+  duration_ms: 66.855068
+  type: 'test'
+  ...
+# Subtest: PUT rejeita corpo parcial, campos extras e id sem alterar a linha
+ok 20 - PUT rejeita corpo parcial, campos extras e id sem alterar a linha
+  ---
+  duration_ms: 62.565234
+  type: 'test'
+  ...
+# Subtest: PUT rejeita campos e datas inválidas sem mudar os dados persistidos
+ok 21 - PUT rejeita campos e datas inválidas sem mudar os dados persistidos
+  ---
+  duration_ms: 165.081642
+  type: 'test'
+  ...
+# Subtest: PUT de ID ausente retorna 404 sem criar linha; corpo inválido retorna 400
+ok 22 - PUT de ID ausente retorna 404 sem criar linha; corpo inválido retorna 400
+  ---
+  duration_ms: 13.519172
+  type: 'test'
+  ...
+# Subtest: PUT e DELETE rejeitam IDs e URLs inválidos com 400
+ok 23 - PUT e DELETE rejeitam IDs e URLs inválidos com 400
+  ---
+  duration_ms: 42.293099
+  type: 'test'
+  ...
+# Subtest: PUT aplica os mesmos erros JSON 400, limite 413 e Content-Type 415 do POST
+ok 24 - PUT aplica os mesmos erros JSON 400, limite 413 e Content-Type 415 do POST
+  ---
+  duration_ms: 25.514516
+  type: 'test'
+  ...
+# Subtest: DELETE remove somente a reserva pedida, retorna 204 vazio e segundo DELETE retorna 404
+ok 25 - DELETE remove somente a reserva pedida, retorna 204 vazio e segundo DELETE retorna 404
+  ---
+  duration_ms: 24.551702
+  type: 'test'
+  ...
+# DELETE -> 204, corpo vazio; SQL confirmou remoção; segundo DELETE -> 404; outra reserva preservada.
+# Subtest: DELETE de ID ausente retorna 404 com o mesmo erro das consultas
+ok 26 - DELETE de ID ausente retorna 404 com o mesmo erro das consultas
+  ---
+  duration_ms: 7.087518
+  type: 'test'
+  ...
+# Subtest: health com PostgreSQL disponível retorna 200 e somente status/database, sem cache
+ok 27 - health com PostgreSQL disponível retorna 200 e somente status/database, sem cache
+  ---
+  duration_ms: 6.161608
+  type: 'test'
+  ...
+# GET /health com conexão real -> 200 {"status":"ok","database":"ok"}.
+# API nativa iniciada em subprocesso; HTTP real e PostgreSQL real, sem mocks.
+# API encerrada com SIGTERM, código 0.
+# Subtest: configuração incompleta é rejeitada antes de tentar conexão padrão
+ok 28 - configuração incompleta é rejeitada antes de tentar conexão padrão
+  ---
+  duration_ms: 2.280289
+  type: 'test'
+  ...
+# Subtest: porta inválida e modo TLS ambíguo não viram configuração silenciosa
+ok 29 - porta inválida e modo TLS ambíguo não viram configuração silenciosa
+  ---
+  duration_ms: 0.577521
+  type: 'test'
+  ...
+# Subtest: TLS exige CA legível e preserva verificação do certificado
+ok 30 - TLS exige CA legível e preserva verificação do certificado
+  ---
+  duration_ms: 1.020419
+  type: 'test'
+  ...
+# Subtest: schema contém somente as quatro colunas, tipos e identidade aprovados
+ok 31 - schema contém somente as quatro colunas, tipos e identidade aprovados
+  ---
+  duration_ms: 70.800408
+  type: 'test'
+  ...
+# Subtest: parâmetros preservam apóstrofo e conteúdo SQL como texto
+ok 32 - parâmetros preservam apóstrofo e conteúdo SQL como texto
+  ---
+  duration_ms: 7.362397
+  type: 'test'
+  ...
+# Subtest: linha confirmada é lida por uma segunda conexão real
+ok 33 - linha confirmada é lida por uma segunda conexão real
+  ---
+  duration_ms: 19.708404
+  type: 'test'
+  ...
+# Subtest: DATE mantém dia, mês e ano na leitura explícita DD-MM-YYYY
+ok 34 - DATE mantém dia, mês e ano na leitura explícita DD-MM-YYYY
+  ---
+  duration_ms: 12.437508
+  type: 'test'
+  ...
+# Subtest: reaplicar o schema preserva uma linha existente e seu ID
+ok 35 - reaplicar o schema preserva uma linha existente e seu ID
+  ---
+  duration_ms: 7.686961
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita cliente ausente
+ok 36 - NOT NULL rejeita cliente ausente
+  ---
+  duration_ms: 5.11974
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita data ausente
+ok 37 - NOT NULL rejeita data ausente
+  ---
+  duration_ms: 3.992664
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita status ausente
+ok 38 - NOT NULL rejeita status ausente
+  ---
+  duration_ms: 4.326969
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita cliente vazio
+ok 39 - CHECK rejeita cliente vazio
+  ---
+  duration_ms: 6.664751
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita cliente somente espaços
+ok 40 - CHECK rejeita cliente somente espaços
+  ---
+  duration_ms: 4.002673
+  type: 'test'
+  ...
+# Subtest: VARCHAR(120) aceita exatamente 120 caracteres Unicode
+ok 41 - VARCHAR(120) aceita exatamente 120 caracteres Unicode
+  ---
+  duration_ms: 5.256373
+  type: 'test'
+  ...
+# Subtest: VARCHAR(120) rejeita cliente com 121 caracteres
+ok 42 - VARCHAR(120) rejeita cliente com 121 caracteres
+  ---
+  duration_ms: 3.827015
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita status fora da lista aprovada
+ok 43 - CHECK rejeita status fora da lista aprovada
+  ---
+  duration_ms: 3.925864
+  type: 'test'
+  ...
+# Subtest: DATE rejeita dia impossível no calendário
+ok 44 - DATE rejeita dia impossível no calendário
+  ---
+  duration_ms: 3.681013
+  type: 'test'
+  ...
+# Subtest: GENERATED ALWAYS rejeita ID informado manualmente
+ok 45 - GENERATED ALWAYS rejeita ID informado manualmente
+  ---
+  duration_ms: 4.73408
+  type: 'test'
+  ...
+# Subtest: verify-api.py executa CRUD real, limpa IDs próprios e preserva reserva preexistente
+ok 46 - verify-api.py executa CRUD real, limpa IDs próprios e preserva reserva preexistente
+  ---
+  duration_ms: 506.747332
+  type: 'test'
+  ...
+# Comando: python3 scripts/verify-api.py --base-url http://127.0.0.1:44701
+# stdout real:\\nMarcador exclusivo para conferência/limpeza: Verificacao API a527fa94-0a3d-4b37-b675-e10df1592a64\\nPASSOU: GET /health -> 200\\nPASSOU: POST /reservas -> 201\\nPASSOU: GET /reservas -> 200\\nPASSOU: GET /reservas/38 -> 200\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: PUT /reservas/38 -> 200\\nPASSOU: PUT /reservas/38 -> 400\\nPASSOU: GET /reservas/38 -> 200\\nPASSOU: DELETE /reservas/38 -> 204\\nPASSOU: GET /reservas/38 -> 404\\nPASSOU: DELETE /reservas/38 -> 404\\nLimpeza confirmada: nenhuma reserva com ID próprio remanescente.\\nPASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.\\n
+# stderr real:\\n(vazio)
+# Exit code real do script: 0
+# SQL independente: somente a sentinela ID 37 permanece, inalterada.
+# Subtest: verify-api.py retorna exit 1 na falha SQL controlada e limpa a reserva criada antes do erro
+ok 47 - verify-api.py retorna exit 1 na falha SQL controlada e limpa a reserva criada antes do erro
+  ---
+  duration_ms: 209.302424
+  type: 'test'
+  ...
+# Comando: python3 scripts/verify-api.py --base-url http://127.0.0.1:44701
+# stdout real:\\nMarcador exclusivo para conferência/limpeza: Verificacao API f81ec182-da2a-499f-a502-266d591f4ef3\\nPASSOU: GET /health -> 200\\nPASSOU: POST /reservas -> 201\\nPASSOU: GET /reservas -> 200\\nPASSOU: GET /reservas/40 -> 200\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: DELETE /reservas/40 -> 204\\nLimpeza confirmada: nenhuma reserva com ID próprio remanescente.\\n
+# stderr real:\\nFALHOU: PUT /reservas/40: esperado HTTP 200, recebido 500.. Confira o marcador caso um POST tenha resultado incerto.\\n
+# Exit code real do script: 1
+# CHECK temporário induziu PUT 500 real; SQL confirma limpeza e sentinela ID 39 inalterada.
+# Subtest: reserva persiste por SQL e HTTP após encerrar a API e iniciar outro processo na mesma porta
+ok 48 - reserva persiste por SQL e HTTP após encerrar a API e iniciar outro processo na mesma porta
+  ---
+  duration_ms: 355.149154
+  type: 'test'
+  ...
+# Antes: API PID 562767; POST 201 {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data":"01-10-2026","status":"pendente"}; SQL {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data_iso":"2026-10-01","status":"pendente","tipo":"date"}.
+# API PID 562767 encerrada realmente: SIGTERM -> exit 0.
+# Com a API encerrada, consulta SQL independente ainda lê {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data_iso":"2026-10-01","status":"pendente","tipo":"date"}.
+# Depois: API PID 562783, mesma porta 44701; GET 200 {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data":"01-10-2026","status":"pendente"}; SQL idêntico.
+# PostgreSQL permaneceu iniciado desde 2026-09-29 01:04:30.219404+00; somente o processo da API foi reiniciado.
+# SQL final: zero reservas remanescentes da suíte T09.
+# API nativa final PID 562783: SIGTERM -> exit 0.
+# Falha inesperada ao processar requisição.
+# Subtest: erro SQL inesperado mantém 500 genérico e restaura a tabela exclusiva
+ok 49 - erro SQL inesperado mantém 500 genérico e restaura a tabela exclusiva
+  ---
+  duration_ms: 130.038003
+  type: 'test'
+  ...
+# Tabela temporariamente renomeada no banco exclusivo: erro SQL real -> 500 genérico, sem SQL/stack.
+# Subtest: health retorna 503 dentro do prazo quando PostgreSQL é pausado e volta a 200 após retomar
+ok 50 - health retorna 503 dentro do prazo quando PostgreSQL é pausado e volta a 200 após retomar
+  ---
+  duration_ms: 2177.324284
+  type: 'test'
+  ...
+# Docker pause confirmado; GET /health -> 503 em 2008 ms (prazo 2000 ms).
+# Docker unpause; GET /health -> 200 com nova consulta real.
+# Conexão ociosa com PostgreSQL foi interrompida.
+# Subtest: banco encerrado de verdade retorna 503 uniforme no CRUD; entradas inválidas continuam 400
+ok 51 - banco encerrado de verdade retorna 503 uniforme no CRUD; entradas inválidas continuam 400
+  ---
+  duration_ms: 362.617493
+  type: 'test'
+  ...
+# Antes da indisponibilidade: POST -> 201 com gravação real.
+# GET /reservas com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# GET /reservas/42 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# POST /reservas com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# PUT /reservas/42 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# DELETE /reservas/42 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# Docker stop/remove confirmado; health 503; validação pré-SQL continuou 400 sem banco.
+1..51
+# tests 51
+# suites 0
+# pass 51
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6231.878396
+Limpeza confirmada: container de teste removido; dados temporários descartados.
+stderr:
+(vazio)
+Exit code real: 0

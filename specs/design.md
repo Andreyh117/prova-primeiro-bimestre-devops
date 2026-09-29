@@ -5,7 +5,8 @@ As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas 
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
 data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
 conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
-locais aprovados. Restart/persistência (T09) e infraestrutura são futuros.
+locais aprovados. T09 verificou script/restart nativo com 51 testes; Dockerfile,
+Compose, persistência de volume e infraestrutura continuam futuros.
 Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
@@ -312,9 +313,24 @@ e só então versionar. Não criar arquivos vazios com aparência de teste aprov
 Evidências de falha permanecem identificadas como falha; validar novamente após
 correção, mantendo explicação no diário. Imagens/screenshots são opcionais.
 
-Scripts futuros Python 3 usam stdlib para HTTP; `verify-aws.py` também depende de
-AWS CLI e SSH e recebe identifiers/URL sem senhas. Testes API usam PostgreSQL
-isolado; scripts criam IDs próprios e não apagam dados gerais. Verificação de
+Python 3 usa stdlib para HTTP. Em T09, `scripts/verify-api.py` foi executado com
+Python 3.12.3: urllib.request/HTTPError tratam respostas HTTP sem pip,
+argparse/json cuidam de CLI e corpo. URL não admite credenciais/query/fragmento;
+redirecionamentos são recusados e há timeout por requisição. Referências:
+[urllib.request](https://docs.python.org/3.12/library/urllib.request.html) e
+[urllib.error](https://docs.python.org/3.12/library/urllib.error.html).
+Script cria marcador UUID, rastreia IDs devolvidos com esse marcador e limpa em
+finally após confirmar propriedade por GET. Exit 0 só após verificar/limpar;
+falha retorna 1 e CLI inválida 2. Em perda de resposta/limpeza, informa marcador
+ou IDs pendentes, sem anunciar CRUD aprovado nem excluir dados gerais.
+Teste real preservou uma sentinela, induziu CHECK temporário/PUT 500 e conferiu
+exit 1 com limpeza por SQL. O teste persistence.test.js encerrou server.js,
+iniciou outro PID na mesma porta e conferiu ID/DATE/campos por SQL durante a parada
+e GET após reinício; pg_postmaster_start_time permaneceu igual. Isso comprova
+persistência fora do processo nativo, não persistência de volume Compose/RDS.
+`verify-aws.py` futuro também depende de AWS CLI e SSH e recebe identifiers/URL
+sem senhas. Testes API usam PostgreSQL isolado; scripts criam IDs próprios e não
+apagam dados gerais. Verificação de
 segurança compara atributos AWS reais, não só a presença de strings em arquivos.
 `verify-delivery.py` checa estrutura e metadados, mas não substitui revisão humana,
 data presencial ou experiência do aluno. Todos retornam código não zero na falha.

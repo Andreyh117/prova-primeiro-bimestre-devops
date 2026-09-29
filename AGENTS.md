@@ -16,21 +16,22 @@ Fontes consultadas em 27/09/2026:
   decisões propostas e acompanhamento. Não transformar escolhas do design em
   critérios que o professor teria exigido.
 
-Em 28/09/2026, o aluno aprovou a regra de commits por marcos reais, revisou T07
-e autorizou T08. T01–T08 estão verificadas em `feat/api-reservas`. CRUD completo
-e /health estão implementados, com validação DD-MM-YYYY, SQL parametrizado,
-204/404 de DELETE, erros JSON e 503 quando o banco fica indisponível.
-A suíte passou 48 testes com PostgreSQL 16.15 real: 27 HTTP em servidor nativo,
-3 HTTP de falha real do banco, 15 de banco e 3 de configuração. Health consultou
-SELECT 1, retornou 503 em 2008 ms com banco pausado, recuperou 200 após unpause;
-as cinco rotas CRUD retornaram 503 após stop do banco exclusivo.
-Evidências T08: `evidencias/api-local.txt` (histórico preservado) e
-`evidencias/health-local.txt`. API encerrada e zero containers de teste ao final.
-Registros da auditoria Git aprovados acompanham este marco, sem commit extra só
-para contagem. R02 ainda depende de seis commits reais e merge em T32.
-Próxima tarefa pendente: T09, script verify-api.py e persistência ao reiniciar API.
-Não avançar para outra tarefa no encerramento de T08; Dockerfile/Compose,
-Terraform, AWS e publicação seguem futuros.
+Em 28/09/2026, o aluno manteve a regra de commits reais, revisou T08 e autorizou
+T09. T01–T09 estão verificadas em `feat/api-reservas`. CRUD completo e /health
+mantêm validação DD-MM-YYYY, SQL parametrizado, 204/404 e erros JSON/503.
+A suíte passou 51 testes com PostgreSQL 16.15 real: 27 HTTP nativos, 3 HTTP de
+falha do banco, 3 de script/persistência nativa, 15 de banco e 3 de configuração.
+verify-api.py passou com exit 0; CHECK temporário no banco exclusivo provocou
+PUT 500 e exit 1 esperado, com reserva própria limpa e sentinela preservada.
+API PID 562767 encerrou via SIGTERM/0; PID 562783 iniciou na mesma porta 44701.
+Reserva ID 41 manteve todos os campos por SQL durante a parada e GET após restart;
+PostgreSQL permaneceu ativo. APIs encerradas, zero containers ao final.
+Evidências: api-local.txt (histórico preservado), health-local.txt (T08) e
+postgres-local.txt (T09). O marco T09 será o sexto commit real; R02 continua
+parcial até o merge preservando a feature em T32. Auditoria anterior é histórica.
+Próxima tarefa pendente: T10, Dockerfile não-root e build/execução real.
+Não avançar para T10 no encerramento de T09. Compose, Terraform, AWS e publicação
+seguem futuros; restart nativo não comprova persistência do volume Compose.
 
 O contrato aprovado exige data civil `DD-MM-YYYY` nas entradas e saídas JSON.
 Manter PostgreSQL `DATE` e conversão explícita por componentes; não depender de
@@ -112,19 +113,19 @@ git ls-files
 rg --files --hidden -g '!.git/**' -g '!node_modules/**'
 ```
 
-A validação PostgreSQL/HTTP já está disponível em T08; os demais comandos dependem
+A validação PostgreSQL/HTTP e script/restart já está disponível em T09; os demais comandos dependem
 das respectivas tarefas. Não anunciar sucesso quando arquivos/dependências não
 existirem. Scripts devem ter saída clara e exit code não zero na falha.
 
 | Verificação | Comando e pré-condição |
 |---|---|
-| PostgreSQL e HTTP (T08 disponível) | `npm --prefix app ci --ignore-scripts --no-fund`; `npm --prefix app test`. Node 24 e Docker local: 48 testes, incluindo pause/unpause/stop somente do banco UUID/labels verificados; limpeza confirmada. |
+| PostgreSQL, HTTP e restart (T09 disponível) | `npm --prefix app ci --ignore-scripts --no-fund`; `npm --prefix app test`. Node 24, Python 3 (validado 3.12.3) e Docker local: 51 testes, incluindo script/restart e pause/unpause/stop somente do banco UUID/labels verificados; limpeza confirmada. |
 | API nativa (T07 disponível) | Configurar PG* em banco próprio e aplicar `npm --prefix app run db:migrate`; executar `npm --prefix app start`. PORT padrão 3000; não usar dados de outros projetos. |
 | Build Docker | `docker build -t prova-reservas:local app`; daemon disponível e lockfile criado. |
 | Usuário da imagem | `docker run --rm --entrypoint id prova-reservas:local -u`; exigir UID diferente de 0. |
 | Compose | `docker compose config --quiet`; `docker compose up --build --wait`; `docker compose ps`; `.env` local válido e plugin Compose compatível. Não publicar `docker compose config` completo, que pode expandir senhas. |
 | Saúde local (T08 disponível) | `curl --fail --silent --show-error http://127.0.0.1:3000/health`, com API nativa configurada em execução; Compose será futuro. |
-| CRUD local | `python3 scripts/verify-api.py --base-url http://127.0.0.1:3000`; script futuro cria dados próprios, confere HTTP/JSON e os limpa. |
+| CRUD local (T09 disponível) | `python3 scripts/verify-api.py --base-url http://127.0.0.1:3000`; Python stdlib, API/banco já iniciados; cria marcador/IDs próprios, confere HTTP/JSON e limpa em finally. Código 1 na falha; configuração CLI inválida retorna 2. |
 | Persistência Compose | `python3 scripts/verify-persistence.py`; script futuro recria containers preservando o volume e confere dados no banco real; nunca usa `down -v`. |
 | Formatação Terraform | `terraform fmt -check -recursive infra`. |
 | Bootstrap | `terraform -chdir=infra/backend init`; `terraform -chdir=infra/backend validate`; `terraform -chdir=infra/backend plan -out=backend.tfplan`; variáveis locais e credenciais válidas. Plano binário ignorado. |

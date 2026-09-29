@@ -19,19 +19,21 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 28/09/2026, T01–T08 foram concluídas. O commit inicial `21cb5f0` está em
-`main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo e /health
-estão implementados sobre o schema/pool de T06. A suíte passou 48 testes com
-PostgreSQL 16.15 real: 27 HTTP em servidor nativo, 3 HTTP de indisponibilidade,
-15 de banco e 3 de configuração. PUT preservou o ID; entradas rejeitadas não
-alteraram dados; DELETE retornou 204 e depois 404. Health retornou 200/503
-conforme o banco, recuperou 200 após unpause; as cinco rotas CRUD retornaram 503
-após stop. API encerrada e banco exclusivo removido ao finalizar.
+Em 28/09/2026, T01–T09 foram concluídas. O commit inicial `21cb5f0` está em
+`main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
+e o script de verificação estão implementados. A suíte passou 51 testes com
+PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
+15 de banco e 3 de configuração. O script passou com exit 0; erro SQL controlado
+retornou exit 1, limpando apenas a reserva própria e preservando outra existente.
+A reserva sobreviveu ao encerramento da API e foi consultada por SQL durante a
+parada e por GET em outro processo na mesma porta. APIs encerradas e zero
+containers de teste ao final. Datas JSON mantidas em DD-MM-YYYY.
 
 Express 5.2.1 e pg 8.23.0 estão fixados no package.json/lockfile. A imagem oficial
-PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. Os seis commits
-e merge da prova, Dockerfile/Compose da API, infraestrutura AWS e relatório
-continuam pendentes. Próxima tarefa: T09, script de CRUD e persistência após restart da API.
+PostgreSQL foi fixada por digest em `app/test/postgres-image.txt`. T09 é o marco
+previsto para o sexto commit real; merge preservando a feature continua em T32.
+Dockerfile/Compose da API, infraestrutura AWS e relatório continuam pendentes.
+Próxima tarefa: T10, Dockerfile não-root, build e execução com banco real.
 
 ## Contrato aprovado para implementação
 
@@ -72,14 +74,16 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Dependências T06](evidencias/t06-dependencias.txt): instalação, npm ci e versões reais.
 - [PostgreSQL T06](evidencias/t06-postgres-local.txt): migração e 18 testes com banco real.
 - [Falha controlada T06](evidencias/t06-falha-controlada.txt): código não zero e limpeza confirmada.
-- [HTTP e PostgreSQL local](evidencias/api-local.txt): duas execuções T07 com 35 testes e T08 com 48 testes, sem apagar histórico.
+- [HTTP e PostgreSQL local](evidencias/api-local.txt): duas execuções T07 com 35 testes, T08 com 48 e T09 com 51, sem apagar histórico.
+- [Persistência T09](evidencias/postgres-local.txt): script com exit 0/1, sentinela preservada e SQL/GET antes, durante e após reiniciar a API nativa.
 - [Saúde T08](evidencias/health-local.txt): pause/unpause/stop reais do banco exclusivo, respostas HTTP e limpeza.
 - [Execução T07](evidencias/t07-execucao.txt): falhas esperadas de npm start e limpeza.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
 
-Dependências: Node 24, npm e Docker local com daemon acessível. Execute na raiz:
+Dependências: Node 24, npm, Python 3 (validado 3.12.3) e Docker local com daemon
+acessível. Python usa apenas stdlib; não requer pip. Execute na raiz:
 
 ```bash
 npm --prefix app ci --ignore-scripts --no-fund
@@ -89,7 +93,9 @@ npm --prefix app test
 O runner cria seu container PostgreSQL, publica porta dinâmica em 127.0.0.1,
 gera senha em memória, aplica o schema e roda `node:test`. A suíte HTTP inicia
 a API nativa em porta livre e verifica requisições/SQL; limpa somente seus IDs
-e encerra a API. A última suíte confere UUID/labels/porta do banco e o pausa,
+e encerra a API. T09 executa o script Python contra esse servidor nativo, induz
+um CHECK temporário para testar exit 1/limpeza e reinicia somente a API,
+conferindo os dados por outra conexão SQL. A última suíte confere UUID/labels/porta do banco e o pausa,
 retoma e encerra para verificar 503 real. Ao terminar, o runner confirma remoção
 do container/dados tmpfs; se ainda estiver pausado na falha, retoma antes da limpeza.
 A primeira execução pode baixar a imagem fixada por digest. Não é necessário
@@ -99,7 +105,9 @@ O schema está em [app/sql/001-reservas.sql](app/sql/001-reservas.sql), o pool e
 [app/src/db.js](app/src/db.js), e os testes reais em
 [app/test/database.test.js](app/test/database.test.js) e
 [app/test/api.test.js](app/test/api.test.js); indisponibilidade real em
-[app/test/z-unavailable.test.js](app/test/z-unavailable.test.js).
+[app/test/z-unavailable.test.js](app/test/z-unavailable.test.js); script/restart em
+[app/test/persistence.test.js](app/test/persistence.test.js), que usa
+[app/test/helpers/native-api.js](app/test/helpers/native-api.js) para processos reais.
 Rotas em [app/src/app.js](app/src/app.js),
 validação em [app/src/validation.js](app/src/validation.js) e inicialização em
 [app/src/server.js](app/src/server.js). O SQL inicial pode ser reaplicado sem
@@ -125,6 +133,31 @@ código 1 e mensagem sem credenciais. Com API em execução, pode conferir a lis
 curl --fail --silent --show-error http://127.0.0.1:3000/reservas
 curl --fail --silent --show-error http://127.0.0.1:3000/health
 ```
+
+Para verificar o CRUD de uma API já iniciada e com banco configurado:
+
+```bash
+python3 scripts/verify-api.py --base-url http://127.0.0.1:3000
+```
+
+[verify-api.py](scripts/verify-api.py) usa urllib/json/argparse da biblioteca padrão.
+Cria uma reserva com marcador UUID e confere POST, lista, GET, PUT completo,
+DELETE, campos ausentes, data impossível, PUT parcial e 404. O timeout padrão
+por requisição é 5s; pode definir `--timeout 10`. Aceita HTTP/HTTPS sem credenciais
+na URL, query ou fragmento; não segue redirecionamentos. Não requer Docker para
+verificar uma API existente e não inicia serviços nem modifica infraestrutura.
+
+A limpeza roda em finally, consulta ID e marcador antes de excluir e confirma
+404. A execução retorna 0 somente com verificação e limpeza concluídas; falha
+retorna 1, argumentos inválidos retornam 2. Se a comunicação impedir a limpeza,
+registra os IDs pendentes; um POST sem resposta exige conferir o marcador mostrado
+no início. Dados de outras reservas não são impressos nem removidos. Use um banco
+próprio de teste e confira a URL antes de executar.
+
+A persistência nativa é reproduzida por `npm --prefix app test`: POST, consulta
+SQL, SIGTERM/exit 0, consulta SQL enquanto a API está parada, novo PID na mesma
+porta e GET/SQL idênticos. O banco permanece ativo. A persistência de volume
+após recriar containers será verificada em T12; RDS será validado na etapa AWS.
 
 `git status --short --branch` permite conferir o trabalho local. `.gitignore`
 evita inclusão acidental de arquivos locais, mas não protege arquivos já

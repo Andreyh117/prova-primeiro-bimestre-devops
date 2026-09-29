@@ -56,7 +56,7 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R26 / P | No fork da disciplina, PR altera apenas `entregas/provaPrimeiroBi/6325231/entrega.md`, com link do projeto e evidências; modelo traz aluno, RA, data, IA e checklist. | Conferir diff contra base correta; links funcionais e somente o arquivo de entrega no PR. | Arquivo no fork separado e diff de submissão. | pendente |
 | R27 / P | Apenas um PR por aluno, aberto presencialmente no dia da prova; nenhum commit posterior no PR. | Confirmar data com aluno/professor antes da abertura e revisar submissão completa; registrar URL/base/head/commit final. | PR e `evidencias/entrega-checklist.txt`; abertura fora desta etapa. | pendente |
 | R28 / U | Primeiro inspecionar sem sobrescrever, produzir AGENTS e três specs, separar exigências/decisões e obter revisão antes de código; tarefas pequenas e matriz sincronizada. | Conferência documental T01/T02; aprovação do aluno T03. | Os quatro documentos e registro da etapa em tasks. | verificado |
-| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | Scripts futuros e logs de execução por ambiente. | em andamento |
+| R29 / U | Scripts reproduzíveis documentam dependências, saída clara e exit code não zero na falha; não provisionam/destruem infraestrutura. | Testar caso válido e falha controlada; revisar efeitos de cada script e seu uso no README. | scripts/verify-api.py e api-local/postgres-local.txt (T09); demais scripts/logs futuros. | em andamento |
 | R30 / U | Diário registra prompts, decisões, correções e resultados reais; nunca inventar identidade, experiência, evidências ou histórico. | Confrontar diário/relatório com comandos, Git e relato do aluno; usar placeholders enquanto faltarem informações. | `docs/diario-ia.md`, specs e relatório. | em andamento |
 | R31 / U | Antes de provisionar/destruir, apresentar plano e obter autorização específica; sem auto-approve ou apagamento antecipado de state/dados. | Diário registra revisão, escopo e autorização antes de cada operação; scripts só verificam. | Diário, planos locais ignorados e evidências sanitizadas. | pendente |
 | R32 / U | Data civil em `DD-MM-YYYY` nas entradas POST/PUT e nas respostas JSON de reservas; PostgreSQL permanece DATE. | Testar datas válidas e bissextas, rejeitar impossíveis/outros formatos e conferir ida/volta via SQL sem deslocamento de dia. Decisão D02 revisada. | app/test/api.test.js e api-local.txt (POST/GET/PUT local); AWS futuro. | em andamento |
@@ -133,3 +133,18 @@ healthcheck Compose/AWS. R04/R05/R06/R22/R29/R32 têm aceite HTTP local, mantend
 estado parcial até as verificações de persistência/ambientes previstos. R02
 continua parcial: auditoria preservada em dbcd6a1/4 commits, marco T08 preparado
 para commit real; merge só em T32. R03 revalidado no stage T08: 14 arquivos conferidos; diff --cached --check exit 0; scanner delimitado sem ocorrência de padrões sensíveis.
+
+## Evidência parcial T09
+
+R06: reserva ID 41 foi confirmada por SQL antes e durante a parada da API e por
+GET/SQL após iniciar outro processo (PID 562767 -> 562783, porta 44701).
+DATE interno 2026-10-01, JSON 01-10-2026; PostgreSQL permaneceu ativo.
+R22/R29: verify-api.py stdlib passou com exit 0; CHECK temporário induziu PUT
+500 real, exit 1 e limpeza confirmada por SQL; sentinela preexistente preservada.
+51 testes passaram, 0 falharam, npm test exit 0. Evidências api-local.txt
+(histórico preservado) e postgres-local.txt; zero containers e APIs encerradas.
+R06/R22/R29 continuam em andamento até Compose/RDS/demais scripts previstos.
+R02: HEAD cbf2410 antes desta tarefa tem cinco commits reais; marco T09 será o
+sexto, com mudanças de script/testes. Merge preservando a feature segue em T32;
+não declarar R02 completo apenas por atingir a contagem. Guia e evidências
+anteriores preservados; revisão de stage/segredos continua exigida neste marco.

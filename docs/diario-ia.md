@@ -383,3 +383,55 @@ ocorrência de padrões sensíveis; ignores/links/lockfile e guia conferidos. A
 auditoria Git aprovada entra no mesmo marco funcional, sem commit separado.
 Stage preparado para feat(api): completa CRUD e verificacao de saude; sem
 merge/push. O hash e a contagem final só serão anunciados após Git confirmar.
+
+## 28/09/2026 — T09: script CRUD e persistência da API nativa
+
+Prompt: executar a próxima tarefa seguindo AGENTS, implementar, validar,
+corrigir e registrar evidências reais; continuar a regra de commits reais.
+Estado inicial confirmado: HEAD cbf2410 em feat/api-reservas, cinco commits
+reais, worktree limpa e nenhum merge. T09 iniciada; T10 permanece pendente.
+Planejado: verify-api.py com Python stdlib, dados exclusivos e limpeza por ID;
+caso negativo com CHECK temporário no banco isolado; encerrar processo nativo
+e iniciar outro na mesma porta, conferindo a mesma linha por HTTP e SQL.
+Nenhum resultado de teste anunciado antes da execução.
+
+Implementação T09: scripts/verify-api.py stdlib, sem instalar dependências Python;
+CLI com URL/timeout, HTTP/JSON/status/data/IDs, falhas exit 1 e limpeza em finally
+somente para IDs com marcador UUID próprio. Helpers de teste iniciam/encerram
+server.js em subprocessos reais; persistence.test.js confere runner UUID/labels/
+porta antes de qualquer CHECK temporário no banco exclusivo. APIs existentes,
+schema permanente e lockfile não precisaram mudar.
+
+Verificação: ast.parse Python, node --check dos dois arquivos novos e ajuda CLI
+passaram. npm --prefix app test executado em 28/09/2026 22:04:28 -03:00: 51
+passaram, 0 falharam, exit 0. Script positivo exit 0 preservou sentinela ID 37;
+CHECK temporário real bloqueou status confirmada: PUT 500, script exit 1 esperado,
+reserva criada limpa por HTTP/SQL e sentinela ID 39 intacta. Constraint restaurada
+em finally; erro negativo planejado, sem falha inesperada a corrigir.
+
+Persistência: POST ID 41/01-10-2026; SQL independente confirmou tipo DATE e
+2026-10-01. PID 562767 encerrou SIGTERM/0; SQL leu a mesma reserva com API parada.
+PID 562783 iniciou na mesma porta 44701; GET 200 devolveu exatamente os campos
+originais e SQL permaneceu idêntico. pg_postmaster_start_time não mudou. SQL
+final: zero linhas T09; processo final SIGTERM/0 e Docker posterior zero
+containers. Isso comprova persistência fora do processo nativo; volume Compose,
+restart RDS e AWS continuam tarefas futuras.
+
+Saída real completa anexada a evidencias/api-local.txt sem apagar T07/T08;
+postgres-local.txt contém trechos exatos do reporter TAP (stdout/stderr Python
+escapados pelo reporter) e comando/resultado real Docker posterior. README,
+AGENTS, design/tasks/matriz atualizados com dependências, reprodução e limites.
+T09 verificada; próximo T10. Sem bloqueio restante, provisão/destruição de infra,
+merge/push/PR ou tarefas seguintes. Commit proposto corresponde às mudanças
+reais de script/testes; será o sexto, mantendo merge em T32. Documentação oficial
+Python urllib.request/urllib.error consultada; URL Node child_process não abriu
+no navegador e não foi tratada como conteúdo lido. Ferramentas reais: Codex,
+terminal Git/Python/Node/npm/Docker e navegador; nenhum agente auxiliar nesta tarefa.
+
+Revisão final T09: preservação byte a byte do prefixo api-local T07/T08,
+health/auditoria anteriores, lockfile e guia original confirmada por SHA-256.
+Onze arquivos revisados; scanner delimitado sem achados, links/cercas/newlines
+conferidos, matriz com 32 requisitos/34 tarefas e T10 pendente. Sintaxe e
+git diff --check/ignores representativos passaram. Revisão documental corrigiu
+o cabeçalho do design que ainda indicava T09 como futura; não exigiu repetir
+a suíte porque a implementação testada permaneceu intacta.
