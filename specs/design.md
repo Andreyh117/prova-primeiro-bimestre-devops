@@ -610,3 +610,33 @@ No changes comprovaram convergência. S3 Enabled/AES256/BPA4true/tags e DynamoDB
 ACTIVE/on-demand/LockID String. State local 0600/quatro managed normais + data.
 T15/T16 verificadas, R20/R21 parciais até backend remoto/locking T21. Backend.txt
 preserva falhas/correções/applies/planos/consultas reais. Próxima T17.
+
+
+## T17 — D09 implementada e contrato de rede validado localmente
+
+Child infra/modules/vpc tem main/variables/outputs/versions e teste network.
+Inputs name/vpc_cidr/availability_zones/public_subnet_cidrs/private_subnet_cidrs/
+tags; sem provider/backend/data próprios, root T21 configura us-east-1/conta.
+Versões exatas 1.16.2/6.65.0, sem lockfile próprio no child; validação copia do
+bootstrap readonly. D09 CIDR 10.20.0.0/16/DNS/quatro subnets/duas AZs preservados:
+públicas IP true/default 0.0.0.0/0->IGW, privadas IP false/route=[] (local AWS futura).
+Uma table por tipo, associações explícitas, sem NAT/ALB. Oito resource blocks,
+doze instâncias nos inputs D09. Tags VPC/IGW/subnets/tables; associações sem tags.
+Outputs VPC/listas públicas/privadas na ordem dos inputs de AZ.
+Validações escolhidas, não critérios extras atribuídos ao professor: IPv4 canônico/
+prefixos 16–28/dois CIDRs por tipo/duas AZs distintas us-east-1/contenção/não
+sobreposição/Project, Environment e Owner obrigatórios. Preconditions com cidrhost
+normalizam ao prefixo VPC/menor prefixo do par, rejeitam máscaras diferentes
+sobrepostas. Teste CIDRs alternativos passou; AZs atuais ainda exigem preflight.
+Root temporário com cópia exata/teste/lockfile, sem state/credenciais. Fmt/init/validate/
+grafo passaram; nove testes locais command=plan usam
+[provider mock](https://developer.hashicorp.com/terraform/language/tests/mocking),
+sem APIs AWS, não comprovam deploy/IDs reais. Tuple/list corrigido tolist;
+IDs unknown excluídos das asserções, referências conferidas pelo grafo nativo.
+Segunda falha expect_failures IPv6 pedia erro recurso após variável bloquear;
+corrigida para var.vpc_cidr, guardas intactas. Falhas/reexecuções vpc-validate.txt;
+root composto/plan AWS/execução T21/T23 futuros. T17 local verificada, próxima T18.
+
+Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
+para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
+reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.

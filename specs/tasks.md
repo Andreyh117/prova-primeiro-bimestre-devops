@@ -41,8 +41,10 @@ e consultas antes/depois preservadas. T15 recebeu autorização explícita para
 bootstrap em 29/09/2026. T16 verificada: apply parcial falhou por SCP, recuperação
 preservou bucket/tabela e aplicou três configs S3; consultas AWS e plan posterior
 sem mudanças passaram. Evidência backend.txt, bucket físico fora da criação/
-remoção TF. Próxima pendente T17. State remoto/locking efetivo T21; principal/
-EC2/RDS/teardown exigem revisão/autorização separadas.
+remoção TF. Após revisão de T16, aluno autorizou T17, agora localmente verificada:
+módulo VPC/testes, fmt/init/validate/grafo 0 e nove testes mock locais 0; sem API
+AWS/provisionamento. Próxima pendente T18. State remoto/locking efetivo T21;
+principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
 
@@ -69,7 +71,7 @@ Cada tarefa recebe entrada no diário.
 | T14 | T13 | R19–R21 | Implementar bootstrap S3/DynamoDB com state local separado. | fmt/init/validate em infra/backend; plan real revisado para região/tags/encriptação/versionamento/IAM ausente. | backend-validate.txt/backend-plan.txt: fmt/init/validate/plan reais, falhas/correção, revisão JSON e consultas; commit backend. | verificado |
 | T15 | T14 | R21, R31 | Apresentar plano bootstrap e obter autorização específica. | Aluno confere recursos, escopo/custo e autoriza antes de apply. | backend-revisao.txt: plano/identidade/custo revisados e autorização explícita recebida em 29/09; plano local ignorado. | verificado |
 | T16 | T15 | R20, R21 | Aplicar somente bootstrap autorizado; conferir recursos antes do init principal. | Apply real e consultas S3/DynamoDB; versão/encriptação/public access block/LockID efetivos. | backend.txt: falha SCP parcial, recuperação sem exclusão, apply/8 consultas AWS/plan No changes; principal pendente. | verificado |
-| T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | Diário e revisão estática do módulo. | pendente |
+| T17 | T16 | R14, R19 | Implementar módulo vpc e validar contrato de subnets/rotas. | fmt e init/validate em root de validação isolado; quatro subnets em duas AZs e rotas públicas/privadas no plan futuro. | vpc-validate.txt/diário: fmt/init/validate/grafo 0, duas falhas corrigidas e 9 testes locais mock aprovados; AWS futura. | verificado |
 | T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | Diário/checklist de SG; execução efetiva ainda pendente. | pendente |
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | Diário/checklist do RDS. | pendente |
 | T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | Diário/checklist EC2. | pendente |
@@ -567,3 +569,27 @@ T01–T16 verificadas, T17 próxima sem iniciar módulo nesta retomada. R20/R21
 parciais até backend principal/state remoto/locking T21. Bucket físico externo:
 reprodução/teardown CLI autorizados, criado nesta sessão pelo apply parcial.
 Um commit coerente revisão/decisão/aplicação/recuperação, sem commits por tentativa.
+
+
+### T17 — VPC verificada localmente em 29/09/2026
+
+Aluno revisou T16/autorizou próxima tarefa, HEAD a9c3df8/12 commits/feature limpa.
+Quatro .tf e tests/network.tftest.hcl, seis inputs/três outputs: VPC/DNS/IGW,
+duas públicas/duas privadas em duas AZs, duas route tables/quatro associações.
+Privadas route=[]/IP público false; públicas default IGW/IP público true.
+Tags/guardas CIDR/duas AZs/sem sobreposição; sem NAT/ALB/IAM/provider/backend.
+Root /tmp com cópia idêntica e lockfile/mirror local: fmt/init/validate 0.
+Test inicial 1 tuple/list e IDs unknown, corrigidos tolist e asserções; grafo 0
+conferiu 12 vínculos. Segunda execução 1: sete pass, IPv6 esperava erro posterior
+à rejeição da variável, um skip. expect_failures corrigido apenas var.vpc_cidr,
+sem relaxar guardas. Terceira 0: nove passaram/zero falhas, fmt-check final 0.
+Logs reais e hashes em vpc-validate.txt. São testes LOCAIS mock/command=plan,
+não evidência AWS. Sem credenciais/API AWS/plan principal/apply/destroy/escrita
+no backend. R14/R19/R22 parciais até plano/conferência AWS; próxima T18 não iniciada.
+Guia/API/Docker/Compose/bootstrap/evidências anteriores preservados, sem repetir
+suites. Commit único coerente módulo/evidências, sem quantidade/por tentativa;
+merge/publicação futura.
+
+Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
+para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
+reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.

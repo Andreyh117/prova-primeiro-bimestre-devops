@@ -19,7 +19,7 @@ pelo aluno em 28/09/2026.
 
 ## Estado real
 
-Em 29/09/2026, T01–T16 foram verificadas. O commit inicial `21cb5f0` está em
+Em 29/09/2026, T01–T17 foram verificadas (T17 somente local). O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
 e o script de verificação estão implementados. A suíte passou 51 testes com
 PostgreSQL 16.15 real: 27 HTTP nativos, 3 de indisponibilidade, 3 de script/restart,
@@ -58,8 +58,10 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T17, módulo VPC. State remoto/locking principal são T21; EC2/RDS/CRUD
-na nuvem e limpeza permanecem pendentes.
+pendente: T18, security-group. T17 implementou VPC/quatro subnets/IGW/tabelas e
+associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
+usam provider mock, sem chamadas AWS: rede não implantada. State remoto/locking
+principal são T21; EC2/RDS/CRUD na nuvem e limpeza permanecem pendentes.
 
 ## Contrato aprovado para implementação
 
@@ -114,6 +116,7 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Plano bootstrap T14](evidencias/backend-plan.txt): cinco criações propostas, revisão do JSON sanitizada e consultas antes/depois sem recursos criados.
 - [Revisão bootstrap T15](evidencias/backend-revisao.txt): plano preservado, consultas AWS, tarifas/premissas/cálculo e autorização explícita.
 - [Bootstrap aplicado T16](evidencias/backend.txt): falha SCP parcial, recuperação sem exclusão, apply/consultas reais e plano posterior sem mudanças.
+- [Módulo VPC T17](evidencias/vpc-validate.txt): fmt/init/validate/grafo reais, duas falhas de testes corrigidas e nove casos locais aprovados; sem execução AWS.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -564,7 +567,67 @@ recuperação apresentada antes do apply: três configs S3, bucket preservado,
 tabela sem mudança, zero exclusões. Hash do plano de recuperação:
 8d6b2eb17929552712bc152a1f8d794e184c2ceacfa69d086e5c4ec3003503a2.
 [AGENTS, regra 10](AGENTS.md) mantém revisão/autorização para novos escopos,
-principal e teardown. Próxima tarefa T17, módulo VPC.
+principal e teardown. Ao concluir T16 a próxima era T17; agora T18.
+
+
+### Módulo VPC — T17 verificada localmente
+
+[infra/modules/vpc](infra/modules/vpc/main.tf) recebe name, vpc_cidr,
+availability_zones, public_subnet_cidrs, private_subnet_cidrs e tags. Não configura
+provider/backend próprio; root T21 fornecerá. Outputs vpc_id/public_subnet_ids/
+private_subnet_ids preservam a ordem das AZs e dependem das associações de
+rotas, para módulos consumidores aguardarem a rede pronta.
+
+| Tipo | AZ do input | CIDR D09 | Rota de saída |
+|---|---|---|---|
+| Pública 1 | us-east-1a | 10.20.1.0/24 | 0.0.0.0/0 para IGW |
+| Pública 2 | us-east-1b | 10.20.2.0/24 | 0.0.0.0/0 para IGW |
+| Privada 1 | us-east-1a | 10.20.11.0/24 | Somente rota local da VPC |
+| Privada 2 | us-east-1b | 10.20.12.0/24 | Somente rota local da VPC |
+
+VPC 10.20.0.0/16/DNS habilitado, quatro associações às duas route tables;
+IP público automático só públicas. RDS terá tráfego interno; NAT/ALB não previstos.
+Tags nos recursos com suporte; associações não aceitam tags. Guardas rejeitam
+IPv6/CIDRs não canônicos/externos/sobrepostos, quantidade diferente de dois por
+tipo, AZs repetidas ou tags ausentes. AZs reais precisam novo preflight antes do plan.
+
+Reprodução local: Terraform 1.16.2/provider 6.65.0/cache e lockfile do bootstrap
+inicializado. Copia módulo/teste, nenhum state/tfvars privados; mirror local e
+lockfile readonly. Na falha, bloco para e root permanece para investigação.
+Não executar plan/apply nesse root: testes declarados usam provider mock e
+command=plan, somente para conferir contrato HCL. Sem teste de conectividade AWS.
+
+```bash
+(
+  set -eu
+  umask 077
+  repo_dir=$(pwd)
+  vpc_validation_root=$(mktemp -d /tmp/prova-vpc-XXXXXX)
+  cp infra/modules/vpc/*.tf "$vpc_validation_root/"
+  cp -R infra/modules/vpc/tests "$vpc_validation_root/"
+  cp infra/backend/.terraform.lock.hcl "$vpc_validation_root/.terraform.lock.hcl"
+  printf 'provider_installation {\n  filesystem_mirror {\n    path = "%s/infra/backend/.terraform/providers"\n    include = ["registry.terraform.io/hashicorp/aws"]\n  }\n}\n' "$repo_dir" > "$vpc_validation_root/provider-mirror.tfrc"
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
+  unset TF_CLI_ARGS TF_CLI_ARGS_init TF_CLI_ARGS_validate TF_CLI_ARGS_test TF_CLI_ARGS_graph TF_LOG TF_LOG_PATH
+  export TF_CLI_CONFIG_FILE="$vpc_validation_root/provider-mirror.tfrc"
+  export AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_EC2_METADATA_DISABLED=true
+  printf 'Root temporário: %s\n' "$vpc_validation_root"
+  terraform fmt -check -recursive infra
+  terraform -chdir="$vpc_validation_root" init -backend=false -input=false -no-color -lockfile=readonly
+  terraform -chdir="$vpc_validation_root" validate -no-color
+  terraform -chdir="$vpc_validation_root" test -no-color
+  terraform -chdir="$vpc_validation_root" graph -type=plan > "$vpc_validation_root/dependencies.dot"
+)
+```
+
+Init informa unauthenticated por filesystem; lockfile readonly conserva hashes,
+sem download assinado novo nessa etapa. Nove testes locais passaram: contrato,
+CIDRs alternativos, rejeição AZ repetida/única pública/CIDR não canônico/subnet
+externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois IDs
+reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
+comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
+cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
+Root composto/plan real T21, aplicação T23. Próxima tarefa: T18.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega

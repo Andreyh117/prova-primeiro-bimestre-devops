@@ -46,12 +46,12 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R11 / P | Rede bridge customizada; healthcheck PostgreSQL; API depende do banco com condição de saúde. | Conferir configuração/rede efetiva e subida desde banco parado; API só inicia após banco saudável. | Compose e `evidencias/compose-rede-saude.txt` (T11 real). | verificado |
 | R12 / P | `.env.example` versionado sem senhas reais; `.env` ignorado. | Comparar nomes de variáveis com app/Compose; validar ambiente sem imprimir valores. | `.env.example`, `.gitignore` e compose-rede-saude.txt (config/mapeamentos/ignores reais). | verificado |
 | R13 / P | AWS Academy Learner Lab em `us-east-1`, credenciais temporárias com token; nenhum IAM user/group/role novo; usar LabRole/LabInstanceProfile existentes quando necessário. | Confirmar conta/região e expiração sem divulgar credenciais; revisar plano e instance profile efetivo. | `evidencias/aws-preflight.txt` (T13 leitura/Lab/profile); aws-seguranca/plano futuros. | em andamento |
-| R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | Módulo e `evidencias/aws-rede.txt`. | pendente |
+| R14 / P | Módulo `vpc` cria VPC e subnets públicas/privadas em duas AZs. | Plano e AWS mostram duas subnets públicas, duas privadas, AZs distintas e rotas coerentes. | infra/modules/vpc e vpc-validate.txt (T17 local); plan composto T21 e aws-rede.txt efetivo T23 futuros. | em andamento |
 | R15 / P+U | Módulo `security-group`: EC2 22/3000 com menor privilégio, SSH restrito ao IP/CIDR do aluno e API aos clientes necessários; RDS 5432 somente do SG da EC2. | Inspecionar regras e origens em plano/AWS; negar SG do RDS com CIDR público ou origem adicional. | `evidencias/aws-seguranca.txt`. | pendente |
 | R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | `evidencias/ec2-deploy.txt`, `evidencias/api-aws.txt`. | pendente |
 | R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | `evidencias/rds-crud.txt`, `evidencias/aws-rds.txt`. | pendente |
 | R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | `evidencias/aws-rds.txt`, `evidencias/aws-seguranca.txt`. | pendente |
-| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt e backend-plan.txt; módulos/root principal futuros e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
+| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulo vpc T17/vpc-validate.txt; outros módulos/root principal futuros e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
 | R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16 S3/DynamoDB reais após SCP); backend-locking.txt futuro T21 (state remoto/lock efetivo). | em andamento |
 | R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local), backend.txt/diário (T16 apply/conferência reais, bucket externo); init principal futuro T21. | em andamento |
 | R22 / P+U | Evidências reais de build, execução, Compose, `terraform validate` e `plan` sem erros, CRUD local e nuvem; separar estática/local/AWS. | Cada aceite tem comando, ambiente, resultado e arquivo real; plano não serve como prova de CRUD/deploy. | Arquivos em `evidencias/` com índice no README. | em andamento |
@@ -255,3 +255,13 @@ limpeza CLI autorizada/evidenciada. State bootstrap local 0600/ignorado preserva
 Backend.txt registra falhas/correções reais. R20/R21/R31 em andamento: backend
 principal/objeto state remoto/locking ativo e autorizações principal/destroy
 futuros. R19/R22 parciais; EC2/RDS/CRUD nuvem não implantados. Próxima T17.
+
+
+## Evidência T17 — avanço parcial R14/R19/R22
+
+Módulo VPC/DNS/IGW/quatro subnets/duas route tables/quatro associações implementado;
+inputs e outputs D09 explícitos, tags/guardas CIDR/AZs. Core 1.16.2/provider 6.65.0
+fixados, fmt/init/validate/grafo 0 e nove testes mock locais 0, após corrigir duas
+falhas reais das asserções. Logs vpc-validate.txt, nenhuma API/deploy rede AWS.
+R14 passa em andamento, R19/R22 parciais: plan real composto T21 e valores AWS
+T23 ainda necessários. Próxima T18, security-group.

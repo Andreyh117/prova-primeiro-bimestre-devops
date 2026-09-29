@@ -257,3 +257,24 @@ sem repetir suites API/Docker/Compose inalteradas. Merge T32, sem push/PR autom�
 T29/T30: destroy bootstrap não remove bucket externo; versões/delete markers e
 bucket próprio precisam limpeza CLI separada autorizada, principal já destruído,
 locks conferidos e states necessários preservados.
+
+
+## Estado atual — T17 local verificada em 29/09/2026
+
+Substitui próxima T17 do registro histórico acima: agora T18. Módulo
+infra/modules/vpc conforme D09, seis inputs/três outputs, VPC/DNS/IGW/quatro
+subnets/duas route tables/quatro associações, tags. Privadas sem IGW/NAT/default,
+IP público false; públicas default IGW/IP true. Vars/preconditions guardam CIDRs
+inválidos/externos/sobrepostos, AZs/quantidades/tags. Versões 1.16.2/6.65.0 herdáveis,
+sem provider/backend. Root /tmp/cópia exata/lockfile readonly/mirror local,
+sem state/credenciais/config AWS. Fmt/init/validate/grafo 0, nove testes mock locais 0
+command=plan; duas falhas reais das asserções corrigidas, vpc-validate.txt.
+Não apresentar mocks/grafo como plan ou execução AWS. R14/R19/R22 parciais,
+plan real composto T21/rede AWS T23 futuros. Não repetir suites API/Docker/Compose/
+bootstrap inalteradas, não tocar state/planos/tfvars privados existentes.
+Commit único coerente módulo/evidências; feature preservada/merge T32/sem push/PR.
+T18 não iniciada.
+
+Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
+para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
+reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.

@@ -1004,3 +1004,62 @@ tfvars/preflight ignorados/0600. Hashes originais de consultas AWS e planos
 conferidos; show JSON do plano posterior 0/todos no-op. Nenhum apply adicional.
 HEAD d6f4d25/11 commits/feature/zero merges intactos antes do commit. Preparar
 um único commit fix(backend) com recuperação/evidências e decisão T15, sem push.
+
+
+## 29/09/2026 — T17 módulo VPC, validação somente local
+
+Pedido real após revisão T16: "Execute a próxima tarefa pendente de specs/tasks.md,
+seguindo AGENTS.md. Implemente, valide, corrija e registre evidências reais."
+Aluno mantém commits necessários/coerentes. T17 próxima/D09 quatro subnets em
+duas AZs/sem NAT, HEAD a9c3df8/12 commits/feature limpa. Snapshot de 62 arquivos em
+2026-09-29T07:34:06-03:00, preservar anteriores. Shell isolado falhou mountinfo path is not
+absolute/1 antes das leituras; mesmas leituras escaladas passaram. Sem falha AWS.
+Conceito: subnet pública definida por rota IGW, privada só comunicação VPC para
+RDS; associações explícitas e outputs vinculam módulos. Quatro .tf e teste network,
+seis inputs/três outputs, CIDRs/AZs/tags validados. Sem provider/backend child;
+root principal futuro T21. Código copiado exato em /tmp/devops-t17-vpc-sauavl8u,
+lockfile T14 readonly/mirror local, state não copiado/credenciais-config AWS removidos,
+IMDS disabled. Init unauthenticated por filesystem, não novo download assinado;
+versões/hashes fixados. Fmt 07:39:36/0,init 07:39:49–52/0,validate 07:40:01–05/0.
+Test 07:40:11–15/1: tuple/list igualdade falhou e IDs unknown no plan. Corrigido
+tolist, asserções sem IDs calculados, override_during desnecessário removido;
+grafo 07:41:36–40/0 conferiu 12 referências sem IDs AWS fictícios publicados.
+Retry2 07:41:08–12/1: sete passaram, IPv6 Missing expected failure aws_vpc.this
+porque var.vpc_cidr já interrompeu; um skip. Corrigido expect_failures var.vpc_cidr,
+sem relaxar guardas. Retry3 07:42:06–09/0: nove passaram/zero falhas. Fmt-check
+07:43:13/0; grafo-review/cópia/lockfile 07:43:10/0. Logs brutos/hashes/falhas no
+vpc-validate.txt. Uma entrega do script documental por apply_patch falhou na
+validação do patch, nenhum arquivo alterado; script criado via terminal.
+Sem API AWS/plan principal/apply/destroy/escrita S3/DDB, nenhum state/plan no
+root temporário. Resultado local/HCL/mock não comprova rede/AZs reais atuais/
+permissões/deploy/locking. T17 local verificada, R14 em andamento/R19/R22 parciais,
+próxima T18 não implementada. API/schema/Docker/Compose/bootstrap/guia/evidências
+preservados, sem repetir suites inalteradas. Codex/Python/Git/Terraform/terminal/
+fontes primárias navegador; sem skill/agentes/entregas de colegas. Documentos
+atualizados em 2026-09-29T07:51:02-03:00. Um commit coerente necessário módulo/evidências depois
+de revisar escopo/segredos, sem falha/quantidade nem publicação/merge antecipado.
+
+Na revisão final, outputs public/private_subnet_ids passaram a depender das
+associações de rotas respectivas, evitando consumidores iniciarem antes de rede
+pronta. T17 voltou em andamento durante mudança; sync de cópia idêntica, fmt 0
+07:52:18, validate 0 às07:52:29, grafo 0 às07:52:28 e nove testes locais 0 após
+alteração. T17 só voltou verificada após essa rechecagem; todas capturas em
+vpc-validate.txt e grafo-final. Sem AWS/escopo novo.
+
+Fmt-check final após outputs passou 07:54:34/0. Schema nativo providers-schema
+07:54:42/0 confirmou tags em VPC/IGW/subnets/route tables e ausência do campo
+em associações; metadados/sha da saída e resumo derivado em vpc-validate.txt.
+Conferência 07:56:24/0: doze arquivos no escopo, 56 anteriores por SHA-256
+intactos, diário/AGENTS anteriores como prefixos idênticos. Guia/API/Docker/
+Compose/bootstrap/lockfile/evidências antigas preservados. T01–T17 verificadas/
+T18–T34 pendentes, 34 IDs únicos; 32 requisitos únicos e parciais mantidos.
+Links/fences/newlines/diff-check0, scanner delimitado sem achados, conta/IP
+privados ausentes; state/plan/tfvars/preflight ignorados/0600. Root local sem
+state/plan, cópia/lockfile idênticos, hashes brutos das duas falhas preservados.
+Preparar um único feat(vpc) real/coerente, sem push/merge, feature/main intactas.
+
+Em 2026-09-29T07:58:09-03:00, removido somente root temporário próprio após
+conferir prefixo/tmp/sem symlink/ausência de state-plan. Cache original do provider
+no bootstrap preservado por inode/tamanho/mtime; rmtree não seguiu symlink.
+Logs brutos/metadados de verificações e falhas mantidos em /tmp. Nenhum recurso
+AWS/state/plan/tfvars do projeto apagado. Reprodução documentada recria root novo.
