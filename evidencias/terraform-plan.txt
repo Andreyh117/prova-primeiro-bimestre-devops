@@ -1,0 +1,892 @@
+T21 — execução real em 29/09/2026 (-03:00).
+Terraform=1.16.2 / hashicorp/aws=6.65.0; default/voclabs/conta terminada5811/us-east-1.
+Sem apply/destroy/push; bootstrap anterior preservado.
+Capturas reais incluem comando, horários, exit code e SHA-256 do bruto privado.
+Redação explícita: conta completa, CIDR/IP, username/password e identidade local do lock ocultados; espaços finais normalizados.
+Nenhuma saída de sucesso construída para substituir falha.
+
+
+CAPTURA plan
+{
+  "started": "2026-09-29T08:54:42-03:00",
+  "finished": "2026-09-29T08:54:57-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "plan",
+    "-input=false",
+    "-no-color",
+    "-lock-timeout=60s",
+    "-detailed-exitcode",
+    "-out=infra.tfplan"
+  ],
+  "exit_code": 2,
+  "raw_sha256": "d83a276746dd77d0901d3324635cb3fef2d029d6981a3ed2bc75be3caf737d58"
+}
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+Acquiring state lock. This may take a few moments...
+data.aws_ami.selected: Reading...
+data.aws_ami.selected: Read complete after 1s [id=ami-048da71c4d98f46b1]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.ec2.aws_instance.this will be created
+  + resource "aws_instance" "this" {
+      + ami                                  = "ami-048da71c4d98f46b1"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = true
+      + availability_zone                    = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + force_destroy                        = false
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = "LabInstanceProfile"
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t2.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "vockey"
+      + monitoring                           = false
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_group_id                   = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + region                               = "us-east-1"
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-api"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                             = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-api"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tenancy                              = "default"
+      + user_data                            = <<-EOT
+            #!/bin/bash
+            set -euo pipefail
+            umask 077
+
+            # Amazon Linux 2023: instalar Docker dos repositórios da AMI escolhida.
+            # Não usar set -x; nunca colocar credenciais, senha RDS ou imagem privada aqui.
+            dnf install -y docker
+            systemctl enable --now docker
+
+            # Artefatos públicos e ambiente privado serão transferidos separadamente em T24.
+            install -d -o root -g root -m 0755 /opt/prova-reservas
+            install -d -o root -g root -m 0700 /etc/prova-reservas
+        EOT
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = true
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + credit_specification {
+          + cpu_credits = "standard"
+        }
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = "disabled"
+        }
+
+      + network_interface (known after apply)
+
+      + primary_network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = {
+              + "Environment" = "learner-lab"
+              + "Name"        = "prova-6325231-api-root"
+              + "Owner"       = "6325231"
+              + "Project"     = "prova-primeiro-bimestre-devops"
+            }
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 8
+          + volume_type           = "gp3"
+        }
+
+      + secondary_network_interface (known after apply)
+    }
+
+  # module.rds.aws_db_instance.this will be created
+  + resource "aws_db_instance" "this" {
+      + address                               = (known after apply)
+      + allocated_storage                     = 20
+      + allow_major_version_upgrade           = false
+      + apply_immediately                     = false
+      + arn                                   = (known after apply)
+      + auto_minor_version_upgrade            = false
+      + availability_zone                     = (known after apply)
+      + backup_retention_period               = 0
+      + backup_target                         = (known after apply)
+      + backup_window                         = (known after apply)
+      + ca_cert_identifier                    = (known after apply)
+      + character_set_name                    = (known after apply)
+      + copy_tags_to_snapshot                 = true
+      + database_insights_mode                = (known after apply)
+      + db_name                               = "reservas"
+      + db_subnet_group_name                  = "prova-6325231-rds-private"
+      + dedicated_log_volume                  = false
+      + delete_automated_backups              = true
+      + deletion_protection                   = false
+      + domain_fqdn                           = (known after apply)
+      + endpoint                              = (known after apply)
+      + engine                                = "postgres"
+      + engine_lifecycle_support              = "open-source-rds-extended-support-disabled"
+      + engine_version                        = "16.15"
+      + engine_version_actual                 = (known after apply)
+      + hosted_zone_id                        = (known after apply)
+      + iam_database_authentication_enabled   = false
+      + id                                    = (known after apply)
+      + identifier                            = "prova-6325231-rds"
+      + identifier_prefix                     = (known after apply)
+      + instance_class                        = "db.t3.micro"
+      + iops                                  = (known after apply)
+      + kms_key_id                            = (known after apply)
+      + latest_restorable_time                = (known after apply)
+      + license_model                         = (known after apply)
+      + listener_endpoint                     = (known after apply)
+      + maintenance_window                    = (known after apply)
+      + master_user_secret                    = (known after apply)
+      + master_user_secret_kms_key_id         = (known after apply)
+      + max_allocated_storage                 = 0
+      + monitoring_interval                   = 0
+      + monitoring_role_arn                   = (known after apply)
+      + multi_az                              = false
+      + nchar_character_set_name              = (known after apply)
+      + network_type                          = (known after apply)
+      + option_group_name                     = (known after apply)
+      + parameter_group_name                  = (known after apply)
+      + password                              = (sensitive value)
+      + password_wo                           = (write-only attribute)
+      + performance_insights_enabled          = false
+      + performance_insights_kms_key_id       = (known after apply)
+      + performance_insights_retention_period = (known after apply)
+      + port                                  = 5432
+      + publicly_accessible                   = false
+      + region                                = "us-east-1"
+      + replica_mode                          = (known after apply)
+      + replicas                              = (known after apply)
+      + resource_id                           = (known after apply)
+      + skip_final_snapshot                   = true
+      + snapshot_identifier                   = (known after apply)
+      + status                                = (known after apply)
+      + storage_encrypted                     = true
+      + storage_throughput                    = (known after apply)
+      + storage_type                          = "gp3"
+      + tags                                  = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                              = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + timezone                              = (known after apply)
+      + upgrade_rollout_order                 = (known after apply)
+      + username                              = (sensitive value)
+      + vpc_security_group_ids                = (known after apply)
+    }
+
+  # module.rds.aws_db_subnet_group.private will be created
+  + resource "aws_db_subnet_group" "private" {
+      + arn                     = (known after apply)
+      + description             = "Private subnets in two availability zones for the exam RDS"
+      + id                      = (known after apply)
+      + name                    = "prova-6325231-rds-private"
+      + name_prefix             = (known after apply)
+      + region                  = "us-east-1"
+      + subnet_ids              = (known after apply)
+      + supported_network_types = (known after apply)
+      + tags                    = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds-private"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds-private"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                  = (known after apply)
+    }
+
+  # module.security_group.aws_security_group.ec2 will be created
+  + resource "aws_security_group" "ec2" {
+      + arn                    = (known after apply)
+      + description            = "API EC2: restricted SSH and application access"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = (known after apply)
+      + name_prefix            = "prova-6325231-ec2-"
+      + owner_id               = (known after apply)
+      + region                 = "us-east-1"
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ec2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ec2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # module.security_group.aws_security_group.rds will be created
+  + resource "aws_security_group" "rds" {
+      + arn                    = (known after apply)
+      + description            = "Private PostgreSQL: only from the API EC2 security group"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = (known after apply)
+      + name_prefix            = "prova-6325231-rds-"
+      + owner_id               = (known after apply)
+      + region                 = "us-east-1"
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # module.security_group.aws_vpc_security_group_egress_rule.postgres will be created
+  + resource "aws_vpc_security_group_egress_rule" "postgres" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL only to the private RDS security group"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-1"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ec2-postgres"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                     = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ec2-postgres"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                      = 5432
+    }
+
+  # module.security_group.aws_vpc_security_group_egress_rule.web["443"] will be created
+  + resource "aws_vpc_security_group_egress_rule" "web" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTP or HTTPS for installation and artifacts"
+      + from_port              = 443
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-web-443"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-web-443"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                = 443
+    }
+
+  # module.security_group.aws_vpc_security_group_egress_rule.web["80"] will be created
+  + resource "aws_vpc_security_group_egress_rule" "web" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTP or HTTPS for installation and artifacts"
+      + from_port              = 80
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-web-80"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-web-80"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                = 80
+    }
+
+  # module.security_group.aws_vpc_security_group_ingress_rule.api["[SSH_CIDR_OCULTO]"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "api" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "[SSH_CIDR_OCULTO]"
+      + description            = "API from an approved IPv4 host"
+      + from_port              = 3000
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-api-[IP_OCULTO]-32"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-api-[IP_OCULTO]-32"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                = 3000
+    }
+
+  # module.security_group.aws_vpc_security_group_ingress_rule.postgres will be created
+  + resource "aws_vpc_security_group_ingress_rule" "postgres" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL only from the API EC2 security group"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-1"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds-postgres"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                     = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-rds-postgres"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                      = 5432
+    }
+
+  # module.security_group.aws_vpc_security_group_ingress_rule.ssh will be created
+  + resource "aws_vpc_security_group_ingress_rule" "ssh" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "[SSH_CIDR_OCULTO]"
+      + description            = "SSH from the approved student IPv4 host"
+      + from_port              = 22
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ssh"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all               = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-ssh"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + to_port                = 22
+    }
+
+  # module.vpc.aws_internet_gateway.this will be created
+  + resource "aws_internet_gateway" "this" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + region   = "us-east-1"
+      + tags     = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-igw"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-igw"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # module.vpc.aws_route_table.private will be created
+  + resource "aws_route_table" "private" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + region           = "us-east-1"
+      + route            = []
+      + tags             = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all         = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # module.vpc.aws_route_table.public will be created
+  + resource "aws_route_table" "public" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + region           = "us-east-1"
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + gateway_id                 = (known after apply)
+                # (12 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all         = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # module.vpc.aws_route_table_association.private[0] will be created
+  + resource "aws_route_table_association" "private" {
+      + id             = (known after apply)
+      + region         = "us-east-1"
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # module.vpc.aws_route_table_association.private[1] will be created
+  + resource "aws_route_table_association" "private" {
+      + id             = (known after apply)
+      + region         = "us-east-1"
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # module.vpc.aws_route_table_association.public[0] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + region         = "us-east-1"
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # module.vpc.aws_route_table_association.public[1] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + region         = "us-east-1"
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # module.vpc.aws_subnet.private[0] will be created
+  + resource "aws_subnet" "private" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.20.11.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block                                = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + region                                         = "us-east-1"
+      + tags                                           = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private-1"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                                       = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private-1"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # module.vpc.aws_subnet.private[1] will be created
+  + resource "aws_subnet" "private" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.20.12.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block                                = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + region                                         = "us-east-1"
+      + tags                                           = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private-2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                                       = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-private-2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # module.vpc.aws_subnet.public[0] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.20.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block                                = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + region                                         = "us-east-1"
+      + tags                                           = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public-1"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                                       = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public-1"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # module.vpc.aws_subnet.public[1] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.20.2.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block                                = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + region                                         = "us-east-1"
+      + tags                                           = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public-2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                                       = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231-public-2"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # module.vpc.aws_vpc.this will be created
+  + resource "aws_vpc" "this" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.20.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + region                               = "us-east-1"
+      + tags                                 = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+      + tags_all                             = {
+          + "Environment" = "learner-lab"
+          + "Name"        = "prova-6325231"
+          + "Owner"       = "6325231"
+          + "Project"     = "prova-primeiro-bimestre-devops"
+        }
+    }
+
+Plan: 23 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + api_url         = (known after apply)
+  + ec2_instance_id = (known after apply)
+  + ec2_public_ip   = (known after apply)
+  + rds_endpoint    = (known after apply)
+  + rds_port        = 5432
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: infra.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "infra.tfplan"
+Releasing state lock. This may take a few moments...
+
+CAPTURA show-json
+{
+  "started": "2026-09-29T08:55:37-03:00",
+  "finished": "2026-09-29T08:55:41-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "show",
+    "-json",
+    "infra.tfplan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f38a97e99c053c1b28990f88804afcde7c77ef223fe7e28fa76baffa6cbbc82c"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+Revisão computada sobre JSON REAL privado, exit0; checks por assertions, nenhuma substituição por mocks:
+{
+  "checked_at": "2026-09-29T09:01:06-03:00",
+  "exit_code": 0,
+  "checks": [
+    "state-objects-after exit0",
+    "State principal ainda ausente, sem apply",
+    "Backend efetivo S3, key/bucket/tabela/região/encrypt corretos",
+    "Conta backend e provider confinadas à conta confirmada",
+    "Sem credenciais embutidas no cache backend",
+    "Plano applyable completo sem erro",
+    "23 create / 0 update / 0 delete",
+    "12 VPC / 8 SG / 2 RDS / 1 EC2",
+    "aws_instance região",
+    "aws_instance tags",
+    "aws_db_instance região",
+    "aws_db_instance tags",
+    "aws_db_subnet_group região",
+    "aws_db_subnet_group tags",
+    "aws_security_group região",
+    "aws_security_group tags",
+    "aws_security_group região",
+    "aws_security_group tags",
+    "aws_vpc_security_group_egress_rule região",
+    "aws_vpc_security_group_egress_rule tags",
+    "aws_vpc_security_group_egress_rule região",
+    "aws_vpc_security_group_egress_rule tags",
+    "aws_vpc_security_group_egress_rule região",
+    "aws_vpc_security_group_egress_rule tags",
+    "aws_vpc_security_group_ingress_rule região",
+    "aws_vpc_security_group_ingress_rule tags",
+    "aws_vpc_security_group_ingress_rule região",
+    "aws_vpc_security_group_ingress_rule tags",
+    "aws_vpc_security_group_ingress_rule região",
+    "aws_vpc_security_group_ingress_rule tags",
+    "aws_internet_gateway região",
+    "aws_internet_gateway tags",
+    "aws_route_table região",
+    "aws_route_table tags",
+    "aws_route_table região",
+    "aws_route_table tags",
+    "aws_route_table_association região",
+    "aws_route_table_association região",
+    "aws_route_table_association região",
+    "aws_route_table_association região",
+    "aws_subnet região",
+    "aws_subnet tags",
+    "aws_subnet região",
+    "aws_subnet tags",
+    "aws_subnet região",
+    "aws_subnet tags",
+    "aws_subnet região",
+    "aws_subnet tags",
+    "aws_vpc região",
+    "aws_vpc tags",
+    "VPC 10.20.0.0/16 DNS habilitado",
+    "Subnet public0",
+    "Subnet public1",
+    "Subnet private0",
+    "Subnet private1",
+    "Privadas sem rota externa",
+    "EC2 AMI fixada / t2.micro / perfil/key existentes",
+    "EC2 IMDSv2/gp3 8GiB encrypted/standardCPU",
+    "User-data sem segredo RDS",
+    "RDS postgres16.15/dbt3micro/gp320/private/encrypted/singleAZ",
+    "Proposta snapshot/backup explícita sem autorização destruição",
+    "Password sensitive no plano mas plaintext privado protegido",
+    "Ingress 3000 só IP atual /32",
+    "5432 sem CIDR público",
+    "Ingress 22 só IP atual /32",
+    "Referência ec2.public_subnet_id",
+    "Referência ec2.ec2_sg_id",
+    "Referência rds.private_subnet_ids",
+    "Referência rds.rds_sg_id",
+    "Referência security_group.vpc_id",
+    "5 outputs sem credenciais; porta5432 conhecida / restante futuro",
+    "0600 infra/terraform.tfvars.json",
+    "Ignorado infra/terraform.tfvars.json",
+    "0600 infra/backend.local.hcl",
+    "Ignorado infra/backend.local.hcl",
+    "0600 infra/infra.tfplan",
+    "Ignorado infra/infra.tfplan",
+    "0600 infra/.terraform/terraform.tfstate",
+    "Ignorado infra/.terraform/terraform.tfstate"
+  ],
+  "plan_sha256": "2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7",
+  "plan_json_raw_sha256": "f38a97e99c053c1b28990f88804afcde7c77ef223fe7e28fa76baffa6cbbc82c",
+  "lockfile_sha256": "11d5f66e2ef34be8c31d88adb53b1c8e94a12dbbe647c6250fb5a746f525d0c8",
+  "resource_counts": {
+    "module.ec2": 1,
+    "module.rds": 2,
+    "module.security_group": 8,
+    "module.vpc": 12
+  },
+  "state_object_after": "ausente antes/depois de init/plan; gravação efetiva pendente primeiro apply T23",
+  "limitation": "Sem apply, EC2/RDS/boot/API/CRUD/outputs reais não comprovados; sem state push fictício"
+}
+
+Plano binário infra/infra.tfplan 0600/ignorado, preservado para T22.
+Password sensitive permanece no JSON/plano e futuro state: não publicar esses arquivos.
+Tags conferidas nos 19 recursos que suportam tags; quatro associações de tabelas não as suportam.
+23 criações propostas não são recursos provisionados. IDs/IP/endpoint/URL só após apply; port5432 conhecida.
+skip_final_snapshot=true/backup0 é proposta explícita Learner Lab, sujeita à revisão T22/T27; não autoriza apagar banco/dados.
+Sem nova IAM/key pair/KMS/EIP/NAT. EC2 root8GiB gp3encrypted/IMDSv2; RDS gp320GiB encrypted/private/singleAZ.
+SSH/API somente IP atual /32 privado. Boot/SSH/Docker/CRUD EC2-RDS e permissões de criação ainda não demonstrados.

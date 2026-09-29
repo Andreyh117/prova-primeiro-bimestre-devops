@@ -1,0 +1,370 @@
+T21 — execução real em 29/09/2026 (-03:00).
+Terraform=1.16.2 / hashicorp/aws=6.65.0; default/voclabs/conta terminada5811/us-east-1.
+Sem apply/destroy/push; bootstrap anterior preservado.
+Capturas reais incluem comando, horários, exit code e SHA-256 do bruto privado.
+Redação explícita: conta completa, CIDR/IP, username/password e identidade local do lock ocultados; espaços finais normalizados.
+Nenhuma saída de sucesso construída para substituir falha.
+
+Locking NATIVO DynamoDB no backend S3 real, sem S3 use_lockfile e sem -lock=false/refresh=false/target.
+Primeiro plano Terraform adquiriu lock. Após observação de OperationTypePlan/Path reais, SIGSTOP por ~6s somente no PID próprio84363 ampliou janela de concorrência. Segundo Terraform retornou1/ConditionalCheckFailedException com MESMO lockID. finally SIGCONT no mesmo processo; primeiro retornou2 (mudanças propostas), lock liberado pelo Terraform. Nenhum item DDB inserido/deletado manualmente, nenhum force-unlock.
+
+Falha auxiliar inicial REAL antes de iniciar Terraform:
+{
+  "recorded_at": "2026-09-29T08:54:40-03:00",
+  "observed_failure": "helper JSONDecodeError após get-item exit0/stdout vazio para item inexistente, antes de iniciar Terraform",
+  "correction": "interpretar resposta vazia como ausência de atributos, sem inserir item nem simular lock",
+  "first_capture": "lock-before-initial mantém CLI exit0/bytes vazios/hash original",
+  "terraform_started_in_failed_attempt": false
+}
+
+CAPTURA lock-before-initial
+{
+  "started": "2026-09-29T08:53:51-03:00",
+  "finished": "2026-09-29T08:53:53-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+
+CLI get-item exit0/stdout vazio para item ausente. json.loads("") levantou JSONDecodeError; corrigido para json.loads(stdout.strip() or "{}").get("Item"). Resposta vazia indica ausência, não lock simulado. Reexecução nativa abaixo.
+{
+  "checked_at": "2026-09-29T08:54:58-03:00",
+  "exit_code": 0,
+  "backend": "S3 real/key própria, DynamoDB LockID String; nenhum item inserido/removido manualmente",
+  "observations": [
+    {
+      "observed_at": "2026-09-29T08:54:42-03:00",
+      "label": "lock-before",
+      "lock_present": false
+    },
+    {
+      "observed_at": "2026-09-29T08:54:44-03:00",
+      "label": "lock-poll-1",
+      "lock_present": false
+    },
+    {
+      "observed_at": "2026-09-29T08:54:45-03:00",
+      "label": "lock-poll-2",
+      "lock_present": true
+    },
+    {
+      "observed_at": "2026-09-29T08:54:47-03:00",
+      "label": "lock-paused",
+      "lock_present": true
+    },
+    {
+      "observed_at": "2026-09-29T08:54:58-03:00",
+      "label": "lock-after",
+      "lock_present": false
+    }
+  ],
+  "events": [
+    {
+      "at": "2026-09-29T08:54:45-03:00",
+      "event": "SIGSTOP somente no processo Terraform próprio",
+      "pid": 84363,
+      "lock_id": "b90c02ed-20b1-62b6-d9bc-d432ef1891f9"
+    },
+    {
+      "at": "2026-09-29T08:54:51-03:00",
+      "event": "SIGCONT no mesmo processo; nenhuma edição manual do lock",
+      "pid": 84363
+    }
+  ],
+  "lock_id_observed": "b90c02ed-20b1-62b6-d9bc-d432ef1891f9",
+  "operation": "OperationTypePlan",
+  "contender_exit": 1,
+  "first_plan_exit": 2,
+  "lock_after": "ausente",
+  "state": "não foi criado state falso nem executado apply/state push/force-unlock/-lock=false",
+  "failure": null
+}
+
+CAPTURA lock-before
+{
+  "started": "2026-09-29T08:54:40-03:00",
+  "finished": "2026-09-29T08:54:42-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA lock-poll-1
+{
+  "started": "2026-09-29T08:54:42-03:00",
+  "finished": "2026-09-29T08:54:44-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA lock-poll-2
+{
+  "started": "2026-09-29T08:54:44-03:00",
+  "finished": "2026-09-29T08:54:45-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "7d379fb48470847b2c3c22e1e68531e2d04baa681ecbaf27b67a87a2a21285a4"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+Info extraída da resposta DDB real (Who removido):
+{
+  "ID": "b90c02ed-20b1-62b6-d9bc-d432ef1891f9",
+  "Operation": "OperationTypePlan",
+  "Info": "",
+  "Version": "1.16.2",
+  "Created": "2026-09-29T11:54:45.17221221Z",
+  "Path": "prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate"
+}
+
+CAPTURA lock-paused
+{
+  "started": "2026-09-29T08:54:45-03:00",
+  "finished": "2026-09-29T08:54:47-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "7d379fb48470847b2c3c22e1e68531e2d04baa681ecbaf27b67a87a2a21285a4"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+Info extraída da resposta DDB real (Who removido):
+{
+  "ID": "b90c02ed-20b1-62b6-d9bc-d432ef1891f9",
+  "Operation": "OperationTypePlan",
+  "Info": "",
+  "Version": "1.16.2",
+  "Created": "2026-09-29T11:54:45.17221221Z",
+  "Path": "prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate"
+}
+
+CAPTURA lock-contender
+{
+  "started": "2026-09-29T08:54:47-03:00",
+  "finished": "2026-09-29T08:54:51-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "plan",
+    "-input=false",
+    "-no-color",
+    "-lock-timeout=0s",
+    "-detailed-exitcode",
+    "-out=lock-contender.tfplan"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "be2d0ce03df7224f307ab2b1e62b16a6b23a049091865bfc3c080e922c3af60e"
+}
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+Acquiring state lock. This may take a few moments...
+
+Error: Error acquiring the state lock
+
+Error message: operation error DynamoDB: PutItem, https response error
+StatusCode: 400, RequestID:
+5KEJP8AV61HPIOQUBHSLPHG8BJVV4KQNSO5AEMVJF66Q9ASUAAJG,
+ConditionalCheckFailedException: The conditional request failed
+Lock Info:
+  ID:        b90c02ed-20b1-62b6-d9bc-d432ef1891f9
+  Path:      prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate
+  Operation: OperationTypePlan
+  Who:       [IDENTIDADE_LOCAL_OCULTA]
+  Version:   1.16.2
+  Created:   2026-09-29 11:54:45.17221221 +0000 UTC
+  Info:
+
+
+Terraform acquires a state lock to protect the state from being written
+by multiple users at the same time. Please resolve the issue above and try
+again. For most commands, you can disable locking with the "-lock=false"
+flag, but this is not recommended.
+
+CAPTURA lock-after
+{
+  "started": "2026-09-29T08:54:57-03:00",
+  "finished": "2026-09-29T08:54:58-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA state-list
+{
+  "started": "2026-09-29T08:55:41-03:00",
+  "finished": "2026-09-29T08:55:44-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "state",
+    "list"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "66a451d770c3d1485c9a72203f89a19a3fbe9111451d5ce948216f46a90f3b3e"
+}
+[31mNo state file was found!
+
+State management commands require a state file. Run this command
+in a directory where Terraform has been run or use the -state flag
+to point the command to a specific state location.[0m[0m
+
+CAPTURA state-objects-before
+{
+  "started": "2026-09-29T08:49:09-03:00",
+  "finished": "2026-09-29T08:49:11-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "list-objects-v2",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--prefix",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b8af8fb7fe480d1c546cdb609cfe1da54d6c711adb29b82bceff09a0c8be54a3"
+}
+{
+    "RequestCharged": null,
+    "Prefix": "prova-primeiro-bimestre-devops/terraform.tfstate"
+}
+
+CAPTURA state-objects-after
+{
+  "started": "2026-09-29T09:01:04-03:00",
+  "finished": "2026-09-29T09:01:06-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "list-objects-v2",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--prefix",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b8af8fb7fe480d1c546cdb609cfe1da54d6c711adb29b82bceff09a0c8be54a3"
+}
+{
+    "RequestCharged": null,
+    "Prefix": "prova-primeiro-bimestre-devops/terraform.tfstate"
+}
+
+Limitação comprovada: backend é S3 efetivo (cache .terraform/terraform.tfstate é apenas configuração LOCAL), mas objeto principal não existe antes/depois init/plan sem apply. state list retornou1 por ausência esperada. Não foi criado state vazio/artificial nem executado state push. R20 permanece em andamento até gravação real do objeto S3 no primeiro apply T23 e sua conferência.
+T21 configura backend e testa locking reais; esse aceite não afirma deploy/state gravado.
+DynamoDB depreciado pelo Terraform1.16, mantido por requisito da prova; aviso real de init/validate/plan preservado.
+Fonte oficial: https://developer.hashicorp.com/terraform/language/backend/s3
+Implementação fixada: https://raw.githubusercontent.com/hashicorp/terraform/v1.16.2/internal/backend/remote-state/s3/backend.go
+AMI: https://docs.aws.amazon.com/linux/al2023/ug/ec2.html

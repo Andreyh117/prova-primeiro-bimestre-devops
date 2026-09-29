@@ -51,9 +51,9 @@ planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
 | R16 / P | Módulo `ec2`: t2.micro pública executando a API; LabInstanceProfile se houver acesso a serviços. | Conferir tipo/subnet/IP/profile e chamar as seis rotas na EC2 após deploy. | infra/modules/ec2 e ec2-validate.txt (T20 local); ec2-deploy.txt/api-aws.txt reais futuros. | em andamento |
 | R17 / P | Módulo `rds`: PostgreSQL db.t3.micro provisionado e funcional como banco da API na nuvem. | RDS `available`; SQL pela EC2 confirma dados do CRUD e o endpoint realmente usado pela API. | infra/modules/rds e rds-validate.txt (T19 local); rds-crud.txt/aws-rds.txt reais futuros. | em andamento |
 | R18 / P | RDS `publicly_accessible=false`, `storage_encrypted=true`, subnet group nas privadas e acesso só do SG EC2 na 5432. | Conferir valores efetivos em AWS, subnet group e SG, além de revisar Terraform. | rds-validate.txt (T19 local); aws-rds.txt/aws-seguranca.txt efetivos futuros. | em andamento |
-| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulos vpc T17/vpc-validate.txt e security-group T18/security-group-validate.txt e rds T19/rds-validate.txt e ec2 T20/ec2-validate.txt; root principal futuro e `evidencias/terraform-validate.txt`, `evidencias/terraform-plan.txt`, `evidencias/terraform-outputs.txt`. | em andamento |
-| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16 S3/DynamoDB reais após SCP); backend-locking.txt futuro T21 (state remoto/lock efetivo). | em andamento |
-| R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local), backend.txt/diário (T16 apply/conferência reais, bucket externo); init principal futuro T21. | em andamento |
+| R19 / P | `infra/modules/{vpc,security-group,ec2,rds}`; composição de outputs/inputs em `infra/main.tf`; variables/outputs/providers; tags e outputs IP EC2, endpoint RDS e URL API. | `validate`, plano e revisão dos vínculos; tags em todos os recursos que suportam tagging e outputs sem senhas. | Bootstrap T14/plano em backend-validate.txt/backend-plan.txt e módulos vpc T17/vpc-validate.txt e security-group T18/security-group-validate.txt e rds T19/rds-validate.txt e ec2 T20/ec2-validate.txt; root T21 composto/validado/plano real em terraform-validate.txt/terraform-plan.txt; terraform-outputs.txt efetivo futuro T23. | em andamento |
+| R20 / P | State principal remoto em S3 versionado/encriptado; locking DynamoDB ativo. | Conferir configuração efetiva do bucket/tabela, objeto de state e uso de lock no backend, sem divulgar conteúdo do state. | backend.txt (T16 S3/DynamoDB reais após SCP); backend-locking.txt T21: init S3 real/locking nativo comprovados; objeto de state ausente antes/depois do plano, gravação/conferência T23 pendente. | em andamento |
+| R21 / U; dica P | Criar `infra/backend` antes de inicializar o backend S3 principal; preservar state bootstrap separado. | Registrar sequência: bootstrap init/validate/plan, apply autorizado, conferência de S3/DynamoDB, init principal. | backend-validate.txt/backend-plan.txt (T14 local), backend.txt/diário (T16 apply/conferência reais, bucket externo); terraform-validate.txt T21/init S3 real após bootstrap, states separados preservados. | verificado |
 | R22 / P+U | Evidências reais de build, execução, Compose, `terraform validate` e `plan` sem erros, CRUD local e nuvem; separar estática/local/AWS. | Cada aceite tem comando, ambiente, resultado e arquivo real; plano não serve como prova de CRUD/deploy. | Arquivos em `evidencias/` com índice no README. | em andamento |
 | R23 / P+U | Executar `terraform destroy` após coletar evidências; preparar limpeza do backend separadamente, preservando state até encerrar. | Plano de destruição revisado/autorizado, destroy principal real e ausência de recursos confirmada; explicitar retenções/pendências do backend. | `evidencias/terraform-destroy.txt`, `evidencias/aws-pos-destroy.txt`, `evidencias/backend-teardown.txt`. | pendente |
 | R24 / P | Usar Kiro ou outra LLM como copiloto para parte da solução e documentar uso crítico. | Histórico e diário identificam Codex, prompts, revisão humana, geração e correções efetivamente ocorridas. | `docs/diario-ia.md`, `relatorio.md`. | em andamento |
@@ -304,3 +304,50 @@ corrigidos/preservados em ec2-validate.txt. User-data sem segredos/sem API/RDSlo
 R16 agora em andamento; running/subnet/profile/key/IMDS/volume/boot/Docker/API/SQL
 reais só T23–T25. R13/R19/R22 parciais, sem backend remoto/plano principal ainda.
 PróximaT21 composição/locking/plano; não executar apply sem revisão T22.
+
+## Evidência T21 — composição/locking reais e R21 verificado
+
+T21 executada em 29/09/2026 após revisão do aluno: root infra/main.tf/variables.tf/
+providers.tf/outputs.tf e lockfile real, módulos anteriores preservados. STS atual
+mesma conta terminada5811/default/voclabs/us-east-1; S3 Enabled/AES256/BPA4true,
+DynamoDB ACTIVE/PAY_PER_REQUEST/LockID String. AZs/RDS16.15/db.t3.micro/gp320GiB/
+encriptação/key vockey/LabInstanceProfile-LabRole revalidados. IP atual /32 privado
+somente SSH/API; saldo atual/duração do token/posse da chave/SSH não inferidos.
+AMI concreta ami-048da71c4d98f46b1, AL2023 standard x86_64/HVM/EBS/uefi-preferred/
+root8GiB consultada, compatível com oferta t2.micro/us-east-1a; boot não testado.
+
+fmt/init S3 real/validate/grafo/fmt-check exit0. Provider filesystem_mirror local
+não autenticado nesta instalação, lockfile/hashes T14 preservados, sem nova
+assinatura alegada; nenhuma configuração global alterada. DynamoDB depreciado
+mantido por requisito, avisos reais preservados. Primeiro plan nativo adquiriu
+lock real; SIGSTOP por aproximadamente6s só no PID próprio após observá-lo;
+contender native exit1/ConditionalCheckFailedException/mesmo ID; finally SIGCONT,
+primeiro plan exit2 e item ausente ao final, sem edição manual/force-unlock.
+Falha auxiliar inicial JSONDecodeError antes de iniciar TF: get-item exit0 com
+stdout vazio indica item ausente; leitor corrigido para aceitar ausência, não
+inseriu lock. Captura inicial/correção/reexecução reais em backend-locking.txt.
+
+Plano principal real 23create/0update/0delete (VPC12/SG8/RDS2/EC2 1), JSON privado
+conferido por assertions: vínculos inputs/outputs/tags/segurança/região/AMI/política
+RDS/5outputs sem credenciais. EC2 pública0/SGEC2, RDS privadas/SGRDS,5432 somente
+referência SGEC2;22/3000 só IP atual /32. Proposta skip_final_snapshot=true/backup0
+não autoriza destruir; T22/T27 devem revisar retenção/custo/dados.
+SHA-256 plano: 2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+
+State list exit1/No state file was found e list-objects antes/depois exit0/sem
+objeto: init/backend S3 real e locking comprovados, gravação do state principal
+só primeiro apply T23; R20 continua parcial. Cache .terraform/terraform.tfstate
+é configuração local, não objeto de state de recursos remoto. Não criar vazio/
+state push simulado. T21 aceite de backend/plan/locking verificado; explicitação
+do objeto no aceite T23 mantém requisito R20, não dispensa conferência futura.
+R21 verificado: bootstrap aplicado/conferido antes init real, state local separado.
+R19/R22 continuam parciais até outputs efetivos/AWS/CRUD/verificadores futuros.
+
+Terraform-validate.txt/terraform-plan.txt/backend-locking.txt contêm comandos,
+horários, exit codes, hashes e redação declarada. Tfvars/backendconfig/plano/cache
+ignorados0600 preservados; senha sensitive ainda presente no privado plano/state.
+Sem apply/destroy/IAM novo/EC2/RDS/rede/boot/API/CRUD; sem bloqueio T21.
+T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/custo/
+autorização principal, nenhuma aprovação principal presumida do bootstrap.
+Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
+coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.

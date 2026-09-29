@@ -1245,3 +1245,70 @@ recursiva de state/plan, prefixo/tmp/sem symlink. Cache original por inode/taman
 /mtime intacto; logs/brutos/falha/metadados em /tmp preservados. Recursos AWS/
 state/plan/tfvars reais não removidos. Preparar commit após conferir stage exato;
 comandos dependentes param no erro para impedir commit após checagem falhada.
+
+## T21 — root e backend/locking reais, 29/09/2026
+
+Prompt relevante: “Revisei o que foi feito. Execute a próxima tarefa pendente de
+specs/tasks.md, seguindo AGENTS.md. Implemente, valide, corrija e registre evidências
+reais.” IA usada: Codex; ferramentas: terminal/Python stdlib, Terraform/AWS CLI e
+consulta web a fontes oficiais Terraform/AL2023. Sem subagentes nesta tarefa.
+Git inicial HEAD76911e7/feat/api-reservas limpa/16 commits reais/zero merges,
+main21cb5f0 preservada; 88 arquivos anteriores registrados por SHA-256.
+
+T21 executada em 29/09/2026 após revisão do aluno: root infra/main.tf/variables.tf/
+providers.tf/outputs.tf e lockfile real, módulos anteriores preservados. STS atual
+mesma conta terminada5811/default/voclabs/us-east-1; S3 Enabled/AES256/BPA4true,
+DynamoDB ACTIVE/PAY_PER_REQUEST/LockID String. AZs/RDS16.15/db.t3.micro/gp320GiB/
+encriptação/key vockey/LabInstanceProfile-LabRole revalidados. IP atual /32 privado
+somente SSH/API; saldo atual/duração do token/posse da chave/SSH não inferidos.
+AMI concreta ami-048da71c4d98f46b1, AL2023 standard x86_64/HVM/EBS/uefi-preferred/
+root8GiB consultada, compatível com oferta t2.micro/us-east-1a; boot não testado.
+
+fmt/init S3 real/validate/grafo/fmt-check exit0. Provider filesystem_mirror local
+não autenticado nesta instalação, lockfile/hashes T14 preservados, sem nova
+assinatura alegada; nenhuma configuração global alterada. DynamoDB depreciado
+mantido por requisito, avisos reais preservados. Primeiro plan nativo adquiriu
+lock real; SIGSTOP por aproximadamente6s só no PID próprio após observá-lo;
+contender native exit1/ConditionalCheckFailedException/mesmo ID; finally SIGCONT,
+primeiro plan exit2 e item ausente ao final, sem edição manual/force-unlock.
+Falha auxiliar inicial JSONDecodeError antes de iniciar TF: get-item exit0 com
+stdout vazio indica item ausente; leitor corrigido para aceitar ausência, não
+inseriu lock. Captura inicial/correção/reexecução reais em backend-locking.txt.
+
+Plano principal real 23create/0update/0delete (VPC12/SG8/RDS2/EC2 1), JSON privado
+conferido por assertions: vínculos inputs/outputs/tags/segurança/região/AMI/política
+RDS/5outputs sem credenciais. EC2 pública0/SGEC2, RDS privadas/SGRDS,5432 somente
+referência SGEC2;22/3000 só IP atual /32. Proposta skip_final_snapshot=true/backup0
+não autoriza destruir; T22/T27 devem revisar retenção/custo/dados.
+SHA-256 plano: 2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+
+State list exit1/No state file was found e list-objects antes/depois exit0/sem
+objeto: init/backend S3 real e locking comprovados, gravação do state principal
+só primeiro apply T23; R20 continua parcial. Cache .terraform/terraform.tfstate
+é configuração local, não objeto de state de recursos remoto. Não criar vazio/
+state push simulado. T21 aceite de backend/plan/locking verificado; explicitação
+do objeto no aceite T23 mantém requisito R20, não dispensa conferência futura.
+R21 verificado: bootstrap aplicado/conferido antes init real, state local separado.
+R19/R22 continuam parciais até outputs efetivos/AWS/CRUD/verificadores futuros.
+
+Terraform-validate.txt/terraform-plan.txt/backend-locking.txt contêm comandos,
+horários, exit codes, hashes e redação declarada. Tfvars/backendconfig/plano/cache
+ignorados0600 preservados; senha sensitive ainda presente no privado plano/state.
+Sem apply/destroy/IAM novo/EC2/RDS/rede/boot/API/CRUD; sem bloqueio T21.
+T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/custo/
+autorização principal, nenhuma aprovação principal presumida do bootstrap.
+Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
+coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.
+
+Comandos reais e seus resultados constam nas três novas evidências; show-json
+real0 foi revisado sem publicar JSON com senha. Auxiliares privados /tmp não
+substituem saída nativa e não executam apply/destroy. Nenhuma vivência pessoal
+do aluno escrita em seu nome; contribuição pessoal permanece necessária T26.
+
+Conferência final 2026-09-29T09:06:33-03:00/exit0: 181 checks, escopo de14 arquivos,
+82 anteriores preservados por SHA-256. Links/fences/newlines/whitespace/segredos
+conhecidos sem achados; proteção0600/ignore e plano binário intactos. Git mantém
+feature/main e16 Conventional não vazios/zero merges antes deste commit.
+Objecto S3 principal pendente T23, R20 parcial/R21 verificado; nenhuma simulação
+de deploy. Preparar um commit coerente do root/backend/locking e documentação,
+sem push/merge/PR. Brutos/metadados/auxiliares privados em /tmp preservados.

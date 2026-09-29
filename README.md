@@ -58,10 +58,10 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T21, composição da infraestrutura e backend remoto. T17 implementou VPC/quatro subnets/IGW/tabelas e
+pendente: T22, revisão do plano principal, segurança/custo e autorização. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
-usam provider mock, sem chamadas AWS: rede não implantada. State remoto/locking
-principal são T21. T18 implementou grupos EC2/RDS e regras separadas, com
+usam provider mock, sem chamadas AWS: rede não implantada. Backend S3/locking
+principal foram conferidos em T21, conforme os limites abaixo. T18 implementou grupos EC2/RDS e regras separadas, com
 14 testes mock locais, fmt/init/validate/grafo aprovados. EC2/RDS/CRUD na nuvem
 e limpeza permanecem pendentes; os security groups ainda não foram aplicados.
 T19 implementou o módulo RDS privado/encriptado; 17 testes mock locais e
@@ -70,6 +70,11 @@ O banco real, seus acessos e o CRUD na nuvem ainda não foram executados.
 T20 implementou módulo EC2/user-data: dez testes Terraform mock e três testes
 de fluxo Bash com stubs passaram, além de fmt/init/validate/grafo/schema/bash-n.
 Nenhuma instância criada; boot/Docker/API reais continuam pendentes.
+T21 compôs o root e inicializou S3 real: fmt/init/validate/grafo 0, plano real
+2 com 23 criações/zero alterações/exclusões. Contenção DynamoDB comprovada:
+segundo plano falhou1 enquanto o primeiro mantinha lock; primeiro terminou2
+e liberou o lock. Sem apply, o objeto de state principal ainda não existe;
+R20 segue parcial até T23. IDs/IP/endpoint/URL efetivos também pendentes.
 
 ## Contrato aprovado para implementação
 
@@ -128,6 +133,9 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Security groups T18](evidencias/security-group-validate.txt): fmt inicial corrigido, fmt/init/validate/grafo e 14 testes locais aprovados; sem execução AWS.
 - [Módulo RDS T19](evidencias/rds-validate.txt): falha real do provider/correção, fmt/init/validate/grafo/schema e 17 testes mock aprovados; sem RDS real.
 - [Módulo EC2 T20](evidencias/ec2-validate.txt): sintaxe/contrato/grafo/schema, dez testes mock e três de fluxo/stubs; falhas/correções e limites, sem AWS.
+- [Root e backend T21](evidencias/terraform-validate.txt): preflight AWS, instalação do cache fixo, fmt/init S3/validate/grafo reais.
+- [Plano principal T21](evidencias/terraform-plan.txt): 23 criações propostas, JSON real revisado e hash do plano privado; sem apply.
+- [Locking real T21](evidencias/backend-locking.txt): DynamoDB, contenção entre dois Terraform/release, correção do leitor e ausência do objeto principal sem apply.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 
 ## Executar os testes disponíveis
@@ -639,7 +647,7 @@ externa/sobreposição/IPv6/Owner ausente. Grafo nativo conferiu vínculos, pois
 reais não existem nesta fase. Falhas e correções em vpc-validate.txt; mocks não
 comprovam rede/permissões/deploy AWS. Após conferir, remova somente o root
 cujo caminho foi mostrado, preservando logs necessários; nunca state bootstrap.
-Root composto/plan real T21, aplicação T23. T18–T20 locais concluídas abaixo; próxima T21.
+Root/plano real T21 concluídos, aplicação T23 pendente após revisão T22.
 
 ### Security groups — T18 verificada localmente
 
@@ -712,11 +720,11 @@ continuam em andamento; T19/T20 locais concluídas abaixo, próxima T21 (root/pl
 [infra/modules/rds](infra/modules/rds/main.tf) define DB subnet group e instância
 PostgreSQL 16.15/db.t3.micro/gp3 20GiB, Single-AZ, sem autoscale, encriptada e
 publicly_accessible=false. São configurações locais propostas; ainda sem banco
-provisionado. Versão/opções observadas em T13 precisam novo preflight em T21.
+provisionado. Versão/opções observadas em T13 foram revalidadas na AWS em T21.
 
 Onze inputs: identifier, private_subnet_ids, rds_sg_id, engine_version,
 instance_class, db_name, username, password, skip_final_snapshot,
-final_snapshot_identifier e tags. Root T21 deve fornecer private_subnet_ids do
+final_snapshot_identifier e tags. Root T21 fornece private_subnet_ids do
 módulo VPC e rds_sg_id do módulo SG; dois IDs válidos não comprovam privadas/AZs.
 Subnet group exige duas AZs mesmo com instância Single-AZ, conforme
 [documentação AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html).
@@ -775,8 +783,8 @@ informa unauthenticated, não novo download assinado. Testes rejeitam subnets
 única/repetidas/malformadas, SG/classe/versão/identificador/nomes inválidos,
 senha curta/caracteres inválidos, tags ausentes e política snapshot incoerente.
 Não comprovam AZ/rotas privadas/permissões/KMS/endpoint disponível ou SQL/CRUD
-na AWS. R17/R18/R19/R22 em andamento; T20 local concluída abaixo, próxima T21. Root/plano T21,
-execução real T23 e deploy/CRUD T24/T25 continuam pendentes.
+na AWS. R17/R18/R19/R22 em andamento; root/plano real T21 concluídos,
+execução T23 e deploy/CRUD T24/T25 continuam pendentes após revisão T22.
 
 ### EC2 — T20 verificada localmente
 
@@ -848,11 +856,68 @@ confere dez referências; fmt/init/validate/schema/bash-n/testes de fluxo passar
 Init filesystem unauthenticated/lockfile readonly, nenhum download assinado novo.
 Após conferir, remover somente root temporário mostrado, preservando logs/cache.
 Não comprova boot/Docker/encriptação/IMDS/SSH/API/CRUD efetivos. R13/R16/R19/R22
-em andamento; próxima T21 (composição/backend/locking/plano), aplicação somente
-T23 após revisão/autorização T22, deploy/API T24/T25.
+em andamento; composição/backend/locking/plano T21 concluídos abaixo, aplicação
+T23 somente após revisão/autorização T22, deploy/API T24/T25.
 
 A submissão da disciplina ficará somente em
 `entregas/provaPrimeiroBi/6325231/entrega.md` no fork separado. A data de entrega
 informada é 01/10/2026. Um único PR deve ser
 aberto presencialmente no dia confirmado da prova, sem commits posteriores no PR.
 O relatório será escrito com base no diário e na experiência real do aluno.
+
+## Root principal T21 — backend e plano, sem apply
+
+`infra/main.tf` liga os quatro módulos: privadas VPC → RDS, primeira pública
+→ EC2, grupos específicos → respectivas instâncias. AMI explícita consultada
+na AWS: `ami-048da71c4d98f46b1`, Amazon Linux 2023 standard x86_64/HVM/EBS,
+uefi-preferred e raiz8GiB, ofertada com t2.micro em us-east-1a. Essa seleção
+não comprova boot/SSH; revalidar credenciais, IP e disponibilidade antes do apply.
+Root preserva Terraform1.16.2/provider6.65.0 e lockfile com os hashes existentes.
+
+São necessários `infra/terraform.tfvars.json` e `infra/backend.local.hcl`, ambos
+locais ignorados/0600, já preparados nesta execução e preservados para T22.
+Não sobrescrever esses arquivos nem publicar plano/JSON/cache/state. Variáveis
+obrigatórias: conta STS `aws_account_id`, `ami_id`, `ssh_cidr`,
+`api_allowed_cidrs`, `rds_username`, `rds_password`, `skip_final_snapshot`.
+Região/perfil são restritos a us-east-1/default; os defaults restantes estão em
+[variables.tf](infra/variables.tf). Conta precisa corresponder ao Learner Lab.
+SSH/API usam somente IPv4 atual /32 aprovado pelo aluno. Username/password
+não possuem default: foram guardados privadamente, senha aleatória gerada via
+Python secrets. `sensitive` oculta a exibição, mas mantém senha no plano/state.
+Política proposta Lab: skip_final_snapshot=true/final_snapshot_identifier=null,
+backup0; revisar dados, custo e retenção em T22/T27, sem autorização de remoção.
+
+Backend parcial em [providers.tf](infra/providers.tf) recebe bucket/key/region/
+encrypt/dynamodb_table do output `backend_config` do bootstrap aplicado T16,
+mais profile=default e allowed_account_ids contendo a conta privada conferida.
+Nome da key: `prova-primeiro-bimestre-devops/terraform.tfstate`; bootstrap
+continua com state LOCAL separado. Backend inicializado não implica objeto
+existente: init/plan sem apply deixaram S3 sem esse objeto, state list retornou1.
+T23 deve conferir a gravação efetiva; não criar state artificial para isso.
+
+Com os arquivos privados preparados e credenciais temporárias válidas:
+
+```bash
+terraform fmt -check -recursive infra
+terraform -chdir=infra init -reconfigure -input=false -backend-config=backend.local.hcl -lockfile=readonly
+terraform -chdir=infra validate
+terraform -chdir=infra plan -input=false -lock-timeout=60s -detailed-exitcode -out=infra.tfplan
+```
+
+O plan retorna2 quando há mudanças propostas (0 sem mudanças, 1 erro); conferir
+o código e revisar o plano antes de avançar. Nenhum comando acima faz apply.
+Nesta execução, init usou TF_CLI_CONFIG_FILE temporário0600 com filesystem_mirror
+apontando o cache já instalado em `infra/backend/.terraform/providers`; esse
+arquivo privado está em `/tmp/devops-t21-provider-mirror.tfrc`. Para repetir nesta
+mesma máquina com o mesmo cache, prefixar init com
+`TF_CLI_CONFIG_FILE=/tmp/devops-t21-provider-mirror.tfrc`. Instalação local reportou
+provider não autenticado: hashes do lockfile previamente obtido foram mantidos,
+sem alegar assinatura nova. Não alterar config global/versões para ocultar erros.
+
+[outputs.tf](infra/outputs.tf) define ID/IP EC2, hostname/porta RDS e URL API;
+só porta5432 é conhecida no plano, demais valores dependem do apply e URL não
+comprova serviço. [Locking T21](evidencias/backend-locking.txt) registra o teste
+real: pausa curta no próprio plano com lock observado, segundo plano recusado,
+retomada em finally e liberação natural. Não editar locks manualmente nem usar
+-lock=false. DynamoDB permanece exigido na prova apesar do aviso de depreciação
+na [documentação oficial](https://developer.hashicorp.com/terraform/language/backend/s3).

@@ -50,7 +50,11 @@ fmt/init/validate/grafo/schema 0 e 17 testes mock locais 0 após corrigir confli
 password/manage_master_user_password=false. Capturas preservadas, nenhuma AWS.
 Após revisão, T20 local verificada: EC2/user-data, fmt/init/validate/grafo/schema0,
 10 testes mock e 3 testes Bash/stubs aprovados, correções reais preservadas.
-Próxima pendente T21. State remoto/locking efetivo T21;
+Após revisão, T21 verificada: root composto, fmt/init S3 real/validate/grafo 0,
+plan principal 2 (23 criações/zero alterações/exclusões), JSON/vínculos/tags
+conferidos e locking DynamoDB real com contenção/release. Objeto principal S3
+ainda ausente sem apply: gravação/conferência pendentes T23, R20 parcial.
+Próxima pendente T22, revisão concreta de segurança/custo/autorização;
 principal/EC2/RDS/teardown exigem revisão/autorização separadas.
 
 ## Plano de tarefas pequenas
@@ -82,9 +86,9 @@ Cada tarefa recebe entrada no diário.
 | T18 | T17 | R15, R19 | Implementar security-group com regras separadas e CIDRs explícitos. | fmt/validate; conferir referências sem ciclo, 22/3000 restritas e 5432 só SG EC2. | security-group-validate.txt: fmt inicial 2 corrigido; fmt/init/validate/grafo 0, 14 testes locais mock 0, referências/outputs/schema conferidos; AWS futura. | verificado |
 | T19 | T18 | R17–R19 | Implementar rds com privadas, classe, engine, encriptação e senha sensível. | fmt/validate; DB subnet group privado e outputs sem senha; plano no root composto depois. | rds-validate.txt: fmt/init/validate/grafo/schema 0, conflito real corrigido e 17 testes locais mock aprovados; AWS/SQL futuros. | verificado |
 | T20 | T19 | R13, R16, R19 | Implementar ec2 com AMI/tipo/subnet/SG/profile existente e bootstrap sem segredos. | fmt/validate; revisar user-data, IMDSv2, disco e ausência de IAM novo. | ec2-validate.txt: fmt/init/validate/grafo/schema/bash-n 0, 10 testes Terraform mock + 3 testes de fluxo/stubs aprovados, falhas/correções preservadas; AWS futura. | verificado |
-| T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init real/validate/plan; outputs alimentam inputs; confirmar state remoto/locking e tags. | terraform-validate.txt, terraform-plan.txt, backend-locking.txt; commit módulos. | pendente |
+| T21 | T20 | R19–R22 | Compor root, configurar backend efetivo e gerar plano principal. | fmt/init S3 real/validate/plan; vínculos/tags e locking real; objeto S3 confirmado ausente sem apply, gravação/conferência T23. | terraform-validate.txt/terraform-plan.txt/backend-locking.txt: init/validate 0, plan 2/23 create, contenção 1 esperada e release real; sem apply. | verificado |
 | T22 | T21 | R13–R20, R31 | Apresentar plano principal, revisar segurança/custo e obter autorização de provisionamento. | Checklist humano do plano com conta/região, tipos, SG, subnet, state e IAM. | Diário da revisão/autorização; não marcar deploy verificado. | pendente |
-| T23 | T22 | R14–R18, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos. | aws-rede.txt, aws-rds.txt, aws-seguranca.txt, terraform-outputs.txt. | pendente |
+| T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt, aws-rds.txt, aws-seguranca.txt, terraform-outputs.txt. | pendente |
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt, health-aws.txt; commit deploy. | pendente |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt, rds-crud.txt, aws-seguranca.txt. | pendente |
 | T26 | T25 | R24, R25, R30 | Redigir relatório com contribuição do aluno, a partir do diário/evidências. | Quatro respostas dissertativas de dez linhas cada; IA e ferramentas reais; aluno revisa sua experiência. | relatorio.md, diário; limitações honestas, sem inventar desafios. | pendente |
@@ -659,3 +663,50 @@ root/cópias/lockfile readonly idênticos, sem state/plano/credenciais/API AWS.
 T20 local verificada; R13/R16/R19/R22 parciais, próxima T21 não iniciada. Sem
 bloqueio; suites anteriores inalteradas não repetidas. Um commit real/coerente,
 sem quantidade/por tentativa/push/merge/PR. Boot/Docker/API/AWS efetivos futuros.
+
+## Registro T21 — root, backend S3 e locking reais
+
+T21 executada em 29/09/2026 após revisão do aluno: root infra/main.tf/variables.tf/
+providers.tf/outputs.tf e lockfile real, módulos anteriores preservados. STS atual
+mesma conta terminada5811/default/voclabs/us-east-1; S3 Enabled/AES256/BPA4true,
+DynamoDB ACTIVE/PAY_PER_REQUEST/LockID String. AZs/RDS16.15/db.t3.micro/gp320GiB/
+encriptação/key vockey/LabInstanceProfile-LabRole revalidados. IP atual /32 privado
+somente SSH/API; saldo atual/duração do token/posse da chave/SSH não inferidos.
+AMI concreta ami-048da71c4d98f46b1, AL2023 standard x86_64/HVM/EBS/uefi-preferred/
+root8GiB consultada, compatível com oferta t2.micro/us-east-1a; boot não testado.
+
+fmt/init S3 real/validate/grafo/fmt-check exit0. Provider filesystem_mirror local
+não autenticado nesta instalação, lockfile/hashes T14 preservados, sem nova
+assinatura alegada; nenhuma configuração global alterada. DynamoDB depreciado
+mantido por requisito, avisos reais preservados. Primeiro plan nativo adquiriu
+lock real; SIGSTOP por aproximadamente6s só no PID próprio após observá-lo;
+contender native exit1/ConditionalCheckFailedException/mesmo ID; finally SIGCONT,
+primeiro plan exit2 e item ausente ao final, sem edição manual/force-unlock.
+Falha auxiliar inicial JSONDecodeError antes de iniciar TF: get-item exit0 com
+stdout vazio indica item ausente; leitor corrigido para aceitar ausência, não
+inseriu lock. Captura inicial/correção/reexecução reais em backend-locking.txt.
+
+Plano principal real 23create/0update/0delete (VPC12/SG8/RDS2/EC2 1), JSON privado
+conferido por assertions: vínculos inputs/outputs/tags/segurança/região/AMI/política
+RDS/5outputs sem credenciais. EC2 pública0/SGEC2, RDS privadas/SGRDS,5432 somente
+referência SGEC2;22/3000 só IP atual /32. Proposta skip_final_snapshot=true/backup0
+não autoriza destruir; T22/T27 devem revisar retenção/custo/dados.
+SHA-256 plano: 2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+
+State list exit1/No state file was found e list-objects antes/depois exit0/sem
+objeto: init/backend S3 real e locking comprovados, gravação do state principal
+só primeiro apply T23; R20 continua parcial. Cache .terraform/terraform.tfstate
+é configuração local, não objeto de state de recursos remoto. Não criar vazio/
+state push simulado. T21 aceite de backend/plan/locking verificado; explicitação
+do objeto no aceite T23 mantém requisito R20, não dispensa conferência futura.
+R21 verificado: bootstrap aplicado/conferido antes init real, state local separado.
+R19/R22 continuam parciais até outputs efetivos/AWS/CRUD/verificadores futuros.
+
+Terraform-validate.txt/terraform-plan.txt/backend-locking.txt contêm comandos,
+horários, exit codes, hashes e redação declarada. Tfvars/backendconfig/plano/cache
+ignorados0600 preservados; senha sensitive ainda presente no privado plano/state.
+Sem apply/destroy/IAM novo/EC2/RDS/rede/boot/API/CRUD; sem bloqueio T21.
+T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/custo/
+autorização principal, nenhuma aprovação principal presumida do bootstrap.
+Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
+coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.

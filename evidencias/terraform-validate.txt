@@ -1,0 +1,502 @@
+T21 — execução real em 29/09/2026 (-03:00).
+Terraform=1.16.2 / hashicorp/aws=6.65.0; default/voclabs/conta terminada5811/us-east-1.
+Sem apply/destroy/push; bootstrap anterior preservado.
+Capturas reais incluem comando, horários, exit code e SHA-256 do bruto privado.
+Redação explícita: conta completa, CIDR/IP, username/password e identidade local do lock ocultados; espaços finais normalizados.
+Nenhuma saída de sucesso construída para substituir falha.
+
+Backend S3 principal inicializado DEPOIS do bootstrap aplicado T16; state bootstrap local separado.
+Instalação filesystem_mirror do cache bootstrap com lockfile readonly: provider local não autenticado nesta instalação; hashes assinados preservados do lockfile T14, nenhuma nova verificação de assinatura alegada.
+TF_CLI_CONFIG_FILE=/tmp/devops-t21-provider-mirror.tfrc privado; sem alterar configuração global.
+
+CAPTURA fmt
+{
+  "started": "2026-09-29T08:52:12-03:00",
+  "finished": "2026-09-29T08:52:12-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "ac8760073d733a8de8f2425db7a9962bd76c782af86eea6c13f423fadb0ecc8c"
+}
+infra/main.tf
+
+CAPTURA init
+{
+  "started": "2026-09-29T08:52:12-03:00",
+  "finished": "2026-09-29T08:52:17-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "init",
+    "-reconfigure",
+    "-input=false",
+    "-no-color",
+    "-backend-config=backend.local.hcl",
+    "-lockfile=readonly"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "0d1dfdef1636339f73edf6b650a2f52fee75d41306b7b73970bcb2d0574d7fa4"
+}
+Initializing the backend...
+
+Successfully configured the backend "s3"! Terraform will automatically
+use this backend unless the backend configuration changes.
+
+Initializing modules...
+- vpc in modules/vpc
+- ec2 in modules/ec2
+- rds in modules/rds
+- security_group in modules/security-group
+
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (unauthenticated)
+
+
+Warning: Deprecated Parameter
+
+  on providers.tf line 10, in terraform:
+  10:   backend "s3" {}
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+CAPTURA validate
+{
+  "started": "2026-09-29T08:52:17-03:00",
+  "finished": "2026-09-29T08:52:21-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "validate",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1"
+}
+Success! The configuration is valid.
+
+
+CAPTURA fmt-check
+{
+  "started": "2026-09-29T08:59:16-03:00",
+  "finished": "2026-09-29T08:59:16-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-check",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+
+CAPTURA graph
+{
+  "started": "2026-09-29T08:59:09-03:00",
+  "finished": "2026-09-29T08:59:16-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "graph",
+    "-type=plan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "7e549d6252f468b02e051297a2204db64241aa41c1ccdb343e9cdf337ee29560"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+Grafo real: dependências EC2->VPC/SG/AMI e RDS->privadas/SG conferidas no JSON do plano. Nenhum ciclo relatado.
+
+Preflight READ-ONLY:
+{
+  "checked_at": "2026-09-29T08:49:26-03:00",
+  "exit_code": 0,
+  "aws_identity": "mesma conta terminada5811/default/voclabs/us-east-1 (STS anterior0)",
+  "backend": "bucket próprio us-east-1/Enabled/AES256/BPA4true; tabela ACTIVE/PAY_PER_REQUEST/LockID String",
+  "state_key_before": "nenhum objeto, não sobrescrever state existente",
+  "azs": [
+    "us-east-1a",
+    "us-east-1b"
+  ],
+  "rds": "16.15/db.t3.micro/gp3/20GiB/encriptação ofertados nas duas AZs",
+  "key_profile": "vockey e LabInstanceProfile/LabRole existentes; posse da chave/SSH não testados",
+  "ami": {
+    "id": "ami-048da71c4d98f46b1",
+    "name": "al2023-ami-2023.12.20260928.0-kernel-6.12-x86_64",
+    "creation_date": "2026-09-24T19:35:33.000Z",
+    "owner": "amazon",
+    "architecture": "x86_64",
+    "virtualization": "hvm",
+    "root_type": "ebs",
+    "boot_mode": "uefi-preferred",
+    "root_size_gib": 8
+  },
+  "t2": "x86_64/t2.micro ofertada em us-east-1a; boot não testado",
+  "cidrs": "IP IPv4 atual consultado por HTTPS; SSH/API somente esse /32 conforme decisão do aluno, valor privado",
+  "capture_names": [
+    "bucket-location",
+    "bucket-versioning",
+    "bucket-encryption",
+    "bucket-public-access",
+    "lock-table",
+    "state-objects-before",
+    "azs",
+    "rds-options",
+    "key-pair",
+    "instance-profile",
+    "ami-candidates",
+    "t2-type",
+    "t2-offerings"
+  ],
+  "resources": "nenhuma criação/alteração/exclusão nesta consulta; sem IAM novo"
+}
+
+CAPTURA bucket-location
+{
+  "started": "2026-09-29T08:49:01-03:00",
+  "finished": "2026-09-29T08:49:03-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-bucket-location",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "c91914411f90553792f3dfb1803f7c51ada8a48fadfb74f817af5f86a8b061ff"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA bucket-versioning
+{
+  "started": "2026-09-29T08:49:03-03:00",
+  "finished": "2026-09-29T08:49:04-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-bucket-versioning",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e0d7fcfe6b2ca7b3376e1af42cfbf309d2ee91d4cd664565f9b73c4816079f22"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA bucket-encryption
+{
+  "started": "2026-09-29T08:49:04-03:00",
+  "finished": "2026-09-29T08:49:06-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-bucket-encryption",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "9dcbf5a9219555f282511d108aea0d88f078e8824b9fdd397160394bd3c2a213"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA bucket-public-access
+{
+  "started": "2026-09-29T08:49:06-03:00",
+  "finished": "2026-09-29T08:49:08-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-public-access-block",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "31f1f0a092cfdc6587c931923da09fc537545478aca3c5dcc2c060b73a91e4d9"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA lock-table
+{
+  "started": "2026-09-29T08:49:08-03:00",
+  "finished": "2026-09-29T08:49:09-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "describe-table",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "8583f685c05d80db11f2637afcd70144e56dbc46622079a33473fadc1049cfbf"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA state-objects-before
+{
+  "started": "2026-09-29T08:49:09-03:00",
+  "finished": "2026-09-29T08:49:11-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "list-objects-v2",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--prefix",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b8af8fb7fe480d1c546cdb609cfe1da54d6c711adb29b82bceff09a0c8be54a3"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA azs
+{
+  "started": "2026-09-29T08:49:11-03:00",
+  "finished": "2026-09-29T08:49:13-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-availability-zones",
+    "--filters",
+    "Name=state,Values=available",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "82b08dff397ef6149ce42979053f874a56bbca5fa3c32233e0a2b73da00dd957"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA rds-options
+{
+  "started": "2026-09-29T08:49:13-03:00",
+  "finished": "2026-09-29T08:49:15-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "describe-orderable-db-instance-options",
+    "--engine",
+    "postgres",
+    "--engine-version",
+    "16.15",
+    "--db-instance-class",
+    "db.t3.micro",
+    "--vpc",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "907bd7a56d44c493e22a260fc087fce1efdb0b7df42bf0d88183c79c745b64b9"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA key-pair
+{
+  "started": "2026-09-29T08:49:15-03:00",
+  "finished": "2026-09-29T08:49:17-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-key-pairs",
+    "--key-names",
+    "vockey",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "84861f4efd186a6a8fa834dfcfa347da63807c9f0b7ae274760d90442950d804"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA instance-profile
+{
+  "started": "2026-09-29T08:49:17-03:00",
+  "finished": "2026-09-29T08:49:19-03:00",
+  "command": [
+    "aws",
+    "iam",
+    "get-instance-profile",
+    "--instance-profile-name",
+    "LabInstanceProfile",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "79a6a6e935425a052b2049fbadc0692082a8762b5d5e74d089de291288d7e79e"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA ami-candidates
+{
+  "started": "2026-09-29T08:49:19-03:00",
+  "finished": "2026-09-29T08:49:21-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-images",
+    "--owners",
+    "amazon",
+    "--filters",
+    "Name=name,Values=al2023-ami-2023.*-x86_64",
+    "Name=architecture,Values=x86_64",
+    "Name=virtualization-type,Values=hvm",
+    "Name=root-device-type,Values=ebs",
+    "Name=state,Values=available",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "58cc50037ad4b1d9d66d3a5dad7d5ba3994fbb4d559708ee7cd0f1d90328297e"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA t2-type
+{
+  "started": "2026-09-29T08:49:21-03:00",
+  "finished": "2026-09-29T08:49:24-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instance-types",
+    "--instance-types",
+    "t2.micro",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "a7ab2b5d2d07ba211c71c7b1578fc35f03428c3436d0280ba72d70689497482f"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA t2-offerings
+{
+  "started": "2026-09-29T08:49:24-03:00",
+  "finished": "2026-09-29T08:49:26-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instance-type-offerings",
+    "--location-type",
+    "availability-zone",
+    "--filters",
+    "Name=instance-type,Values=t2.micro",
+    "Name=location,Values=us-east-1a",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "2a8857106bdbb4cf730dab2c1e59fbe5eb741eede51ecb62e8515ed26f47e81d"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+CAPTURA sts
+{
+  "started": "2026-09-29T08:47:11-03:00",
+  "command": [
+    "aws",
+    "sts",
+    "get-caller-identity",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "finished": "2026-09-29T08:47:13-03:00",
+  "exit_code": 0,
+  "raw_sha256": "b00b74d61f79ed7e408e0321ab46f4ce5c91f07626bcab4ad25633c40ee37365"
+}
+[Saída integral privada preservada; resumo conferido abaixo.]
+
+STS validou a mesma conta privada/voclabs; nenhuma credencial impressa. Saldo atual do painel e tempo restante do token não consultados/inferidos.
