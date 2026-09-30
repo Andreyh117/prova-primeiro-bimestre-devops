@@ -1,0 +1,63 @@
+T27 — revisão de evidências e tentativa de plano destroy (bloqueada)
+Data/hora: 2026-09-29T21:28:53-03:00
+Região: us-east-1; perfil: default/role voclabs; conta STS terminada em 5811.
+Nenhum ID completo de conta, credencial, state, plano binário ou senha publicado.
+
+Escopo autorizado nesta tarefa: consultas read-only, revisão e plan -destroy.
+NÃO executado: apply, destroy, alteração de IAM/SCP, lock=false, refresh=false,
+force-unlock, remoção de snapshot, backend ou dados.
+
+Arquivos privados conferidos: infra/terraform.tfvars.json e
+infra/backend.local.hcl existem com modo 0600; Terraform 1.16.2. tfvars atual
+indica skip_final_snapshot=true e final_snapshot_identifier=null; senha não
+foi exibida. Código do módulo RDS configura backup_retention_period=0,
+delete_automated_backups=true, deletion_protection=false, gp3/20 GiB.
+Essa configuração é PROPOSTA para o Lab, não autorização de exclusão.
+
+Preflight real: aws sts get-caller-identity --profile default --region us-east-1
+retornou exit 0, mesma conta terminada em 5811 e role voclabs.
+Comando real: terraform -chdir=infra plan -destroy -input=false -no-color
+-lock-timeout=60s -detailed-exitcode -var-file=terraform.tfvars.json
+-out=destroy-t27.tfplan
+Resultado: exit 1, antes de gerar plano. DynamoDB PutItem e GetItem no locking
+retornaram AccessDeniedException. Nenhum destroy-t27.tfplan foi criado.
+Saída bruta privada em /tmp/prova-t27-destroy-plan.raw, modo 0600; não copiar
+para Git. Não desabilitar locking para forçar o plano.
+
+Diagnóstico read-only adicional: aws dynamodb describe-table exit 254/
+AccessDeniedException; aws ec2 describe-instances exit 254/
+UnauthorizedOperation; aws rds describe-db-instances exit 254/AccessDenied.
+STS exit 0 sozinho não prova permissões de serviço; causa exata da negação
+não foi comprovada. Pode ser sessão temporária cancelada/limitada; renovar
+credenciais do Learner Lab e revalidar antes de repetir. Estado corrente dos
+recursos, locks e dados não pôde ser confirmado nesta execução.
+
+Revisão documental real: 12 evidências T16/T21/T23/T24/T25 necessárias existem
+e estão rastreadas no Git: backend.txt, backend-locking.txt,
+terraform-plan.txt, aws-rede.txt, aws-rds.txt, aws-seguranca.txt,
+terraform-outputs.txt, ec2-deploy.txt, health-aws.txt, api-aws.txt,
+rds-crud.txt e aws-retomada-t25.txt. Padrões conhecidos de chave privada,
+AWS access key, atribuição de secret e Bearer token: zero arquivos detectados
+nesse conjunto. A busca não substitui revisão final completa de segredos.
+As evidências históricas confirmam backend/locking, apply, deploy e CRUD/SQL;
+NÃO são um plano destroy atual nem comprovam a situação AWS neste momento.
+
+Política para decisão após plano válido: a configuração atual pula snapshot
+final e exclui backups automatizados, portanto a exclusão do RDS apagaria os
+dados sem ponto final de restauração. Dados de teste foram limpos em T25,
+mas não foi possível consultar agora se há outros dados/snapshots. Se o aluno
+preferir retenção, configurar identificador de snapshot final explícito,
+gerar novo plano e revisar custo contínuo de armazenamento; não criar snapshot
+silenciosamente. O backend S3/DynamoDB fica ativo durante o destroy principal.
+Teardown do backend e suas versões é separado em T29/T30.
+
+Fontes oficiais consultadas nesta tarefa:
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html
+https://aws.amazon.com/rds/postgresql/pricing/
+https://developer.hashicorp.com/terraform/cli/run
+
+Próximo passo: renovar localmente access key/secret key/session token do perfil
+default (não enviar valores pelo chat); conferir STS e permissões DDB/EC2/RDS,
+lock e recursos; repetir plan -destroy com backend ativo, inspecionar JSON
+sanitizado/contagem/IDs/política de dados/custo e apresentar o plano concreto
+para decisão específica. T27 permanece BLOQUEADA até esses aceites.

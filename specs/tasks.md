@@ -97,7 +97,7 @@ Cada tarefa recebe entrada no diário.
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt/health-aws.txt: build/11 testes/SSH/TLS/schema/repetição/reboot e três HTTP200 reais; falhas corrigidas preservadas. | verificado |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt/rds-crud.txt/aws-retomada-t25.txt:10testes0, positivoAWS0/SQLTLS/restartID3, negativo1/limpeza/sentinela reais; backend/EC2/state recuperados, bloqueio histórico preservado. | verificado |
 | T26 | T25 | R24, R25, R30 | Redigir a parte factual do relatório a partir do diário/evidências; contribuição pessoal adiada para T30A por decisão do aluno. | Quatro respostas dissertativas de dez linhas cada; IA/ferramentas reais e pendências explícitas, sem atribuir experiência pessoal. | relatorio.md e diário; estrutura 4 × 10, conteúdo factual cotejado e git diff --check aprovados; R25 ainda parcial. | verificado |
-| T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | Diário, checklist e plano de destroy sanitizado. | pendente |
+| T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | teardown-revisao.txt: 12 evidências auditadas, STS0 mas lock DDB/EC2/RDS negados, plan exit1 sem arquivo; plano/autorização ainda pendentes. | bloqueada |
 | T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
 | T29 | T28 | R23, R31 | Preparar limpeza backend, listar versões/delete markers e explicar retenção/state. | Conferir principal encerrado, state bootstrap disponível e nenhum lock ativo; obter autorização de escopo separado. | Diário e plano/checklist backend-teardown. | pendente |
 | T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza só do projeto: destroy quatro managed bootstrap pelo state local e exclusão CLI do bucket externo vazio autorizada; registrar sobras/falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
@@ -861,3 +861,17 @@ a contribuição e revisão pessoais agora compõem T30A, antes da checagem fina
 R25 permanece em andamento até T30A; T31 depende de T30A, e T27 é a próxima
 tarefa. As menções históricas a T26 acima registram o estado anterior ao ajuste.
 Isto não elimina as autorizações específicas de destroy previstas em T27/T29.
+
+## T27 — tentativa e bloqueio por credenciais em 29/09/2026
+
+Evidências T16/T21/T23/T24/T25 foram conferidas no Git (12 arquivos) e uma
+varredura limitada de padrões de segredos não encontrou chave/token nesses
+arquivos. tfvars/backend privados0600; STS0 confirmou perfil default/voclabs/
+conta terminada5811. `terraform plan -destroy` terminou1 ao obter lock: DDB
+PutItem/GetItem AccessDeniedException; nenhum plano foi criado. Consultas AWS
+read-only DDB/EC2/RDS também negadas (254). Não usar -lock=false/refresh=false,
+nem tomar STS0 como credencial suficiente. T27 fica bloqueada, R23 pendente.
+Dados/snapshot ainda exigem decisão após plano concreto; nenhum apply/destroy
+executado. Registro sanitizado: evidencias/teardown-revisao.txt; bruto privado
+0600 em /tmp. Usuário foi solicitado a renovar credenciais localmente, sem
+enviá-las no chat. T28 não inicia antes do aceite integral T27.

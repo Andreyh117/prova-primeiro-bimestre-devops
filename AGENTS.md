@@ -561,3 +561,18 @@ linhas de conteúdo cada, verificadas localmente; `relatorio.md` ainda explicita
 as lacunas pessoais. R25 continua parcial. Próxima tarefa T27. Não solicitar
 o relato novamente até T30A ou pedido do aluno. Preservar a necessidade de
 revisão/autorização concreta do destroy em T27/T29 e não avançar T31 sem T30A.
+
+## Estado mais recente — T27 bloqueada por acesso AWS
+
+Em 29/09/2026, após T26 factual, T27 auditou 12 evidências e tentou o
+`terraform plan -destroy` com locking normal. STS default/voclabs/us-east-1
+confirmou conta do Lab terminada5811, mas DDB PutItem/GetItem negados; plano
+exit1/arquivo ausente. DDB DescribeTable, EC2 DescribeInstances e RDS
+DescribeDBInstances read-only também negados. Evidência sanitizada em
+`evidencias/teardown-revisao.txt`; bruto privado0600 em /tmp. Sem apply,
+destroy, -lock=false, refresh=false ou consulta atual comprovada dos recursos.
+T27 bloqueada/R23 pendente; não avançar T28. Aguardar renovação local das
+credenciais pelo aluno, revalidar permissões e gerar plano concreto antes de
+pedir autorização específica para apagar dados/recursos. Snapshot atual
+configurado para pular, sem consentimento de descarte. T30A pessoal permanece
+pendente antes de T31.

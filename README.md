@@ -1166,3 +1166,13 @@ de dez linhas de conteúdo conferidas localmente. Por pedido do aluno, a
 contribuição pessoal e sua revisão ficam na tarefa pendente T30A, antes do
 checklist final T31. R25 permanece parcial. Próxima tarefa: **T27**. Sem
 destroy, push, merge ou PR nesta etapa; recursos ativos podem consumir créditos.
+
+### Estado T27 — plano de destruição bloqueado
+
+A revisão local de 12 evidências e de padrões conhecidos de segredos está em
+[evidencias/teardown-revisao.txt](evidencias/teardown-revisao.txt). STS confirmou
+a conta do Lab, mas DynamoDB recusou o lock e EC2/RDS recusaram consultas;
+`plan -destroy` saiu 1 sem gerar plano. T27 permanece bloqueada, R23 pendente.
+Renovar as credenciais temporárias do perfil default localmente, revalidar
+acessos e então gerar/revisar o plano antes de decidir descarte ou retenção de
+snapshot. Nenhum destroy ou autorização de dados foi inferido.

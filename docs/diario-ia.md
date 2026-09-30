@@ -1659,3 +1659,29 @@ Revisão do stage T26: `git diff --cached --check` detectou três espaços
 finais no cabeçalho de `relatorio.md` (exit 2). Removidos e stage refeito;
 a checagem seguinte retornou exit 0. Seis arquivos documentais revisados,
 sem códigos, credenciais ou recursos AWS alterados.
+
+## T27 — tentativa de plan -destroy e bloqueio real (29/09/2026)
+
+Prompt: executar a próxima tarefa, validar/corrigir e registrar resultados sem
+simular sucesso. Revisei AGENTS, T27, R23/R31, D14, código do RDS e 12 arquivos
+de evidência Git. Busca limitada por formatos de chave privada, access key,
+atribuição de secret e Bearer token encontrou zero arquivos entre esses 12;
+não é auditoria exaustiva. Fontes oficiais AWS RDS delete/pricing e fluxo
+Terraform foram consultadas pelo navegador; links na evidência.
+
+STS default/us-east-1/voclabs/conta terminada5811 exit0; tfvars/backend0600,
+skip_final_snapshot=true/final_identifier=null, sem exibir senha. `terraform
+-chdir=infra plan -destroy ... -out=destroy-t27.tfplan` exit1 em 3,7s:
+DDB PutItem/GetItem AccessDeniedException, antes do plano; nenhum arquivo
+criado. Bruto privado0600 em /tmp; resumo sanitizado em teardown-revisao.txt.
+DDB DescribeTable254/AccessDeniedException, EC2 DescribeInstances254/
+UnauthorizedOperation, RDS DescribeDBInstances254/AccessDenied. A causa
+exata da negação não foi comprovada; não desabilitar locking nem forçar
+refresh. Nenhum apply/destroy/recurso alterado.
+
+Política RDS atual propõe descartar sem snapshot e com backup0, mas apagar
+dados depende de revisão concreta e autorização após plan válido. STS0 não
+comprova permissões de serviço nem estado atual dos recursos. Solicitei ao
+aluno renovação local das credenciais temporárias, sem enviar valores. T27
+bloqueada e T28 pendente. Próximo passo: revalidar DDB/EC2/RDS, gerar plano,
+conferir ações/snapshot/custo e apresentar autorização específica.
