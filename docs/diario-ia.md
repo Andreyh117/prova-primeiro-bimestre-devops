@@ -1758,3 +1758,68 @@ primeiro procurou prefixo `| R23 |` em vez do cabeçalho real `| R23 /`;
 depois encontrou um espaço final na linha de backup automático de
 aws-pos-destroy.txt. Prefixo e espaço corrigidos, sem alterar resultados
 AWS ou o log bruto; checagem repetida abaixo.
+
+
+## T29 — inventário e plano do backend (29/09/2026)
+
+Prompt: executar a próxima tarefa, validar/corrigir, registrar evidências reais.
+Git inicial limpo/feat/api-reservas, HEAD 307d6f4; AGENTS, T29/R23/R31/D14
+revisados. Consulta STS confirmou voclabs/us-east-1 e conta completa do Lab
+contra tfvars privado; apenas sufixo 5811 registrado. `terraform state pull`
+principal exit0/zero recursos e outputs; state local bootstrap0600/quatro
+managed. Cópias finais T28 0600 foram verificadas e seus hashes anotados em
+backend-teardown.txt; não movidas para Git.
+
+Consultas read-only S3: bucket próprio versionado, AES256, BPA4true, tags;
+head-object presente. list-object-versions retornou seis versões da única
+chave de state, zero delete markers, 257210 bytes; list-objects-v2/Contents
+confirmou um objeto atual, uploads multipart0. A primeira contagem local
+leu KeyCount ausente como zero. Foi falha do parser do inventário, não do S3;
+repeti head-object e ambas listagens, e corrigi o registro para um objeto.
+Manifesto exato de versões foi salvo privado/0600 em /tmp, com hash na evidência.
+DynamoDB ACTIVE/on-demand/LockID String; scan mostrou apenas checksum-md5,
+sem Info/lock observado no instante.
+
+`terraform -chdir=infra/backend plan -destroy -input=false -no-color
+-detailed-exitcode -var-file=terraform.tfvars -out=backend-destroy-t29.tfplan`
+saiu2: zero add/update, quatro deletes. `show -json` saiu0, somente tabela
+e três configurações S3. Bucket físico não gerenciado por Terraform após
+limitação SCP T16; planejar exclusão CLI somente após remover versões.
+Plano/binário/bruto0600 ignorados, hash e endereços em backend-teardown.txt.
+O editor isolado falhou ao gravar a evidência (`mountinfo path is not absolute`);
+o terminal autorizado gravou o mesmo conteúdo. Não houve apply, delete,
+push, merge ou PR. T29 em andamento até autorização específica para o backend;
+T30 não iniciada. O uso restante pode consumir créditos do Learner Lab.
+
+
+## T29/T30 — decisão recebida, preflight e limpeza real (29/09/2026)
+
+O aluno respondeu “Sim, autorizo esse escopo de limpeza” à pergunta concreta
+sobre seis versões do único state S3, quatro exclusões Terraform e bucket
+físico, na conta Lab terminada5811/us-east-1. A autorização anterior do
+principal não foi reutilizada para o backend. Git inicial continha somente
+os documentos T29 ainda não commitados; nenhum arquivo/segredo anterior foi
+sobrescrito. Plano e manifesto mantinham os hashes da revisão.
+
+Preflight falhou primeiro por assertiva textual errada do ARN (o real contém
+assumed-role/voclabs/..., não termina em /voclabs). Corrigida a validação;
+uma segunda assertiva falhou porque o LockID checksum inclui prefixo do
+bucket antes da chave de state. Scan mostrou só LockID/Digest com sufixo -md5,
+sem Info. Após corrigir, preflight completo exit0 confirmou STS/conta, state
+principal0, bootstrap4, seis versões idênticas/zero markers, um objeto atual,
+DDB sem lock e plano quatro deletes. Nenhuma exclusão ocorreu durante falhas.
+
+AWS CLI delete-object --version-id para cada uma das seis versões autorizadas:
+seis retornos0 e VersionId correspondente; list-object-versions e
+list-objects-v2 ficaram zero. Log privado0600/hash em backend-teardown.txt.
+Terraform apply do plano binário aprovado exit0, quatro Destroying/quatro
+Destruction complete, 0 add/change/4 destroy/zero Error. State list local
+exit0/sem endereços. Não usei -auto-approve nem -lock=false.
+
+Com state bootstrap0, bucket verificado vazio/sem uploads e tags próprias,
+AWS CLI delete-bucket com expected owner exit0. Depois, head-bucket404 e
+list-buckets sem nome; DynamoDB ResourceNotFoundException e list-tables sem
+nome. Cópias privadas dos states T28 preservadas/hash conferido. Evidência
+sanitizada, comandos/resultados e limites em backend-teardown.txt. T29/T30
+verificadas; R23/R31 fechados. Relatório factual atualizado com resultado
+real, mas experiência pessoal continua pendente T30A. Sem push/merge/PR.

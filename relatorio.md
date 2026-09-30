@@ -59,6 +59,6 @@ A T25 executou seis rotas com leitura e escrita SQL por TLS no RDS.
 Uma reserva persistiu após reiniciar apenas o serviço da API e criar outro contêiner da mesma imagem.
 O teste negativo detectou divergência deliberada no SQL, retornou erro e limpou somente seu registro.
 Uma reserva sentinela distinta foi preservada durante o teste e removida separadamente ao final.
-A infraestrutura principal foi destruída e conferida em T28; backend, revisão final, merge e PR presencial pertencem às próximas tarefas.
+A infraestrutura principal foi destruída em T28; seis versões de state e o backend S3/DynamoDB foram removidos e conferidos em T30.
 
 **Revisão pessoal pendente:** confirmar a descrição e acrescentar a visão do aluno sobre validação e responsabilidade.

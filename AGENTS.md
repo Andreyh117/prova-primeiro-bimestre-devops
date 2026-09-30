@@ -618,3 +618,37 @@ versionado continua ativo, lock ausente no scan; NÃO foi apagado. T28
 verificada, R23 parcial, T29 próxima: revisar versões/delete markers,
 retenção e obter autorização separada do backend antes de T30. Relatório
 factual atualizado, T30A manual ainda pendente. Sem push/merge/PR.
+
+
+## Estado mais recente — T29 preparada, decisão backend pendente
+
+Em 29/09/2026, T29 inventariou conta Lab/voclabs/us-east-1, principal state0,
+bootstrap local4 managed/cópias privadas0600; bucket com uma chave/um objeto
+atual, seis versões/zero markers/257210 bytes, DynamoDB ACTIVE com apenas
+checksum-md5 e sem lock observado. Uma primeira contagem de objeto atual0
+foi erro de parser de KeyCount omitido; head-object/Contents confirmaram1.
+Plan -destroy bootstrap exit2/quatro deletes: tabela e configurações S3 de
+BPA/encriptação/versionamento; binário privado0600, hash/evidência em
+backend-teardown.txt. Bucket físico permanece externo ao state managed por
+SCP T16, exigindo CLI após apagar versões. Nenhuma exclusão ocorreu em T29.
+Aguardar autorização específica para perda permanente das seis versões,
+quatro recursos managed e bucket físico antes de T30; revalidar inventário e
+lock imediatamente antes. Se divergir, parar e rever. Não tocar em IAM,
+force_destroy, -lock=false nem state privado antes da auditoria final.
+
+
+## Estado mais recente — T29/T30 verificadas, backend removido
+
+Aluno autorizou explicitamente o escopo T30 apresentado em T29. Em 29/09/2026,
+preflight confirmou conta Lab/voclabs/us-east-1, principal0, bootstrap4,
+manifesto de seis versões S3 idêntico/zero markers e DDB somente checksum sem
+lock. Duas assertivas preparatórias falharam por formato do ARN e prefixo do
+LockID, corrigidas antes de qualquer mutação; preflight final0. Seis
+`delete-object --version-id` retornaram0 e listagem ficou vazia; apply do
+plano Terraform aprovado retornou0/4 destroyed/0 add/change; bootstrap state
+list0. Bucket próprio vazio/tags conferidos e delete-bucket CLI0. Pós-consultas:
+S3 head404/ausente list-buckets, DDB ResourceNotFound/ausente list-tables.
+States privados T28 mantidos fora do Git; logs privados0600, hashes e resumo
+sanitizado em backend-teardown.txt; R23/R31 verificados. Relatório factual
+atualizado. Próxima T30A: obter relato pessoal do aluno e sua revisão antes
+de T31; não inventar vivências. T31/T32/T33/PR ainda não feitos.

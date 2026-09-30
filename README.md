@@ -550,7 +550,7 @@ Na limpeza futura T29/T30, obtenha autorização separada, destrua primeiro a
 infra dependente, preserve states e confira locks/versões. Elimine somente
 versões/delete markers do bucket próprio autorizados. Destroy bootstrap deve
 remover quatro managed; NÃO remove bucket físico. Remoção do bucket vazio será
-por CLI, com ownership/região conferidos e registro real. Teardown não executado.
+por CLI, com ownership/região conferidos e registro real. Teardown do bootstrap não executado nesta etapa.
 
 ### Revisão concreta e custo do bootstrap — T15
 
@@ -1211,3 +1211,45 @@ S3/DynamoDB/backend e versões de state continuam ativos para T29/T30;
 **T29 é a próxima tarefa** e requer revisão/autorização separada antes de
 qualquer exclusão do backend. Cópias privadas dos states ficam fora do Git.
 R23 permanece parcial até a limpeza do backend.
+
+
+### T29 — inventário e plano de limpeza do backend
+
+Na conta do Learner Lab terminada em 5811, `us-east-1`, o state principal
+permanece vazio. O bucket privado contém **um objeto atual e seis versões** da
+chave de state (257210 bytes no total), sem delete markers; a tabela de lock
+está ativa e a leitura encontrou apenas o item de checksum, sem lock ativo
+observado. O state local do bootstrap tem quatro recursos managed. O
+`plan -destroy` retornou exit 2 com **quatro exclusões**: tabela DynamoDB,
+versionamento, encriptação e bloqueio público do S3. O bucket físico está fora
+do state managed e exige exclusão CLI separada após remover todas as versões.
+O plano, inventário e correção de uma primeira contagem incorreta estão em
+[evidencias/backend-teardown.txt](evidencias/backend-teardown.txt). Manifesto,
+plano binário e cópias de state ficam privados fora do Git.
+
+A limpeza irreversível do histórico remoto requer autorização **separada**:
+revalidar conta/state/lock/versões; apagar somente as seis versões da chave
+deste projeto; aplicar o plano de quatro exclusões; apagar o bucket físico
+vazio; conferir ausência de S3/DynamoDB. Se o inventário mudar, revisar antes
+de excluir. T29 está em andamento aguardando essa decisão; T30 não começou.
+Enquanto o backend existir, pode consumir créditos do Lab. Nenhum saldo atual
+ou custo real foi medido nesta tarefa.
+
+
+### T30 — backend removido no Learner Lab
+
+O aluno autorizou separadamente a perda das seis versões de state, a remoção
+dos quatro recursos do bootstrap e a exclusão do bucket físico. O preflight
+reconfirmou conta terminada em 5811, `us-east-1`, state principal vazio,
+manifesto de versões idêntico, apenas checksum no DynamoDB e hash do plano.
+Seis `delete-object --version-id` retornaram sucesso; a listagem passou a
+zero versões, marcadores e objetos. O `terraform apply` do plano salvo retornou
+**0 added, 0 changed, 4 destroyed**; o state local do bootstrap ficou vazio.
+O bucket próprio foi excluído por CLI após conferir que estava vazio.
+`head-bucket` retornou 404, e a tabela DynamoDB retornou
+`ResourceNotFoundException`; ambos também estavam ausentes das listas da
+conta. Detalhes, falhas corrigidas nos verificadores e hashes dos logs privados
+estão em [evidencias/backend-teardown.txt](evidencias/backend-teardown.txt).
+Cópias privadas dos states permanecem fora do Git para auditoria. T29/T30
+estão verificadas; T30A, a contribuição pessoal do aluno ao relatório, é a
+próxima tarefa. Nenhum push, merge ou PR ocorreu nesta etapa.
