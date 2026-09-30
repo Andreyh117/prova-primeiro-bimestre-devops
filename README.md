@@ -1176,3 +1176,24 @@ a conta do Lab, mas DynamoDB recusou o lock e EC2/RDS recusaram consultas;
 Renovar as credenciais temporárias do perfil default localmente, revalidar
 acessos e então gerar/revisar o plano antes de decidir descarte ou retenção de
 snapshot. Nenhum destroy ou autorização de dados foi inferido.
+
+### T27 — plano disponível para decisão
+
+Após renovar a sessão, STS/DynamoDB/EC2/RDS responderam. O plano privado
+`infra/destroy-t27.tfplan` (ignorado/0600) propõe somente 23 exclusões
+da infraestrutura principal; hash e revisão sanitizada em
+[evidencias/teardown-revisao.txt](evidencias/teardown-revisao.txt). O backend
+S3/DynamoDB permanece ativo. O RDS seria apagado sem snapshot final; uma
+consulta atual de linhas não foi possível pela API. T27 aguarda decisão
+específica do aluno sobre dados/snapshot e autorização deste plano; T28 não
+foi iniciada.
+
+### T27 — autorização recebida
+
+O aluno autorizou explicitamente excluir os dados do RDS sem snapshot final
+e os 23 recursos da infraestrutura principal revisada. Um segundo plano
+confirmou os mesmos endereços, ações, IDs e política de snapshot do plano
+aprovado; detalhes e hashes em
+[evidencias/teardown-revisao.txt](evidencias/teardown-revisao.txt). T27 está
+verificada, T28 é a próxima tarefa. Backend S3/DynamoDB e versões de state
+permanecem fora deste escopo. Nenhum destroy havia sido feito ao fechar T27.

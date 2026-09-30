@@ -61,3 +61,80 @@ default (não enviar valores pelo chat); conferir STS e permissões DDB/EC2/RDS,
 lock e recursos; repetir plan -destroy com backend ativo, inspecionar JSON
 sanitizado/contagem/IDs/política de dados/custo e apresentar o plano concreto
 para decisão específica. T27 permanece BLOQUEADA até esses aceites.
+
+T27 — retomada após renovação do Learner Lab (2026-09-29T21:41:01-03:00)
+
+Reteste read-only: STS0 conta terminada5811/role voclabs/us-east-1;
+DynamoDB DescribeTable0/ACTIVE, EC2 DescribeInstances0/running e
+RDS DescribeDBInstances0/available. O bloqueio anterior permanece acima
+como histórico, não como estado atual. Git estava limpo antes da retomada.
+
+Terraform plan -destroy real, backend remoto S3+DynamoDB com locking normal:
+comando: terraform -chdir=infra plan -destroy -input=false -no-color
+-lock-timeout=60s -detailed-exitcode -var-file=terraform.tfvars.json
+-out=destroy-t27.tfplan
+exit2 esperado, 16,9s; Plan: 0 to add, 0 to change, 23 to destroy.
+Plano binário ignorado/0600 em infra/destroy-t27.tfplan, SHA-256
+bc76e83d340fe0bb00c925c5eb9e8afa3a3ae0aee2daa57fe268a6b8560925b2.
+Saída bruta em /tmp/prova-t27-destroy-plan.raw 0600. Terraform show -json
+exit0; inspeção programática de 23 resource_changes: todas action=[delete],
+nenhuma create/update/read planejada nesse conjunto. Cinco outputs removidos.
+Sem apply/destroy; nenhum plano bruto/JSON/state ou segredo versionado.
+
+Composição exata das 23 exclusões: 1 EC2, 1 RDS PostgreSQL, 1 DB subnet
+group, 1 VPC, 4 subnets, 1 internet gateway, 2 route tables, 4 associações,
+2 security groups, 3 regras ingress e 3 regras egress. Instância EC2
+i-0f4b59a8181537b78 tem disco raiz encriptado de 8 GiB com
+delete_on_termination=true. RDS prova-6325231-rds é PostgreSQL16.15/
+db.t3.micro/gp3 20 GiB, privado e encriptado. 19 recursos conferidos com tags
+Project/Owner do projeto; as quatro associações de rota não têm tags no JSON;
+zero tags conflitantes. Nenhum recurso S3/DynamoDB/IAM no plano.
+
+Política de dados no plano e na consulta RDS atual: skip_final_snapshot=true,
+final_snapshot_identifier=null, backup_retention_period=0,
+delete_automated_backups=true, deletion_protection=false. Consulta
+DescribeDBSnapshots0 encontrou 0 snapshots associados; consulta de backups
+automatizados retornou DBInstanceAutomatedBackupNotFound. Um GET somente
+leitura a /reservas falhou com URLError (acesso HTTP /32 ou rede não
+diagnosticados); NÃO há contagem atual de linhas nem prova de banco vazio.
+A evidência T25 registra limpeza dos registros criados pelo próprio teste,
+mas não substitui decisão sobre quaisquer outros dados.
+
+Backend preservado: bucket S3 versioning Enabled, objeto de state existente
+com VersionId e AES256; tabela DynamoDB ACTIVE. Scan read-only retornou
+um item de checksum -md5/Digest e nenhum item com Info/lock no momento da
+consulta. Backend físico e versões de state continuam para T29/T30, após o
+principal. A sessão atual respondeu às leituras; expiração futura desconhecida.
+
+Custo e escolha: cenário histórico T22 estimou ~US$0,94/24h para principal
+mais backend em uso; não é saldo/fatura/preço garantido agora. Excluir EC2/RDS
+encerra as respectivas cobranças após a conclusão; S3/DynamoDB continuarão
+até seu teardown separado. O plano atual não cria snapshot final e apagaria
+definitivamente os dados RDS sem esse ponto de recuperação. Retê-lo exigiria
+identificador explícito, novo plano e armazenamento potencialmente cobrado.
+Nenhuma das opções foi autorizada especificamente após este plano.
+Fontes oficiais: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html
+https://aws.amazon.com/rds/postgresql/pricing/
+
+Próximo passo: apresentar conta/região/hash/23 recursos/política/custo ao
+aluno e obter decisão específica sobre descarte sem snapshot ou retenção.
+Se houver alteração de política, gerar novo plano; antes de qualquer T28,
+revalidar credenciais, state/lock/drift e autorização correspondente.
+
+T27 — autorização específica e plano de confirmação (2026-09-29T22:05:57-03:00)
+
+Após apresentação do plano SHA-256 bc76e83d...e0925b2 e seus 23 deletes,
+conta/região/custo/dados, o aluno respondeu: "autorizo excluir sem snapshot".
+Escopo: somente principal (EC2/disco raiz, RDS/dados, VPC/rede/SGs), sem
+snapshot final. Backend S3/DDB e versões de state não autorizados nesta etapa.
+Preflight antes de T28: STS conta completa comparada ao tfvars sem divulgar,
+role voclabs/us-east-1; DDB ACTIVE, EC2 running, RDS available, snapshots 0.
+Plano aprovado íntegro SHA-256 bc76e83d340fe0bb00c925c5eb9e8afa3a3ae0aee2daa57fe268a6b8560925b2.
+Novo plan -destroy de confirmação exit2/15,7s, arquivo privado 0600
+infra/destroy-t28-confirm.tfplan/hash SHA-256
+8e5b06cab22aa998e922ba392ef09015d07c942c5c65a838a394b633dfc9d55a.
+Show JSON dos dois planos exit0: mesmos 23 endereços, ações delete, IDs e
+RDS skip_final_snapshot=true/final_snapshot_identifier=null/backup0.
+Saída bruta confirmatória em /tmp/prova-t28-confirm-plan.raw 0600.
+Nenhum apply/destroy ainda neste registro. T27 verificada; T28 autorizada
+no escopo exato, sujeito a validação imediata da conta/credenciais.

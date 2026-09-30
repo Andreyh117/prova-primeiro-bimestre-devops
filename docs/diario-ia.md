@@ -1685,3 +1685,50 @@ comprova permissões de serviço nem estado atual dos recursos. Solicitei ao
 aluno renovação local das credenciais temporárias, sem enviar valores. T27
 bloqueada e T28 pendente. Próximo passo: revalidar DDB/EC2/RDS, gerar plano,
 conferir ações/snapshot/custo e apresentar autorização específica.
+
+## T27 — retomada com credenciais funcionais (29/09/2026)
+
+Novo pedido do aluno: testar conexão e refazer T27 caso funcionasse. Git
+limpo/feature; STS0 mesma conta terminada5811/voclabs/us-east-1, DDB
+ACTIVE, EC2 running, RDS available. Plan -destroy com lock remoto normal
+exit2 em16,9s; 0 add/0 change/23 destroy; binário0600 ignorado e SHA-256
+registrado em teardown-revisao.txt. Show JSON0 confirmou 23 deletes,
+zero ações de create/update, 19 tags Project/Owner e quatro associações
+sem tags; nenhum recurso S3/DDB/IAM. EC2rootEBS8GiB
+delete_on_termination=true; RDS20GiB/backup0/skip_final_snapshot=true.
+
+AWS RDS DescribeDBSnapshots0/lista0; backup automático NotFound. GET
+/reservas somente leitura falhou URLError, logo não atribuir banco vazio.
+Backend S3 Versioning Enabled/state objetoAES256/VersionId; DDB ACTIVE/
+apenas item checksum-md5, sem Info/lock no scan. Saída bruta plano e JSON
+não entram em Git; nenhum apply/destroy. T27 passa de bloqueada para
+em andamento aguardando decisão humana específica sobre descarte ou
+snapshot final e aprovação do plano concreto. T28 continua pendente.
+
+Validação documental adicional: primeira assertiva local falhou porque
+procurava a substring contínua `GET /reservas`, mas a evidência quebra
+a frase em linhas Markdown. Corrigida apenas a busca para `GET somente`;
+segunda execução exit0 confirmou conta completa contra tfvars sem exibir
+valor, hash do plano, 23 exclusões exclusivas, RDS sem snapshot, backend/
+IAM fora do plano e T28 pendente. `git diff --check` passou.
+
+Orientação adicional do aluno em T27: "não posso gastar dinheiro de verdade,
+é apenas para a prova". Restringir todas as ações à conta já confirmada
+do Learner Lab; não usar conta pessoal nem criar snapshot retido por padrão.
+A documentação pública consultada descreve orçamento de laboratório sem
+cartão de crédito, mas o saldo atual do painel do aluno não foi consultado.
+Infraestrutura ativa pode consumir créditos do Lab. Essa orientação
+financeira não escolhe sozinha a política irreversível de dados: decisão
+específica sobre o plano sem snapshot ainda pendente; nenhum destroy feito.
+Fonte: https://its.ucsc.edu/services/teaching-and-learning/learning-management/aws-academy/
+
+## T27 — autorização sem snapshot e confirmação (2026-09-29T22:05:57-03:00)
+
+Aluno respondeu "autorizo excluir sem snapshot" após pergunta sobre conta
+terminada5811, us-east-1, 23 deletes, RDS/dados, ausência de snapshot, custo
+e backend preservado. Revalidação STS conta exata/voclabs, DDB ACTIVE, EC2
+running, RDS available/snapshots0. Novo plan -destroy exit2/15,7s, hash
+8e5b06ca...d55a, e show JSON0 compararam mesmos 23 endereços/ações/IDs
+e política RDS ao plano autorizado bc76e83d...e0925b2. Brutos e binários
+0600/ignorados, sem apply/destroy até este registro. T27 verificada;
+T28 autorizada apenas para principal. Backend/state futuros T29/T30.

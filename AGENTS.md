@@ -576,3 +576,30 @@ credenciais pelo aluno, revalidar permissões e gerar plano concreto antes de
 pedir autorização específica para apagar dados/recursos. Snapshot atual
 configurado para pular, sem consentimento de descarte. T30A pessoal permanece
 pendente antes de T31.
+
+## Estado mais recente — T27 plano válido, autorização pendente
+
+Em 29/09/2026, nova sessão Lab foi testada: STS/default/voclabs/us-east-1
+conta terminada5811, DDB ACTIVE, EC2 running, RDS available. Plan -destroy
+com locking normal exit2/23 deletes/zero add ou update; show JSON0, hash
+e revisão sanitizada em `evidencias/teardown-revisao.txt`. Plano binário
+`infra/destroy-t27.tfplan` ignorado0600; bruto privado em /tmp. Backend
+S3/state versionadoAES256 e DDB seguem ativos; scan viu só checksum,
+sem lock ativo. RDS skip_final_snapshot=true/backup0, snapshot associado0;
+GET /reservas falhou, portanto dados atuais desconhecidos. Nenhum apply
+ou destroy. T27 agora em andamento até decisão/autorização concreta do
+aluno para descarte dos dados sem snapshot ou retenção com novo plano.
+Não iniciar T28 nem desativar locking. Revalidar plano/conta/credenciais se
+houver demora ou mudança de política. T30A pessoal continua pendente.
+
+## Estado mais recente — T27 verificada; T28 autorizada para principal
+
+Em 29/09/2026, após revisão do plano bc76e83d...e0925b2/23 deletes/RDS
+sem snapshot, o aluno autorizou literalmente "autorizo excluir sem snapshot".
+Revalidação imediata STS/conta Lab5811/voclabs/us-east-1, DDB/EC2/RDS e
+snapshots0; segundo plano exit2 confirmou endereços/ações/IDs e política
+RDS idênticos, hash 8e5b06ca...d55a. T27 verificada; T28 é a próxima,
+autorizada somente para aplicar o plano original privado íntegro e conferir
+a ausência de recursos. Não pedir a mesma autorização novamente se escopo
+permanece idêntico. Backend S3/DDB e versões NÃO incluídos: T29/T30 exigem
+plano e autorização separados. T30A pessoal permanece pendente.

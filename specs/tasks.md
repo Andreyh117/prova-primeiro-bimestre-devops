@@ -97,7 +97,7 @@ Cada tarefa recebe entrada no diário.
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt/health-aws.txt: build/11 testes/SSH/TLS/schema/repetição/reboot e três HTTP200 reais; falhas corrigidas preservadas. | verificado |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt/rds-crud.txt/aws-retomada-t25.txt:10testes0, positivoAWS0/SQLTLS/restartID3, negativo1/limpeza/sentinela reais; backend/EC2/state recuperados, bloqueio histórico preservado. | verificado |
 | T26 | T25 | R24, R25, R30 | Redigir a parte factual do relatório a partir do diário/evidências; contribuição pessoal adiada para T30A por decisão do aluno. | Quatro respostas dissertativas de dez linhas cada; IA/ferramentas reais e pendências explícitas, sem atribuir experiência pessoal. | relatorio.md e diário; estrutura 4 × 10, conteúdo factual cotejado e git diff --check aprovados; R25 ainda parcial. | verificado |
-| T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | teardown-revisao.txt: 12 evidências auditadas, STS0 mas lock DDB/EC2/RDS negados, plan exit1 sem arquivo; plano/autorização ainda pendentes. | bloqueada |
+| T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | teardown-revisao.txt: plano exit2/23 deletes/hash, revisão/custo/política; aluno autorizou exclusão sem snapshot, plano de confirmação idêntico; sem destroy em T27. | verificado |
 | T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
 | T29 | T28 | R23, R31 | Preparar limpeza backend, listar versões/delete markers e explicar retenção/state. | Conferir principal encerrado, state bootstrap disponível e nenhum lock ativo; obter autorização de escopo separado. | Diário e plano/checklist backend-teardown. | pendente |
 | T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza só do projeto: destroy quatro managed bootstrap pelo state local e exclusão CLI do bucket externo vazio autorizada; registrar sobras/falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
@@ -875,3 +875,34 @@ Dados/snapshot ainda exigem decisão após plano concreto; nenhum apply/destroy
 executado. Registro sanitizado: evidencias/teardown-revisao.txt; bruto privado
 0600 em /tmp. Usuário foi solicitado a renovar credenciais localmente, sem
 enviá-las no chat. T28 não inicia antes do aceite integral T27.
+
+## T27 — plano válido após renovação, decisão pendente (29/09/2026)
+
+STS/DDB/EC2/RDS read-only passaram; plano destroy com lock real exit2:
+0 create/0 update/23 delete, show JSON0, hash SHA-256 registrado em
+evidencias/teardown-revisao.txt. S3/state versionado/AES256 e DDB ACTIVE,
+nenhum lock ativo observado; backend excluído do plano. RDS disponível,
+backup0/skip_final_snapshot=true; snapshot associado0, backup automatizado
+NotFound. GET /reservas não alcançado (URLError), portanto linhas atuais
+não comprovadas. Sem apply/destroy. T27 em andamento até decisão específica
+sobre dados/snapshot e autorização do plano; T28 continua pendente.
+
+### Restrição financeira do aluno em T27
+
+O aluno informou que não pode gastar dinheiro real, pois o trabalho é apenas
+para a prova. Usar somente o Learner Lab confirmado; a estimativa de preços
+representa consumo potencial de créditos, não cobrança pessoal comprovada.
+Não criar snapshot retido automaticamente. A escolha de apagar dados RDS sem
+snapshot e a autorização específica do plano de 23 exclusões ainda exigem
+resposta explícita antes de T28. Nenhum destroy realizado.
+
+## T27 — decisão recebida e pré-execução confirmada (2026-09-29T22:05:57-03:00)
+
+Após apresentar plano SHA-256 bc76e83d...e0925b2, conta terminada5811,
+us-east-1, 23 exclusões e RDS sem snapshot, o aluno respondeu literalmente
+"autorizo excluir sem snapshot". Sua restrição de não gastar dinheiro pessoal
+e o contexto Learner Lab foram registrados. Esta autorização abrange somente
+a infraestrutura principal do plano; backend/versionamentos ficam para T29/T30.
+STS, DDB, EC2, RDS e snapshots revalidados; novo plan -destroy exit2 manteve
+os mesmos 23 endereços/ações/IDs e a política RDS, sem mudança de escopo.
+T27 verificada, T28 próxima; o destroy ainda não ocorreu neste marco.
