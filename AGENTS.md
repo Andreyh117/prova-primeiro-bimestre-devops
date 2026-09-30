@@ -603,3 +603,18 @@ autorizada somente para aplicar o plano original privado íntegro e conferir
 a ausência de recursos. Não pedir a mesma autorização novamente se escopo
 permanece idêntico. Backend S3/DDB e versões NÃO incluídos: T29/T30 exigem
 plano e autorização separados. T30A pessoal permanece pendente.
+
+## Estado mais recente — T28 principal destruído, T29 próxima
+
+Em 29/09/2026, conta Lab/voclabs/us-east-1 e plano original
+bc76e83d...e0925b2 revalidados; plano de confirmação mantivera 23 deletes
+e RDS sem snapshot. Apply do plano aprovado exit0, 23 destroyed, zero
+create/update/error. State principal remoto list/pull0/zero recursos/outputs.
+AWS: EC2 terminated; RDS, DB subnet group, VPC, subnets, SGs, IGW e rotas
+NotFound; snapshots0, volume raiz NotFound, volumes por tag0, interfaces
+VPC0. Evidências terraform-destroy.txt/aws-pos-destroy.txt. Cópias
+privadas0600 dos states final/bootstrap em /tmp. Backend S3+DDB/state
+versionado continua ativo, lock ausente no scan; NÃO foi apagado. T28
+verificada, R23 parcial, T29 próxima: revisar versões/delete markers,
+retenção e obter autorização separada do backend antes de T30. Relatório
+factual atualizado, T30A manual ainda pendente. Sem push/merge/PR.

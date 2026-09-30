@@ -1197,3 +1197,17 @@ aprovado; detalhes e hashes em
 [evidencias/teardown-revisao.txt](evidencias/teardown-revisao.txt). T27 está
 verificada, T28 é a próxima tarefa. Backend S3/DynamoDB e versões de state
 permanecem fora deste escopo. Nenhum destroy havia sido feito ao fechar T27.
+
+### T28 — infraestrutura principal removida
+
+Após autorização explícita do aluno, o plano privado aprovado foi aplicado
+com exit 0: **23 recursos destruídos, zero adicionados/alterados**. State
+remoto principal ficou com zero recursos e outputs. A AWS mostra EC2
+`terminated`, RDS/VPC/SGs/subnets/rotas/gateway ausentes; zero snapshots
+associados, disco raiz, volumes do projeto ou ENIs da VPC antiga.
+[evidência Terraform](evidencias/terraform-destroy.txt) e
+[auditoria AWS](evidencias/aws-pos-destroy.txt) preservam resultados reais.
+S3/DynamoDB/backend e versões de state continuam ativos para T29/T30;
+**T29 é a próxima tarefa** e requer revisão/autorização separada antes de
+qualquer exclusão do backend. Cópias privadas dos states ficam fora do Git.
+R23 permanece parcial até a limpeza do backend.

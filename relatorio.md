@@ -59,6 +59,6 @@ A T25 executou seis rotas com leitura e escrita SQL por TLS no RDS.
 Uma reserva persistiu após reiniciar apenas o serviço da API e criar outro contêiner da mesma imagem.
 O teste negativo detectou divergência deliberada no SQL, retornou erro e limpou somente seu registro.
 Uma reserva sentinela distinta foi preservada durante o teste e removida separadamente ao final.
-Os recursos AWS ainda estão ativos; destroy, revisão final, merge e PR presencial pertencem às próximas tarefas.
+A infraestrutura principal foi destruída e conferida em T28; backend, revisão final, merge e PR presencial pertencem às próximas tarefas.
 
 **Revisão pessoal pendente:** confirmar a descrição e acrescentar a visão do aluno sobre validação e responsabilidade.

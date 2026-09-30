@@ -1732,3 +1732,29 @@ running, RDS available/snapshots0. Novo plan -destroy exit2/15,7s, hash
 e política RDS ao plano autorizado bc76e83d...e0925b2. Brutos e binários
 0600/ignorados, sem apply/destroy até este registro. T27 verificada;
 T28 autorizada apenas para principal. Backend/state futuros T29/T30.
+
+## T28 — execução efetiva e auditoria AWS (2026-09-29T22:15:00-03:00)
+
+Autorização específica "autorizo excluir sem snapshot" usada uma vez para
+aplicar somente plano principal bc76e83d...e0925b2. Conta completa do Lab
+comparada ao tfvars sem publicar; voclabs/us-east-1, plano JSON23 deletes,
+RDS sem snapshot. `terraform -chdir=infra apply -input=false -no-color
+-lock-timeout=60s destroy-t27.tfplan` saiu0; log privado0600 registra 23
+Destroying/23 Destruction complete/zero Error e resumo 23 destroyed. Não
+foi usado -auto-approve. `state list` e `state pull` retornaram0 com zero
+endereços, recursos e outputs; cópias finais privadas0600 criadas.
+
+Consultas AWS pós-destroy: EC2 terminated, VPC/subnets/SG/IGW/route tables
+NotFound, RDS e DB subnet group NotFound, snapshots0, backup automatizado
+NotFound, volume raiz NotFound, volumes por tag0, ENIs por VPC0. Backend
+S3/versioning/state AES256/VersionId e DDB ACTIVE, scan só checksum-md5,
+sem Info/lock observado. Evidências sanitizadas em terraform-destroy.txt e
+aws-pos-destroy.txt; nenhum state/plano/log bruto versionado. T28 verificada,
+R23 parcial até T29/T30; relatório factual atualizado. Próxima T29, sem
+exclusão backend/push/merge/PR. Recursos backend podem consumir créditos.
+
+Validação final T28 encontrou dois problemas apenas no verificador/documento:
+primeiro procurou prefixo `| R23 |` em vez do cabeçalho real `| R23 /`;
+depois encontrou um espaço final na linha de backup automático de
+aws-pos-destroy.txt. Prefixo e espaço corrigidos, sem alterar resultados
+AWS ou o log bruto; checagem repetida abaixo.

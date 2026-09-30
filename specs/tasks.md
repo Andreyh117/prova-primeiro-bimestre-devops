@@ -98,7 +98,7 @@ Cada tarefa recebe entrada no diário.
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt/rds-crud.txt/aws-retomada-t25.txt:10testes0, positivoAWS0/SQLTLS/restartID3, negativo1/limpeza/sentinela reais; backend/EC2/state recuperados, bloqueio histórico preservado. | verificado |
 | T26 | T25 | R24, R25, R30 | Redigir a parte factual do relatório a partir do diário/evidências; contribuição pessoal adiada para T30A por decisão do aluno. | Quatro respostas dissertativas de dez linhas cada; IA/ferramentas reais e pendências explícitas, sem atribuir experiência pessoal. | relatorio.md e diário; estrutura 4 × 10, conteúdo factual cotejado e git diff --check aprovados; R25 ainda parcial. | verificado |
 | T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | teardown-revisao.txt: plano exit2/23 deletes/hash, revisão/custo/política; aluno autorizou exclusão sem snapshot, plano de confirmação idêntico; sem destroy em T27. | verificado |
-| T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
+| T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt/aws-pos-destroy.txt: apply do plano aprovado exit0/23 destruídos, state0, EC2 terminated, RDS/VPC/rede ausentes, snapshots/volumes/interfaces0; backend preservado. | verificado |
 | T29 | T28 | R23, R31 | Preparar limpeza backend, listar versões/delete markers e explicar retenção/state. | Conferir principal encerrado, state bootstrap disponível e nenhum lock ativo; obter autorização de escopo separado. | Diário e plano/checklist backend-teardown. | pendente |
 | T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza só do projeto: destroy quatro managed bootstrap pelo state local e exclusão CLI do bucket externo vazio autorizada; registrar sobras/falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
 | T30A | T30 | R24, R25, R30 | Incorporar contribuição pessoal do aluno ao relatório e obter sua revisão antes da entrega. | Aluno fornece suas palavras sobre aulas 01–07, IA/manual e responsabilidade; conferir quatro respostas, coerência e autoria sem inventar vivências. | relatorio.md revisado, diário e checklist; exigência final R25 só fecha após esse aceite. | pendente |
@@ -906,3 +906,17 @@ a infraestrutura principal do plano; backend/versionamentos ficam para T29/T30.
 STS, DDB, EC2, RDS e snapshots revalidados; novo plan -destroy exit2 manteve
 os mesmos 23 endereços/ações/IDs e a política RDS, sem mudança de escopo.
 T27 verificada, T28 próxima; o destroy ainda não ocorreu neste marco.
+
+## T28 — destroy principal executado e conferido (2026-09-29T22:15:00-03:00)
+
+Plano bc76e83d...e0925b2 aprovado e íntegro, conta Lab/voclabs/us-east-1
+revalidada, RDS skip_final_snapshot=true. Terraform apply plano salvo
+sem -auto-approve exit0: 0 added/0 changed/23 destroyed; 23 mensagens de
+conclusão/zero Error no log privado. State list/pull exit0/zero recursos e
+outputs. AWS EC2 terminated; RDS, DB subnet group, VPC, subnets, SGs, IGW e
+rotas NotFound; snapshot associado0, backup automatizado NotFound, raiz EBS
+NotFound, volumes tag projeto0 e ENIs VPC0. Backend S3 versionado/state
+AES256 e DDB ACTIVE preservados/sem lock ativo observado. Cópias privadas
+0600 dos states final e bootstrap mantidas fora Git. Evidências sanitizadas
+terraform-destroy.txt/aws-pos-destroy.txt. T28 verificada, R23 parcial até
+limpeza backend T29/T30. Próxima tarefa T29; sem push/merge/PR.
