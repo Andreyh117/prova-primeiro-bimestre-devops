@@ -96,12 +96,13 @@ Cada tarefa recebe entrada no diário.
 | T23 | T22 | R14–R18, R20, R22 | Aplicar principal autorizado e conferir atributos AWS efetivos. | EC2 running, RDS available, subnets/SG/encriptação/profile reais; outputs sem segredos; objeto de state S3 efetivo sem publicar conteúdo. | aws-rede.txt/aws-rds.txt/aws-seguranca.txt/terraform-outputs.txt: apply0, consultas/assertivas reais, S3 state e plano posterior0/No changes; sem deploy/CRUD. | verificado |
 | T24 | T23 | R06, R07, R16, R17, R29 | Implementar/declarar deploy repetível; imagem por SSH, SQL no RDS, ambiente protegido, serviço API. | Image checksum/commit, schema idempotente, serviço/reboot, /health na EC2 e nenhum PostgreSQL local na nuvem. | ec2-deploy.txt/health-aws.txt: build/11 testes/SSH/TLS/schema/repetição/reboot e três HTTP200 reais; falhas corrigidas preservadas. | verificado |
 | T25 | T24 | R04–R07, R17, R22, R29 | Criar verify-aws.py e executar CRUD/persistência na EC2/RDS. | HTTP completo + SQL pela EC2/TLS; restart API preserva dados; SG/RDS reais; falhas retornam não zero. | api-aws.txt/rds-crud.txt/aws-retomada-t25.txt:10testes0, positivoAWS0/SQLTLS/restartID3, negativo1/limpeza/sentinela reais; backend/EC2/state recuperados, bloqueio histórico preservado. | verificado |
-| T26 | T25 | R24, R25, R30 | Redigir relatório com contribuição do aluno, a partir do diário/evidências. | Quatro respostas dissertativas de dez linhas cada; IA e ferramentas reais; aluno revisa sua experiência. | relatorio.md, diário; limitações honestas, sem inventar desafios. | pendente |
+| T26 | T25 | R24, R25, R30 | Redigir a parte factual do relatório a partir do diário/evidências; contribuição pessoal adiada para T30A por decisão do aluno. | Quatro respostas dissertativas de dez linhas cada; IA/ferramentas reais e pendências explícitas, sem atribuir experiência pessoal. | relatorio.md e diário; estrutura 4 × 10, conteúdo factual cotejado e git diff --check aprovados; R25 ainda parcial. | verificado |
 | T27 | T26 | R22, R23, R31 | Revisar evidências e preparar plano destroy principal + política explícita de dados/snapshot. | Logs reais/sanitizados; plan -destroy com backend ainda ativo; autorização específica de descarte/retenção. | Diário, checklist e plano de destroy sanitizado. | pendente |
 | T28 | T27 | R23 | Executar destroy principal autorizado e confirmar ausência de recursos. | Destroy real; state principal vazio e consulta AWS por identifiers/tags; registrar retenções. | terraform-destroy.txt, aws-pos-destroy.txt. | pendente |
 | T29 | T28 | R23, R31 | Preparar limpeza backend, listar versões/delete markers e explicar retenção/state. | Conferir principal encerrado, state bootstrap disponível e nenhum lock ativo; obter autorização de escopo separado. | Diário e plano/checklist backend-teardown. | pendente |
 | T30 | T29 | R23 | Executar limpeza de versões/backend autorizada e conferir resultado. | Limpeza só do projeto: destroy quatro managed bootstrap pelo state local e exclusão CLI do bucket externo vazio autorizada; registrar sobras/falhas reais. | backend-teardown.txt; não declarar limpeza integral se houver pendência. | pendente |
-| T31 | T30 | R01–R03, R22, R25, R29 | Criar verify-delivery.py, confirmar identidade/público, completar README/índice/evidências e revisar Git. | Arquivos/links/relatório; seis commits reais; script falha quando requisito observável faltar. | entrega-checklist.txt e revisão final de segredos. | pendente |
+| T30A | T30 | R24, R25, R30 | Incorporar contribuição pessoal do aluno ao relatório e obter sua revisão antes da entrega. | Aluno fornece suas palavras sobre aulas 01–07, IA/manual e responsabilidade; conferir quatro respostas, coerência e autoria sem inventar vivências. | relatorio.md revisado, diário e checklist; exigência final R25 só fecha após esse aceite. | pendente |
+| T31 | T30A | R01–R03, R22, R25, R29 | Criar verify-delivery.py, confirmar identidade/público, completar README/índice/evidências e revisar Git. | Arquivos/links/relatório; seis commits reais; script falha quando requisito observável faltar. | entrega-checklist.txt e revisão final de segredos. | pendente |
 | T32 | T31 | R02 | Merge da feature preservando histórico e branch; capturar evidência Git. | Merge real --no-ff, mensagens convencionais, grafo/branches e contagem final ≥6; trabalho limpo. | git-log.txt, git-branches.txt; commit final honesto de docs quando necessário. | pendente |
 | T33 | T32 | R01, R26, R27 | Preparar entrega.md no fork isolado; verificar acesso público, base/head, diff e data presencial. | Apenas caminho da prova alterado; checklist verdadeiro, links válidos e data confirmada; ainda sem abrir PR. | entrega.md no fork, diff revisado e diário. | pendente |
 | T34 | T33 | R26, R27 | No dia da prova e com comando explícito, abrir único PR presencial; congelar head. | Confirmar nenhum PR prévio do RA, uma URL real, base/head e commit final; nenhum commit posterior no PR. | URL do PR e registro final. | pendente |
@@ -116,8 +117,9 @@ Cada tarefa recebe entrada no diário.
 - T24: configurar deploy após outputs RDS evita colocar senha em user-data.
   A autorização da tarefa cobre a implantação nesse ambiente de prova; aplicar
   mudança de infraestrutura fora do plano revisado exige nova revisão.
-- T26: relatório pode registrar que destroy está pendente; depois de T28/T30,
-  atualizar somente com os resultados realmente obtidos antes da revisão final.
+- T26: a parte factual foi concluída; por pedido do aluno, a contribuição e
+  revisão pessoal ficam em T30A, antes de T31. O relatório pode registrar que
+  destroy está pendente; depois de T28/T30, atualizar apenas resultados reais.
 - Commits ao concluir marcos autorizados são reais e revisados. A primeira etapa
   não cria nenhum. Não acumular tudo para inventar seis commits no final.
 - T32: capturar grafo depois do merge e, se a evidência requerer commit de docs,
@@ -850,3 +852,12 @@ incompatível ecleanupsóUUID/ID4; sentinelaID1 preservada e depoislimpa. Fixtur
 Bloqueio e auxiliares/correções reais anteriores preservados nas evidências,
 sem inventarsucesso/dificuldade. PróximaT26, relatório com contribuição do aluno.
 Sem bloqueioatual/destroy/push/merge/PR; recursosativos/faturáveis.
+
+## Ajuste de sequência após T26 — 29/09/2026
+
+O aluno pediu que as partes pessoais do relatório fossem reunidas em uma tarefa
+pendente no fim. A parte factual e estrutural de T26 foi concluída e verificada;
+a contribuição e revisão pessoais agora compõem T30A, antes da checagem final T31.
+R25 permanece em andamento até T30A; T31 depende de T30A, e T27 é a próxima
+tarefa. As menções históricas a T26 acima registram o estado anterior ao ajuste.
+Isto não elimina as autorizações específicas de destroy previstas em T27/T29.

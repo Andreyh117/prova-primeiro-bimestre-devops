@@ -58,7 +58,7 @@ T15 recebeu autorização explícita para o bootstrap. T16 aplicou/conferiu
 S3/DynamoDB reais. Primeiro apply falhou por SCP/Object Lock; recuperação
 preservou recursos e passou. Plano posterior retornou 0/No changes.
 Bucket físico fica fora da criação/remoção TF, conforme abaixo. Próxima tarefa
-pendente: T26, relatório com contribuição do aluno. Deploy T24 e CRUD T25 concluídos abaixo.
+pendente: T27, revisão das evidências e preparação do destroy; a contribuição pessoal do relatório foi adiada para T30A. Deploy T24 e CRUD T25 concluídos abaixo.
 T22 foi autorizada e T23 provisionou/conferiu a infraestrutura AWS real. T17 implementou VPC/quatro subnets/IGW/tabelas e
 associações; fmt/init/validate/grafo e nove testes locais passaram. Os testes
 usaram provider mock, sem chamadas AWS em T17; a rede foi implantada/conferida em T23. Backend S3/locking
@@ -1161,6 +1161,8 @@ inexistente em `--known-hosts`: retorna 1 antes de consultar a conta ou criar
 registros. Os testes locais cobrem regras SG inseguras, datas divergentes e
 limpeza incompleta. Não envie credenciais pelo chat.
 
-Próxima tarefa: **T26**, relatório com suas observações sobre o processo.
-Sem bloqueio atual, destroy, push, merge ou PR nesta etapa. Os recursos
-continuam ativos e podem consumir créditos.
+T26 factual foi verificada: [relatorio.md](relatorio.md) tem quatro respostas
+de dez linhas de conteúdo conferidas localmente. Por pedido do aluno, a
+contribuição pessoal e sua revisão ficam na tarefa pendente T30A, antes do
+checklist final T31. R25 permanece parcial. Próxima tarefa: **T27**. Sem
+destroy, push, merge ou PR nesta etapa; recursos ativos podem consumir créditos.

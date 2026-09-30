@@ -1612,3 +1612,50 @@ da falha observada e corrigida, sem interpretar esse código como êxito do auxi
 Revisão staged: git diff --cached --check2 detectou linhas vazias extras no fim
 de api-aws.txt/rds-crud.txt. Removidas só no texto versionado, com declaração
 nessas evidências; brutos/hashes originais preservados. Nova checagem antes do commit.
+
+## T26 — rascunho factual do relatório (2026-09-29T19:36:21-03:00)
+
+Prompt do aluno: executar a próxima tarefa pendente após revisar T25, implementar,
+validar, corrigir e registrar evidências reais; explicar conceito, arquivos, teste
+e próximo passo, sem simular sucesso. Consultei T26, R24/R25/R30, guia, README e
+o final do diário. Pedi por formulário assíncrono a contribuição pessoal do aluno
+sobre aulas 01–07, uso da IA e processo manual; resposta ainda não recebida.
+
+Criei `relatorio.md` identificando Codex, aluno e RA, com quatro respostas
+factuais baseadas nas evidências anteriores e marcações explícitas onde falta a
+experiência do aluno. O texto não atribui ao aluno uma vivência não relatada nem
+afirma que houve implementação manual paralela. A comparação manual descreve as
+atividades necessárias. T27–T34, destroy, merge e PR continuam pendentes.
+
+Validação local real: script Python leu `relatorio.md`, encontrou quatro seções
+com 10 linhas de conteúdo e frases completas em cada uma, identificou Codex e
+a marca de contribuição pessoal pendente; exit 0. O teste é estrutural e não
+substitui a revisão humana ou a checagem final de entrega. `specs/tasks.md`
+T26 e R25 na matriz foram atualizados para em andamento; README aponta o
+rascunho. Próximo passo: receber o relato do aluno, incorporá-lo sem extrapolar,
+rever coerência, executar a conferência final e só então marcar T26 verificada.
+
+A consulta direta do enunciado no navegador falhou por erro de carregamento;
+o guia/specs locais registram o contrato consultado anteriormente. A primeira
+tentativa de escrita travou no prazo de revisão automática da ferramenta, sem
+confirmação de gravação; a repetição gravou e o `git status` confirmou o arquivo.
+Uma edição posterior via `apply_patch` falhou com `mountinfo path is not absolute`;
+a substituição exata por Python passou. Essas falhas são da ferramenta local,
+não são apresentadas como falhas do projeto. Nenhuma chamada AWS, deploy,
+destroy, push ou PR foi feita nesta etapa.
+
+## Ajuste solicitado pelo aluno para contribuição manual — 29/09/2026
+
+O aluno pediu para deixar as partes que precisa escrever à mão para o fim e
+tratá-las como tarefa pendente, a consultar em conjunto ao chegar ao final.
+Dividi o aceite original de T26: a redação factual/estrutura 4 × 10 é o marco
+verificado agora; T30A recolhe o relato pessoal e a revisão do aluno antes de
+T31. R25 permanece em andamento e `relatorio.md` identifica as lacunas. Não
+foi recebido relato pessoal nem inventada experiência. T27 é a próxima tarefa.
+As autorizações de destruição continuam vinculadas aos planos concretos nas
+tarefas T27/T29, não são adiadas ou presumidas por este ajuste.
+
+Revisão do stage T26: `git diff --cached --check` detectou três espaços
+finais no cabeçalho de `relatorio.md` (exit 2). Removidos e stage refeito;
+a checagem seguinte retornou exit 0. Seis arquivos documentais revisados,
+sem códigos, credenciais ou recursos AWS alterados.

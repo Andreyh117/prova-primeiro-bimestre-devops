@@ -551,3 +551,13 @@ R04/05/06/16/17/22/32verificados; R29T31/R02mergeT32 parciais. Sem bloqueioatual
 provisionamento/destroy/push/merge/PR; recursosativos ecréditosvariáveis.
 App/infra/helpers/locks/evidências anteriores preservados. Não repetir suites
 inalteradas; relatório exige contribuição do aluno, sem escrever vivências dele.
+
+## Estado mais recente — T26 factual verificada, T30A manual pendente
+
+Em 29/09/2026, por pedido expresso do aluno, a contribuição e revisão pessoal
+do relatório foram adiadas para T30A, antes da revisão final T31. T26 passou a
+abranger somente a redação factual e a estrutura de quatro respostas com dez
+linhas de conteúdo cada, verificadas localmente; `relatorio.md` ainda explicita
+as lacunas pessoais. R25 continua parcial. Próxima tarefa T27. Não solicitar
+o relato novamente até T30A ou pedido do aluno. Preservar a necessidade de
+revisão/autorização concreta do destroy em T27/T29 e não avançar T31 sem T30A.
