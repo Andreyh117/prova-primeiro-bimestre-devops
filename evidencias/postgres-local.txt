@@ -1,0 +1,69 @@
+T09 — R06/R22/R29, persistência nativa e script de CRUD
+
+=== T09: execucao real em 2026-09-28T22:04:28-03:00 ===
+Ambiente: Node nativo/Python stdlib, PostgreSQL Docker isolado; sem AWS/Compose.
+Comando: npm --prefix app test
+Fonte: trechos exatos do TAP da execução integral em evidencias/api-local.txt.
+As linhas stdout/stderr do Python estão escapadas pelo reporter TAP, sem simulação.
+
+# Subtest: verify-api.py executa CRUD real, limpa IDs próprios e preserva reserva preexistente
+ok 46 - verify-api.py executa CRUD real, limpa IDs próprios e preserva reserva preexistente
+  ---
+  duration_ms: 506.747332
+  type: 'test'
+  ...
+# Comando: python3 scripts/verify-api.py --base-url http://127.0.0.1:44701
+# stdout real:\\nMarcador exclusivo para conferência/limpeza: Verificacao API a527fa94-0a3d-4b37-b675-e10df1592a64\\nPASSOU: GET /health -> 200\\nPASSOU: POST /reservas -> 201\\nPASSOU: GET /reservas -> 200\\nPASSOU: GET /reservas/38 -> 200\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: PUT /reservas/38 -> 200\\nPASSOU: PUT /reservas/38 -> 400\\nPASSOU: GET /reservas/38 -> 200\\nPASSOU: DELETE /reservas/38 -> 204\\nPASSOU: GET /reservas/38 -> 404\\nPASSOU: DELETE /reservas/38 -> 404\\nLimpeza confirmada: nenhuma reserva com ID próprio remanescente.\\nPASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.\\n
+# stderr real:\\n(vazio)
+# Exit code real do script: 0
+# SQL independente: somente a sentinela ID 37 permanece, inalterada.
+# Subtest: verify-api.py retorna exit 1 na falha SQL controlada e limpa a reserva criada antes do erro
+ok 47 - verify-api.py retorna exit 1 na falha SQL controlada e limpa a reserva criada antes do erro
+  ---
+  duration_ms: 209.302424
+  type: 'test'
+  ...
+# Comando: python3 scripts/verify-api.py --base-url http://127.0.0.1:44701
+# stdout real:\\nMarcador exclusivo para conferência/limpeza: Verificacao API f81ec182-da2a-499f-a502-266d591f4ef3\\nPASSOU: GET /health -> 200\\nPASSOU: POST /reservas -> 201\\nPASSOU: GET /reservas -> 200\\nPASSOU: GET /reservas/40 -> 200\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: POST /reservas -> 400\\nPASSOU: DELETE /reservas/40 -> 204\\nLimpeza confirmada: nenhuma reserva com ID próprio remanescente.\\n
+# stderr real:\\nFALHOU: PUT /reservas/40: esperado HTTP 200, recebido 500.. Confira o marcador caso um POST tenha resultado incerto.\\n
+# Exit code real do script: 1
+# CHECK temporário induziu PUT 500 real; SQL confirma limpeza e sentinela ID 39 inalterada.
+# Subtest: reserva persiste por SQL e HTTP após encerrar a API e iniciar outro processo na mesma porta
+ok 48 - reserva persiste por SQL e HTTP após encerrar a API e iniciar outro processo na mesma porta
+  ---
+  duration_ms: 355.149154
+  type: 'test'
+  ...
+# Antes: API PID 562767; POST 201 {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data":"01-10-2026","status":"pendente"}; SQL {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data_iso":"2026-10-01","status":"pendente","tipo":"date"}.
+# API PID 562767 encerrada realmente: SIGTERM -> exit 0.
+# Com a API encerrada, consulta SQL independente ainda lê {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data_iso":"2026-10-01","status":"pendente","tipo":"date"}.
+# Depois: API PID 562783, mesma porta 44701; GET 200 {"id":41,"cliente":"Persistencia T09 1139d692-6ebd-4f06-9777-4a762f81854b","data":"01-10-2026","status":"pendente"}; SQL idêntico.
+# PostgreSQL permaneceu iniciado desde 2026-09-29 01:04:30.219404+00; somente o processo da API foi reiniciado.
+# SQL final: zero reservas remanescentes da suíte T09.
+# API nativa final PID 562783: SIGTERM -> exit 0.
+
+Resumo da mesma execução real:
+1..51
+# tests 51
+# suites 0
+# pass 51
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6231.878396
+Limpeza confirmada: container de teste removido; dados temporários descartados.
+stderr:
+(vazio)
+Exit code real: 0
+
+Conferência posterior em 2026-09-28T22:05:32-03:00
+Comando: docker ps -aq --filter label=devops.project=prova-primeiro-bimestre-devops
+stdout:
+(vazio; zero containers)
+stderr:
+(vazio)
+Exit code real: 0
+
+Limite: reinício de processo da API nativa; banco temporário permaneceu ativo.
+Persistência de volume Compose e CRUD/RDS na AWS continuam pendentes.

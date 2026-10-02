@@ -37,3 +37,6 @@ id_ed25519
 
 # Logs locais; evidências sanitizadas usam .txt
 *.log
+
+# Conta, IP/CIDRs e seleção do Learner Lab: somente contexto privado T13
+infra/preflight.local.json

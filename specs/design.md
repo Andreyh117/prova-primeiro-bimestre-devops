@@ -3,8 +3,13 @@
 Este documento descreve como cumprir R01–R32 de [requirements.md](requirements.md).
 As decisões D01–D15 são nossas escolhas, não regras adicionais atribuídas ao
 professor. Em 28/09/2026, o aluno revisou as specs e alterou o formato externo de
-data para `DD-MM-YYYY`; a decisão D02 foi atualizada. Ainda não há API/infra
-implementada. Planos AWS e destruição continuam sujeitos a revisão/autorização.
+data para `DD-MM-YYYY`; a decisão D02 foi atualizada. T06 implementou schema/
+conexão; T07 implementou POST/GET. T08 completou CRUD e health/503 com 48 testes
+locais aprovados. T09 verificou script/restart nativo com 51 testes. T10 validou
+build/contexto/UID/CRUD/SQL em imagem Docker. T11 validou Compose, saúde/ordem,
+rede/volume/ambiente e CRUD/SQL. T12 comprovou persistência após recriar api/db
+mantendo o volume nomeado, com HTTP/SQL e negativos reais. Infraestrutura é futura.
+Planos AWS e destruição continuam sujeitos a revisão/autorização.
 
 ## Arquitetura e estrutura
 
@@ -43,13 +48,17 @@ consultas/RETURNING, formatar a data para `DD-MM-YYYY`, por exemplo com
 esse formato nem depender de DateStyle/localidade/fuso. O ISO é apenas uma
 representação interna para a escrita SQL, nunca a resposta da API.
 
-Casos futuros de integração: aceitar `29-02-2024`; rejeitar `29-02-2025`,
-`31-04-2026`, `2026-10-15`, `1-2-2026` e data com horário. POST, GET de lista,
-GET por ID e PUT devem devolver a mesma data válida em `DD-MM-YYYY`; entrada
-rejeitada não pode alterar o banco. Estes testes ainda não foram executados.
+Casos T07 executados por HTTP/SQL: aceitar `29-02-2024` e extremos 0001/9999;
+rejeitar `29-02-2025`, `29-02-1900`, `31-04-2026`, `2026-10-15`, `1-2-2026`,
+horário e whitespace adicional. POST, GET de lista e GET por ID devolveram a
+mesma data válida em `DD-MM-YYYY`; entradas rejeitadas não inseriram linhas.
+T08 validou o mesmo contrato no PUT completo, mantendo ID e dados intactos nas rejeições.
 
 D03: `cliente` é string com espaços externos removidos, entre 1 e 120 caracteres
-Unicode; rejeitar null, valores não string e texto vazio. `status` é obrigatório,
+Unicode; rejeitar null, valores não string, texto vazio, NUL e sequências
+Unicode malformadas (surrogates isolados). A restrição de texto foi explicitada
+em T07 para evitar erro de PostgreSQL ou substituição silenciosa na codificação.
+`status` é obrigatório,
 exatamente `pendente`, `confirmada` ou `cancelada`. Não há status padrão nem
 transições de estado especiais. São escolhas simples para validação previsível.
 
@@ -100,29 +109,105 @@ GET sempre consulta o banco. Script SQL inicial idempotente não apaga dados.
 Mudanças posteriores de schema terão migração explícita: não depender de
 `CREATE TABLE IF NOT EXISTS` para modificar uma tabela existente.
 
+T06: schema em `app/sql/001-reservas.sql`, pool em `app/src/db.js` e CLI em
+`app/src/migrate.js`. `PGSSL` é explícito; modo true exige CA e mantém verificação
+de certificado. O pool limita a cinco conexões e aplica timeouts. O runner
+`app/test/run-postgres.js` cria banco Docker exclusivo por UUID, em loopback,
+com senha só em memória e dados tmpfs. Executa migração e node:test; limpa apenas
+seu container por label. A suíte tem 3 testes de configuração e 15 de banco real.
+A evidência T06 isolada não comprova CRUD HTTP nem TLS/RDS.
+
+T07: `app/src/app.js` implementa POST e GET com parâmetros e RETURNING;
+`validation.js` valida dados antes do SQL; `errors.js` responde erros JSON;
+`server.js` inicia o servidor e fecha HTTP/pool ao receber SIGTERM/SIGINT.
+`npm start` usa PORT 3000 por padrão e exige PG*; schema é aplicado separadamente.
+`app/test/api.test.js` inicia o servidor nativo em subprocesso e confirma o
+estado do banco por um pool independente, incluindo alteração SQL refletida
+no GET. A suíte completa tem 35 testes: 17 HTTP, 15 de banco e 3 de configuração.
+Evidências em `evidencias/api-local.txt` e `evidencias/t07-execucao.txt`.
+400/404/413/415 estão cobertos; PUT/DELETE/health/503 são T08; restart/persistência
+é T09. TLS/RDS permanecem sem execução.
+
+T08: PUT usa a mesma validação/corpo do POST e UPDATE parametrizado com
+RETURNING; DELETE usa DELETE ... RETURNING id para decidir 204/404 sem consulta
+prévia. Sem corpo em 204. /health executa SELECT 1 com query_timeout 2000 ms e
+prazo total 2000 ms incluindo fila/conexão; não guarda resultado em cache.
+A consulta de saúde é somente leitura e pode terminar em segundo plano quando
+o prazo total antecede a aquisição da conexão, limitada pelos timeouts do pool.
+Falhas conhecidas de rede, classe SQLSTATE 08, encerramento/capacidade do servidor
+e timeouts do driver viram 503 BANCO_INDISPONIVEL. Erros inesperados mantêm 500
+com mensagem genérica; SQL/stack/credenciais não são devolvidos. Os textos de
+timeout foram conferidos na versão pg fixa; revalidar ao atualizar dependências.
+
+A suíte tem 48 testes: 27 HTTP em servidor nativo, 3 HTTP de falha real do banco,
+15 de PostgreSQL e 3 de configuração. A última suíte inspeciona apenas labels/
+porta, confirma o UUID de propriedade e executa pause/unpause/stop no container
+exclusivo. Health ficou 503 em 2008 ms e recuperou 200; stop resultou em 503 nas
+cinco rotas CRUD. Renomear/restaurar a tabela exclusiva induziu erro SQL real
+para verificar o fallback 500. São falhas planejadas, não mocks/defeitos observados.
+Evidências: api-local.txt completo e health-local.txt com trechos da mesma execução.
+O runner retoma container próprio pausado antes de limpar, se necessário.
+
+Referências T08: [pg Pool](https://node-postgres.com/apis/pool),
+[pg Client/timeouts](https://node-postgres.com/apis/client),
+[SQLSTATE PostgreSQL 16](https://www.postgresql.org/docs/16/errcodes-appendix.html),
+[UPDATE/RETURNING](https://www.postgresql.org/docs/16/sql-update.html) e
+[Docker pause](https://docs.docker.com/reference/cli/docker/container/pause/).
+
+Referências T07: [Express 5](https://expressjs.com/en/5x/api/),
+[erros assíncronos Express](https://expressjs.com/en/guide/error-handling/) e
+[parâmetros pg](https://node-postgres.com/features/queries).
+
+Referências consultadas para T06: [conexões pg](https://node-postgres.com/features/connecting),
+[parâmetros SQL](https://node-postgres.com/features/queries),
+[TLS pg](https://node-postgres.com/features/ssl) e
+[constraints PostgreSQL 16](https://www.postgresql.org/docs/16/ddl-constraints.html).
+
 ## Runtime, configuração e ambiente local
 
 D07: Node 24 LTS e Express 5, cliente `pg`, testes de integração com `node:test`
 e PostgreSQL real. Node 24.21.0 está instalado; a [lista oficial de releases](https://nodejs.org/en/about/previous-releases)
-identifica a linha 24 como LTS. Fixar versões exatas no lockfile npm após instalar
-e testar; selecionar tag/digest disponível da imagem Node 24 antes do build.
-PostgreSQL 16 é o major proposto nos dois ambientes; consultar engine minor
-disponível no RDS de us-east-1 e fixá-lo antes do plano. Não presumir que uma
-imagem ou engine específica já foi baixada/testada.
+identifica a linha 24 como LTS. T06 instalou Express 5.2.1 e pg 8.23.0 com versões
+exatas e lockfile; `npm ci` e a integração passaram. T10 fixou a base oficial
+Node 24.21.0 bookworm-slim pelo digest
+`sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6`,
+resolvido por docker buildx imagetools inspect; runtime validado em linux/amd64. O teste local usou PostgreSQL 16.15, imagem oficial fixa
+por digest em `app/test/postgres-image.txt`; consultar separadamente a engine
+minor disponível no RDS de us-east-1 antes do plano. Não presumir disponibilidade
+no RDS somente porque uma versão Docker foi validada.
 
 | Configuração futura | Local | EC2/RDS |
 |---|---|---|
-| `PORT` | 3000. | 3000; processo escuta `0.0.0.0` no container. |
+| `PORT` | .env Compose controla publicação loopback no host (3000 padrão); dentro do container permanece 3000. API nativa usa PORT de escuta. | 3000; processo escuta `0.0.0.0` no container. |
 | `PGHOST`, `PGPORT` | Serviço `db`, 5432 no Compose; host/porta próprios ao testar app nativa. | Endpoint RDS, 5432. |
-| `PGDATABASE`, `PGUSER`, `PGPASSWORD` | `.env` local ignorado; `.env.example` só contém placeholders. | Arquivo protegido na EC2; valores nunca no repositório/user-data. |
+| `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Compose deriva de POSTGRES_DB/USER/PASSWORD do .env ignorado; exemplo contém somente placeholders. API nativa usa PG* do ambiente. | Arquivo protegido na EC2; valores nunca no repositório/user-data. |
 | `PGSSL` | `false`, no bridge local. | `true`; validar certificado e hostname do RDS. |
 | `PGSSLROOTCERT` | Não necessário. | Caminho do bundle CA oficial montado somente para leitura. |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Serviço PostgreSQL recebe os mesmos valores de conexão do app. | Não iniciar serviço PostgreSQL na EC2. |
 
 D08: container API não-root, cópia somente dos arquivos necessários, `npm ci`
-com lockfile e dependências de produção no runtime; multi-stage proposto pela
-separação build/test/runtime. `.dockerignore` exclui segredos, node_modules,
+com lockfile e dependências de produção no runtime; multi-stage adotado para
+separar instalação de dependências e execução da API. `.dockerignore` exclui segredos, node_modules,
 Git, evidências e testes desnecessários ao runtime. Nada sensível em build args.
+
+T10 implementou dois estágios dependencies/runtime na mesma base fixada. Primeiro
+npm ci --omit=dev --ignore-scripts --no-audit --no-fund; depois COPY seletivo com
+chown node:node, USER node e CMD exec node src/server.js. O entrypoint da base
+executou Node como PID 1/UID 1000, verificado por /proc e id; SIGTERM encerrou/0.
+Não há build args nem senhas na imagem. As recomendações oficiais fundamentam
+[estágios, USER e digest](https://docs.docker.com/build/building/best-practices/) e
+[contexto/.dockerignore](https://docs.docker.com/build/concepts/context/#dockerignore-files).
+
+.dockerignore nega o contexto geral, reabre manifests/src/sql e exclui segredos/
+artefatos também nesses diretórios. Auditoria real exportou COPY . via FROM
+scratch e confirmou 10 arquivos, sem node_modules/testes ou marcadores .env/PEM.
+Esses marcadores não continham credenciais e foram removidos após a conferência.
+run-docker.js cria rede bridge e PostgreSQL separados com UUID/labels conferidos,
+senha em memória e dados tmpfs; somente a API publica loopback. Migração pela
+mesma imagem, verify-api.py, health e SQL/DATE passaram; zero linhas e recursos
+temporários ao final. Imagem local preservada. Esse teste não implementa Compose
+nem comprova volume persistente. O aviso Docker --time da primeira execução foi
+corrigido para --timeout no novo runner; segunda execução passou sem o aviso.
 
 Compose: serviços `api` e `db`, rede bridge `reservas-net`, volume nomeado
 `reservas-data` em `/var/lib/postgresql/data`. Publicar API apenas em
@@ -134,7 +219,28 @@ explica a condição de saúde. A aplicação também trata reconexão/falha do 
 `depends_on` sozinho não resolve queda posterior. Documentar setup `.env` e
 comando único `docker compose up --build --wait`.
 
-O SQL inicial será montado em `docker-entrypoint-initdb.d` para volume novo.
+T11 implementou docker-compose.yml/.env.example e runner test:compose. Base db
+é o mesmo digest PostgreSQL 16.15 dos testes; API usa build app/USER node.
+Healthcheck db usa TCP -h 127.0.0.1, evitando tratar o servidor temporário de
+bootstrap Unix como pronto; API verifica HTTP 200/status/database via Node.
+Intervalos 3s, timeout 3s, start_period 5s/start_interval 1s; Compose >=2.20.2,
+validado v5.5.1. .env.example define PORT/POSTGRES_DB/USER/PASSWORD, senha
+placeholder. PG* da API são derivados/constantes, sem segunda senha para divergir.
+[Interpolação](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+usou obrigatórios :?; senha ausente deu exit 1 e config válido exit 0, sem dump.
+[Healthchecks](https://docs.docker.com/reference/compose-file/services/#healthcheck)
+e [entrypoint PostgreSQL](https://hub.docker.com/_/postgres) fundamentam readiness
+e bootstrap só em volume vazio. Volume/rede recebem prefixo do projeto para
+isolar stacks. down mantém volume; [referência CLI](https://docs.docker.com/reference/cli/docker/compose/down/).
+
+Teste real: criou api/db parados, up --build --wait e ps healthy; db health exit 0
+terminou às 22:41:56.797 -03:00 e API iniciou 22:41:57.175 -03:00. Bridge com ambos,
+banco sem publicação e API loopback, volume/mount read-only e UID 1000 conferidos.
+CRUD/SQL/DD-MM-YYYY/DATE passaram. Projeto UUID e env 0600 /tmp temporários;
+cleanup sem down -v e remoção separada do volume novo, só após conferir labels;
+zero linhas/recursos. Não há teste de recriação/persistência nessa tarefa.
+
+T11 montou o SQL inicial read-only em `docker-entrypoint-initdb.d` para volume novo.
 Volumes existentes não recebem novamente esses scripts: aplicar migração
 explicitamente quando necessário. Testes locais antes do Compose usarão uma
 instância PostgreSQL de teste com porta apenas no loopback e banco exclusivo.
@@ -142,6 +248,38 @@ Persistência: criar linha, conferir SQL, recriar API/banco preservando o volume
 buscar novamente e limpar somente o registro criado pelo teste. Nunca `down -v`
 para testar persistência. Testes de erro exercitam ausentes, vazios, tipos errados,
 datas impossíveis, status desconhecido, IDs inválidos e 404.
+
+### T12 — decisão e implementação da verificação
+
+verify-persistence.py usa duas fases para manter verificação e recriação local
+separadas: prepare grava linha via HTTP, confere SQL e salva checkpoint 0600
+exclusivo; check exige IDs diferentes de api/db, mesmo nome/data de criação do
+volume e linha idêntica por GET/SQL. Reutiliza Verifier de verify-api.py, stdlib
+Python e psql do db. Inspects limitados a IDs/labels/state/mounts/CreatedAt;
+nenhum ambiente/senha/config expandido é publicado. ID inteiro e marcador UUID
+validados limitam as consultas SQL; cleanup HTTP confere marcador antes de DELETE.
+Check limpa a linha própria em finally mesmo na divergência, confirma SQL count
+0 e remove checkpoint. Cleanup separado permite cancelar prepare; não declara
+persistência. Falha de limpeza mantém checkpoint e informa IDs/marcador; POST
+sem resposta exige conferência. Nunca faz up/down nem remoção de volumes.
+
+run-persistence.py/test:persistence cria fixture local UUID e env 0600 fora do
+repo. Mantém sentinela para comprovar que limpezas do verificador não excluem
+outro registro. Recria api/db via up --no-build --force-recreate --wait, retendo
+volume; IDs/CreatedAt e HTTP/SQL são reais. Negativo altera somente status da
+linha própria por SQL e deve retornar 1; outro negativo sem recriação também
+retorna 1. Proteção contra sobrescrita e cancelamento são verificados. Ao final,
+remove sentinela, exige total SQL 0 e labels próprias antes de down sem -v e
+remoção separada do volume novo vazio. Em falha de cleanup, preserva fixture/env
+para recuperação. Não usa recurso AWS nem dados/volumes de outros projetos.
+
+Fontes primárias consultadas em 28/09/2026:
+[up/force-recreate preserva volumes montados](https://docs.docker.com/reference/cli/docker/compose/up/),
+[down sem --volumes](https://docs.docker.com/reference/cli/docker/compose/down/),
+[ciclo de vida de volumes](https://docs.docker.com/engine/storage/volumes/).
+A primeira execução falhou por Path.open(opener=...), corrigida para open da
+stdlib; resultados de cada execução em compose-persistencia.txt/diário.
+R10 local comprovado; não estender esse aceite a RDS/execução AWS.
 
 ## Rede AWS e contratos dos módulos
 
@@ -155,15 +293,21 @@ NAT para o CRUD. Uma EC2 em uma pública basta; não propor ALB/NAT Gateway.
 | Módulo | Entradas principais | Saídas / integração |
 |---|---|---|
 | `vpc` | Nome, CIDR, AZs, CIDRs de subnets, tags. | `vpc_id`, `public_subnet_ids`, `private_subnet_ids`; alimenta SG, EC2 e RDS. |
-| `security-group` | `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
-| `ec2` | Primeira pública, SG EC2, AMI, `t2.micro`, key pair existente, user-data sem segredos, profile existente opcional, tags. | ID e IP público; URL API composta no root. |
-| `rds` | Privadas, SG RDS, engine version, `db.t3.micro`, nome do banco, credenciais sensíveis, tags. | Identifier, hostname e porta; alimenta configuração posterior do deploy na EC2. |
+| `security-group` | `name`, `vpc_id`, `ssh_cidr`, `api_allowed_cidrs`, tags. | `ec2_sg_id`, `rds_sg_id`; EC2 22/3000 restritas; RDS 5432 com SG EC2 como única origem. |
+| `ec2` | name, primeira pública, SG EC2 único, AMI AL2023 x86_64 explícita, instance_type=t2.micro, key_name existente, iam_instance_profile=null/LabInstanceProfile, tags; user-data fixo sem input de segredo. | instance_id e public_ip; URL API composta no root T21. |
+| `rds` | identifier, duas privadas, SG RDS único, engine_version, instance_class=db.t3.micro, db_name, username/password sensíveis, skip_final_snapshot explícito/final_snapshot_identifier, tags. | identifier, hostname (address sem porta) e port; alimentam deploy futuro, sem credenciais nos outputs. |
 
-D10: SG EC2 restringe SSH ao `<SSH_CIDR>` confirmado (preferir IP atual /32)
-e 3000 a `<API_ALLOWED_CIDRS>` necessários para aluno/professor. Não escolher
-`0.0.0.0/0` automaticamente; consultar acesso da avaliação antes do plan.
-Saída EC2 permite DNS VPC, HTTP/HTTPS para instalação/artefatos/serviços e
-5432 ao SG RDS; revisar regras efetivas. RDS não ganha regra 5432 por CIDR.
+D10: conforme decisão do aluno em T13, SG EC2 restringe SSH e API 3000 somente
+ao seu IP atual IPv4 /32, explícito e revalidado antes do plano. Módulo rejeita
+CIDRs amplos/IPv6/conjunto vazio; mais IPs /32 exigem aprovação do acesso.
+Saída EC2 permite TCP 80/443 para instalação/artefatos/serviços e TCP 5432 ao
+SG RDS. DNS VPC AmazonProvidedDNS não é filtrado por SG (particularidade AWS),
+portanto não criar regra 53 externa nem alegar filtragem do Resolver por SG.
+RDS ganha somente entrada TCP 5432 do SG EC2 e nenhuma saída iniciada;
+respostas das conexões permitidas são stateful. Conferir regras efetivas em T23.
+Sem regras inline nos SGs; recursos de regras separados referenciam ambos os
+IDs após criação dos grupos, evitando ciclos. Outputs aguardam suas regras.
+Provider remove o ALLOW ALL default ao criar SG novo; essa execução ainda futura.
 RDS privado e encriptado, subnet group privado, armazenamento inicial 20 GiB
 e Single-AZ propostos para o Lab; isso não remove a exigência de subnets em
 duas AZs. Disco EC2 encriptado, IMDSv2 e key pair existente. Tags
@@ -174,13 +318,54 @@ RDS security group e egress EC2 que o referencia precisam de ordem de criação
 sem ciclo: criar SGs primeiro e regras separadas; não referenciar mutuamente
 os SGs em regras inline. Tags em subnet group, tabela e bucket também contam.
 
+### T13 — preflight observado e decisões
+
+Consultas AWS read-only em 28/09/2026: default/us-east-1/assumed-role voclabs,
+conta completa mantida privada; aluno confirmou Learner Lab da prova e painel
+US$0 usados de US$50. Orçamento é relato do painel, não teste automatizado.
+AZs us-east-1a/use1-az4 e us-east-1b/use1-az6 available/t2.micro ofertada.
+RDS PostgreSQL16.15 disponível com db.t3.micro/gp3/VPC/mínimo20GiB/encriptação e
+ambas AZs. Seleção Single-AZ encriptada/privada proposta; funcionamento e SGs
+serão conferidos na AWS depois de apply autorizado. Única key pair no retorno
+vockey/RSA; LabInstanceProfile já contém LabRole, sem criar IAM. Posse da chave
+privada e SSH não testados; são pré-condições futuras do deploy.
+
+IP IPv4 HTTPS observado, SSH e API limitados a esse /32 conforme resposta do
+aluno. Não adicionar acesso público geral ou CIDR de professor não informado.
+Conta/IP/opções em infra/preflight.local.json 0600, ignorado antes de criar,
+sem credenciais/chave privada; não é tfvars/state/plan nem aprovação de apply.
+Reconsultar token/identidade/IP/opções antes dos planos. T13 não criou recurso.
+
+Primeiro init provider6.65.0 falhou apesar de Registry HTTPS listar a versão;
+segunda tentativa direct isolada passou na mesma versão, causa inicial não
+comprovada. Validate passou com sonda contendo dynamodb_table e tabela LockID S.
+Leitura de schema exigiu backend S3 inicializado; corrigida só sonda em /tmp para
+usar root sem declaração remota, mantendo S3 real pendente até bootstrap.
+Schemas DynamoDB/RDS e lockfile passaram; caches temporários próprios removidos.
+Fonte oficial Terraform1.16.2 mantém dynamodb_table String/depreciado e seu uso;
+locking ativo será conferido T21, não inferido desses testes.
+
+Evidências reais em aws-preflight.txt e diário, incluindo tentativas/erros,
+redigindo conta/IP. Fontes primárias:
+[release provider6.65.0](https://github.com/hashicorp/terraform-provider-aws/releases/tag/v6.65.0),
+[catálogo Registry](https://registry.terraform.io/v1/providers/hashicorp/aws/versions),
+[código backend Terraform1.16.2](https://github.com/hashicorp/terraform/blob/v1.16.2/internal/backend/remote-state/s3/backend.go),
+[AZs](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-availability-zones.html),
+[opções RDS](https://docs.aws.amazon.com/cli/latest/reference/rds/describe-orderable-db-instance-options.html),
+[identidade STS](https://docs.aws.amazon.com/cli/latest/reference/sts/get-caller-identity.html),
+[key pairs](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-key-pairs.html),
+[instance profile existente](https://docs.aws.amazon.com/cli/latest/reference/iam/get-instance-profile.html).
+
 ## Terraform, bootstrap e state
 
-D11: Terraform instalado 1.16.2, proposto como versão fixa inicial após validar
-compatibilidade na tarefa correspondente; selecionar release estável do provider
-AWS compatível e versioná-lo em `.terraform.lock.hcl` em ambos os roots.
-`infra/backend` começa com state local ignorado e protegido; `infra` tem backend
-S3 parcial em providers, configurado por `backend.local.hcl` ignorado.
+D11: T13 validou Terraform `= 1.16.2` e provider hashicorp/aws `= 6.65.0` em
+sonda isolada, init/validate/schema reais sem credenciais/backend remoto. Fixar
+essas versões e versionar `.terraform.lock.hcl` em ambos os roots quando criados.
+Não atualizar sem necessidade/revisão de compatibilidade. A sonda tem lockfile
+real em /tmp/devops-t13-provider.lock.hcl; a configuração final gera seu próprio.
+`infra/backend` usa state local ignorado e protegido, implementado em T14;
+o root principal `infra` implementado T21 tem backend S3 parcial em providers,
+configurado por `backend.local.hcl` ignorado, após conferência T16 e nova T21.
 
 S3 exclusivo com nome globalmente único, versionamento, encriptação SSE-S3
 AES256 e bloqueio de acesso público. DynamoDB on-demand, chave de partição
@@ -197,8 +382,10 @@ atualização exige revisar essa compatibilidade, não simplesmente ignorar o av
 Ordem reproduzível, com autorizações separadas:
 
 1. Confirmar ferramentas, credenciais/conta/região/Lab, versões, nomes e variáveis.
-2. `infra/backend`: fmt, init, validate, plan; apresentar plano; após autorização,
-   aplicar. Conferir bucket/versionamento/encriptação/bloqueio público e tabela.
+2. Conferir bucket próprio existente/ownership/região/tags. Após SCP realT16,
+   reprodução nova cria esse bucket por CLI somente com autorização concreta.
+   `infra/backend`: fmt/init/validate/plan; apresentar plano; após autorização,
+   aplicar três configs S3/tabela. Conferir versionamento/encriptação/BPA/LockID.
 3. Só então inicializar `infra` com backend real; fmt, validate e plan completo.
    Revisar IAM ausente, tipos, tags, SGs, RDS privado/encriptado e outputs.
 4. Após autorização desse plano, provisionar; coletar estado efetivo AWS,
@@ -218,16 +405,23 @@ adaptar somente com verificação oficial e sem reduzir exigências da prova.
 
 ## Deploy reproduzível da EC2 e inicialização do RDS
 
-D12: EC2 executa somente o container da API. User-data instala Docker e prepara
-diretórios/serviço sem senha, token GitHub ou credenciais AWS. Escolher AMI x86_64
-compatível com t2.micro e confirmar boot/instalação na execução real.
+D12: EC2 executará somente o container da API (deploy T24). Módulo T20 usa
+user-data.sh fixo para instalar Docker por dnf, habilitar/iniciar serviço Docker
+e preparar /opt/prova-reservas(root0755) e /etc/prova-reservas(root0700), sem
+senha/token GitHub/credenciais AWS. Não aceita user-data arbitrário como input.
+Root T21 selecionou AMI explícita Amazon Linux2023 standard/x86_64/HVM/EBS/root8GiB
+em us-east-1 compatível com t2.micro, ID/OS/arquitetura consultados antes do plan;
+boot/Docker efetivos conferidos por SSH em T24. Disco raiz gp3 8GiB/encriptado/excluído na
+terminação, tags no disco/instância. IMDSv2 obrigatório/hop1, metadata tags
+desabilitadas, CPUcredits standard. Mudança no user-data propõe recriação pelo
+provider, sempre sujeita à revisão do plano; não é autorização de apply/destroy.
 
-Proposta de deploy por SSH/SCP a partir da máquina do aluno, sem depender de
-registry privado ou nova role:
+Deploy por SSH/SCP implementado em T24, sem depender de registry privado ou
+nova role. Passos1–3/5 executados; CRUD do passo4 continua T25:
 
 1. Build da imagem x86_64 a partir do commit escolhido e lockfile. Salvar imagem
    em tar fora do Git; calcular checksum. Registrar commit/tag/checksum.
-2. SCP de imagem, SQL e bundle CA público oficial; provisionar arquivo de ambiente
+2. SCP de imagem contendo a migração SQL e bundle CA público oficial; provisionar arquivo de ambiente
    por transferência protegida sem conteúdo em logs. Secret local e remoto com
    modo 0600 fora do repo; não colocar segredo em argumento de linha de comando.
 3. Carregar a mesma imagem na EC2; executar comando de migração nela usando
@@ -251,9 +445,24 @@ e só então versionar. Não criar arquivos vazios com aparência de teste aprov
 Evidências de falha permanecem identificadas como falha; validar novamente após
 correção, mantendo explicação no diário. Imagens/screenshots são opcionais.
 
-Scripts futuros Python 3 usam stdlib para HTTP; `verify-aws.py` também depende de
-AWS CLI e SSH e recebe identifiers/URL sem senhas. Testes API usam PostgreSQL
-isolado; scripts criam IDs próprios e não apagam dados gerais. Verificação de
+Python 3 usa stdlib para HTTP. Em T09, `scripts/verify-api.py` foi executado com
+Python 3.12.3: urllib.request/HTTPError tratam respostas HTTP sem pip,
+argparse/json cuidam de CLI e corpo. URL não admite credenciais/query/fragmento;
+redirecionamentos são recusados e há timeout por requisição. Referências:
+[urllib.request](https://docs.python.org/3.12/library/urllib.request.html) e
+[urllib.error](https://docs.python.org/3.12/library/urllib.error.html).
+Script cria marcador UUID, rastreia IDs devolvidos com esse marcador e limpa em
+finally após confirmar propriedade por GET. Exit 0 só após verificar/limpar;
+falha retorna 1 e CLI inválida 2. Em perda de resposta/limpeza, informa marcador
+ou IDs pendentes, sem anunciar CRUD aprovado nem excluir dados gerais.
+Teste real preservou uma sentinela, induziu CHECK temporário/PUT 500 e conferiu
+exit 1 com limpeza por SQL. O teste persistence.test.js encerrou server.js,
+iniciou outro PID na mesma porta e conferiu ID/DATE/campos por SQL durante a parada
+e GET após reinício; pg_postmaster_start_time permaneceu igual. Isso comprova
+persistência fora do processo nativo, não persistência de volume Compose/RDS.
+`verify-aws.py` futuro também depende de AWS CLI e SSH e recebe identifiers/URL
+sem senhas. Testes API usam PostgreSQL isolado; scripts criam IDs próprios e não
+apagam dados gerais. Verificação de
 segurança compara atributos AWS reais, não só a presença de strings em arquivos.
 `verify-delivery.py` checa estrutura e metadados, mas não substitui revisão humana,
 data presencial ou experiência do aluno. Todos retornam código não zero na falha.
@@ -288,7 +497,9 @@ autorização para as versões de state e o backend. Bucket versionado só fica 
 após remover versões antigas e delete markers, não apenas objetos atuais. Sem
 `force_destroy` automático para eliminar revisão. Limpar somente bucket/chave e
 tabela próprios, após principal destruído e sem operações de lock em curso;
-então destruir `infra/backend` usando seu state local. Confirmar resultado real.
+então destruir quatro managed de `infra/backend` usando seu state local.
+Bucket físico externo após handoffT16 exige exclusão CLI autorizada quando vazio;
+destroy desse root não o remove. Confirmar resultado real.
 Não apagar state local necessário para concluir ou recuperar uma limpeza falha.
 
 D15: projeto/evidências ficam neste repositório; `entrega.md` é preparado apenas
@@ -314,3 +525,384 @@ Identidade e entrega foram informadas em 28/09/2026: Andreyh Rodrigues de Souza,
 RA 6325231, entrega 01/10/2026. Os acessos AWS continuam pendentes até a etapa
 correspondente. Mudanças futuras atualizam requisitos, design e tarefas antes de
 código. A revisão das specs não autoriza provisionar/destruir nem abrir o PR.
+
+## T14 — bootstrap implementado e plano revisado
+
+infra/backend tem versions/providers/variables/main/outputs, tfvars.example
+sem dados reais e .terraform.lock.hcl gerado neste root. Terraform=1.16.2 e
+AWS=6.65.0 permanecem exatos. backend local path terraform.tfstate não usa S3;
+state de recursos ainda ausente antes de apply. Provider allowed_account_ids
+confere conta privada STS, região validada us-east-1; default_tags no bucket/tabela.
+
+Cinco recursos: aws_s3_bucket.state (force_destroy=false), versioning Enabled,
+server_side_encryption AES256, public_access_block quatro flags true e tabela
+locks PAY_PER_REQUEST, hash_key LockID/String. Três configurações dependem do
+bucket.id; outputs propõem bucket/key/region/encrypt/dynamodb_table do principal,
+sem segredos. Sem IAM/KMS novos, credenciais em HCL, módulos principais ou
+backend remoto implementado antes do bootstrap. Nomes reais próprios com sufixo
+aleatório, sem conta/IP; unicidade global não comprovada antes da criação.
+
+fmt/check/init direct/validate passaram 0. Init comum falhou 1 inicialmente e
+com lockfile readonly; Registry listava 6.65.0. CLI config direct temporária
+0600 passou nas duas tentativas, provider assinado; causa da diferença não
+comprovada, sem config global/upgrade. Plano real retornou 2 esperado com
+-detailed-exitcode: cinco create, zero update/delete. JSON conferido em memória
+validou todos os atributos/vínculos e conta privada, sem publicar valores
+sensíveis. Negativo de nome reservado -an retornou 1; plano válido preservado.
+S3 filtrado []/0 e tabela ResourceNotFoundException/254 antes/depois, STS mesma
+conta; nenhum recurso criado. Dados/plan/cache locais ignorados/0600,
+lockfile não sensível versionável. Evidências backend-validate/backend-plan.
+
+T14 verificada não significa R20 completo: S3/DynamoDB efetivos são T16, state
+remoto/locking ativo T21. T15 revisa plano/custo e obtém autorização específica.
+Nenhuma falha SCP/ObjectLock atual observada ou ajuste por CLI de criação.
+
+Fontes primárias consultadas na versão fixada:
+[provider AWS6.65.0](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/index.html.markdown),
+[bucket](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket.html.markdown),
+[versionamento](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket_versioning.html.markdown),
+[encriptação](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/s3_bucket_server_side_encryption_configuration.html.markdown),
+[DynamoDB](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/dynamodb_table.html.markdown),
+[backend local](https://developer.hashicorp.com/terraform/language/backend/local),
+[plan/exit codes](https://developer.hashicorp.com/terraform/cli/commands/plan),
+[show JSON sensível](https://developer.hashicorp.com/terraform/cli/commands/show),
+[nomes S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
+
+## T15 — revisão de plano/custo antes da decisão humana
+
+Em 29/09/2026, plano T14 preservado e reaberto com show JSON/0; hash/atributos/
+cinco create/zero update/delete/conta/região/tags/state local conferidos. STS
+atual/default/us-east-1 confirmou conta terminada 5811/voclabs. Bucket/table
+próprios ainda ausentes, sem atribuir disponibilidade global ao nome S3.
+Escopo de aprovação: apenas cinco recursos bootstrap, sem IAM/KMS/rede/EC2/RDS.
+
+DynamoDB table_class null no plano, omitido em código: estimativa usa default
+Standard documentado pelo provider6.65.0/AWS, não afirma atributo já aplicado.
+Preços comerciais de us-east-1 via tabelas públicas AWS Price List Bulk API,
+HTTPS 200, versões/SKUs/hashes registrados em backend-revisao.txt. Cenário de
+um mês: 10 MiB totais S3 incluindo versões, 1 MiB DDB, 1000 PUT/LIST, 1000 GET,
+1000 WRU/1000 RRU e 10 MiB de saída; total Decimal US$0.00749765625, arredondado
+US$0.008 (~US$0.01/mês), sem usar franquias/créditos. Hipótese de volume/duração,
+sem teto automático ou gasto real confirmado. Saldo painel é relato histórico T13.
+
+Revisão pronta/decisão humana pendente; T15 em andamento, T16 pendente. Não
+regenerar/substituir plano revisado nem aplicar antes de aprovação. Se conta/
+configuração/plano mudar, apresentar novo plano e obter aprovação desse escopo.
+Credenciais devem ser revalidadas em T16; teardown exige autorização separada.
+Fontes [S3](https://aws.amazon.com/s3/pricing/),
+[DynamoDB](https://aws.amazon.com/dynamodb/pricing/),
+[API de preços públicos](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html),
+[classe Standard default](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/dynamodb_table.html.markdown).
+
+
+## D16 — recuperação bootstrap após SCP real T16
+
+Primeiro apply criou bucket/tabela e falhou por 403/AccessDenied/explicit deny SCP
+em GetBucketObjectLockConfiguration. State parcial/backup preservados. Provider
+AWS 6.65 faz essa leitura no recurso completo:
+[bucket.go](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket.go).
+[bucket_data_source.go](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/internal/service/s3/bucket_data_source.go)
+consulta HeadBucket/região/website sem ObjectLock. Não alterar IAM/SCP/provider.
+
+Removed aws_s3_bucket.state/destroy=false preserva físico; data do mesmo bucket
+com postcondition região; três configs referenciam seu ID; DynamoDB inalterado.
+[Removed oficial](https://developer.hashicorp.com/terraform/language/block/removed)
+permite handoff sem destruir. Ownership conferido por CLI expected-bucket-owner/
+conta privada do Lab. Argumento deprecated aceito em versão/encriptação, não
+suportado em BPA nessa versão (validate real falhou, corrigido sem mudar versão).
+
+Impacto: bucket físico/tags fora da gestão TF; reprodução nova depende de CLI
+create autorizado/ownership/região/tags antes do plan; teardown exclui bucket
+vazio por CLI após destroy dos quatro managed. Criado nesta sessão pelo apply
+parcial. Nunca reusar plano anterior com state modificado nem desabilitar
+refresh/locking/usar target/replace para mascarar SCP.
+Plan recuperação revisado: três configs create, forget bucket sem delete, tabela
+no-op. Mesmos nomes/região/proteções/custo do bootstrap autorizado; nenhum novo
+serviço/escopo principal/EC2/RDS/teardown. Apply 0/8 consultas AWS 0/plan posterior 0
+No changes comprovaram convergência. S3 Enabled/AES256/BPA4true/tags e DynamoDB
+ACTIVE/on-demand/LockID String. State local 0600/quatro managed normais + data.
+T15/T16 verificadas, R20/R21 parciais até backend remoto/locking T21. Backend.txt
+preserva falhas/correções/applies/planos/consultas reais. Próxima T17.
+
+
+## T17 — D09 implementada e contrato de rede validado localmente
+
+Child infra/modules/vpc tem main/variables/outputs/versions e teste network.
+Inputs name/vpc_cidr/availability_zones/public_subnet_cidrs/private_subnet_cidrs/
+tags; sem provider/backend/data próprios, root T21 configura us-east-1/conta.
+Versões exatas 1.16.2/6.65.0, sem lockfile próprio no child; validação copia do
+bootstrap readonly. D09 CIDR 10.20.0.0/16/DNS/quatro subnets/duas AZs preservados:
+públicas IP true/default 0.0.0.0/0->IGW, privadas IP false/route=[] (local AWS futura).
+Uma table por tipo, associações explícitas, sem NAT/ALB. Oito resource blocks,
+doze instâncias nos inputs D09. Tags VPC/IGW/subnets/tables; associações sem tags.
+Outputs VPC/listas públicas/privadas na ordem dos inputs de AZ.
+Validações escolhidas, não critérios extras atribuídos ao professor: IPv4 canônico/
+prefixos 16–28/dois CIDRs por tipo/duas AZs distintas us-east-1/contenção/não
+sobreposição/Project, Environment e Owner obrigatórios. Preconditions com cidrhost
+normalizam ao prefixo VPC/menor prefixo do par, rejeitam máscaras diferentes
+sobrepostas. Teste CIDRs alternativos passou; AZs atuais ainda exigem preflight.
+Root temporário com cópia exata/teste/lockfile, sem state/credenciais. Fmt/init/validate/
+grafo passaram; nove testes locais command=plan usam
+[provider mock](https://developer.hashicorp.com/terraform/language/tests/mocking),
+sem APIs AWS, não comprovam deploy/IDs reais. Tuple/list corrigido tolist;
+IDs unknown excluídos das asserções, referências conferidas pelo grafo nativo.
+Segunda falha expect_failures IPv6 pedia erro recurso após variável bloquear;
+corrigida para var.vpc_cidr, guardas intactas. Falhas/reexecuções vpc-validate.txt;
+root composto/plan AWS/execução T21/T23 futuros. T17 local verificada, próxima T18.
+
+Revisão final T17: outputs de subnets têm depends_on nas associações de rotas,
+para consumidores aguardarem rede pronta. Validate/grafo e nove testes locais
+reexecutados após mudança passaram/0; sem API AWS. Capturas finais preservadas.
+
+## Implementação T18 — regras separadas, validada localmente
+
+Em 29/09/2026, módulo security-group adicionou name para nomes/tags distintos,
+sem mudar o contrato ec2_sg_id/rds_sg_id. Inputs explícitos/sem defaults, tags
+obrigatórias e IPv4 /32 por decisão do aluno, não exigência adicional do professor.
+Recursos aws_vpc_security_group_ingress_rule/egress_rule conforme provider fixado;
+grupo sem inline. Regra RDS usa somente SG EC2; saída EC2 PostgreSQL só SG RDS.
+Saída web limitada às portas 80/443; nenhuma regra RDS de saída iniciada.
+D10 esclarecido sobre DNS não filtrado por SG e natureza stateful, conforme
+[fonte AWS](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+e [provider 6.65.0](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/security_group.html.markdown).
+Não introduzir DNS Firewall ou regras inline para aparentar filtragem do Resolver.
+Fmt inicial 2 por teste multilinha corrigido; fmt/init/validate/grafo 0 e
+14 testes mock/command=plan 0. Grafo confirma referências/outputs sem ciclos;
+schema confirma tags. Evidência security-group-validate.txt, sem API AWS ou
+plan principal. R15/R19/R22 parciais até T21/T23; próxima T19, não implementada.
+
+## Implementação T19 — RDS validado localmente
+
+Em 29/09/2026, módulo rds contém dois recursos/11 inputs/3 outputs, encriptação,
+acesso público false, PostgreSQL 16.15/db.t3.micro/gp3 20GiB sem autoscale e
+Single-AZ. Classe limitada à prova, versão16.x completa; disponibilidade AWS
+precisa novo preflight, não inferida de mock. Root T21 deverá usar privadas do
+módulo VPC (duas AZs) e SG RDS do módulo security-group; formato de IDs não prova
+privacidade/rotas/AZs. Outputs identifier/hostname(address)/port sem credenciais.
+Username/password sensitive sem default, senha ainda presente no state/plano;
+proteção existente mantida. Sem IAM/KMS próprios/Secrets Manager/monitoramento
+extra. Engine Extended Support desabilitado, versão menor automática false;
+rever disponibilidade/manutenção antes do plan real. Tags instância/subnet group.
+Proposta Lab sem backup automático retido e sem deletion_protection. Política de
+snapshot explícita: skip_final_snapshot obrigatório; final_snapshot_identifier
+coerente, necessário ao retê-lo. D14 mantém revisão de dados/retenção/custos e
+consentimento antes de destruir; nenhum fixture autoriza apagar/reter dados.
+Primeiro test1: password conflita com manage_master_user_password=false; omissão
+corrigiu, senha sensível preservada. Retry17 mock/plan passed, fmt/init/validate/
+grafo/schema0, oito vínculos sem ciclo. rds-validate.txt preserva todas capturas
+inclusive falha; não comprova AWS/SQL. Fontes:
+[provider](https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/db_instance.html.markdown),
+[VPC/RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html),
+[API RDS](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html).
+T19 local verificada, R17/R18/R19/R22 parciais; próxima T20 não implementada.
+
+## Implementação T20 — EC2/user-data validados localmente
+
+Em 29/09/2026, oito inputs/dois outputs, um aws_instance/nenhum IAM/EIP/KMS/key
+novo; profile null ou LabInstanceProfile existente. Tipo t2.micro obrigatório,
+AMI explícita AL2023 standard/x86_64/HVM/EBS/raiz<=8GiB a selecionar em T21.
+IMDSv2 required/hop1/tags disabled, root 8GiB/gp3/encrypted/delete_on_termination,
+tags no disco/instância, CPU standard/sem monitoramento detalhado. Source_dest_check
+true/tenancydefault. Root futuro conecta primeira pública/SG EC2 correto.
+User-data fixo file(), sem variável arbitrária/segredos; Docker via dnf/serviço,
+diretórios root 0755/root 0700. Deploy de imagem/SQL/CA/ambiente sensível T24,
+sem PostgreSQL local. Alteração propõe recriação, sempre revisão antes de apply.
+Dez testes mock/plan + três Bash/stubs locais aprovados; Bash-n/fmt/init/validate/
+grafo/schema0. Falha inicial profile unknown corrigida só no teste, vínculo
+source/grafo/schema; falso positivo de comentário na revisão auxiliar corrigido.
+Capturas ec2-validate.txt, nenhum boot/instância/deploy/AWS real. T20 local
+verificada, R13/R16/R19/R22 parciais; próxima T21 backend/root/plano/locking.
+
+## Implementação T21 — composição e backend efetivo
+
+T21 executada em 29/09/2026 após revisão do aluno: root infra/main.tf/variables.tf/
+providers.tf/outputs.tf e lockfile real, módulos anteriores preservados. STS atual
+mesma conta terminada5811/default/voclabs/us-east-1; S3 Enabled/AES256/BPA4true,
+DynamoDB ACTIVE/PAY_PER_REQUEST/LockID String. AZs/RDS16.15/db.t3.micro/gp320GiB/
+encriptação/key vockey/LabInstanceProfile-LabRole revalidados. IP atual /32 privado
+somente SSH/API; saldo atual/duração do token/posse da chave/SSH não inferidos.
+AMI concreta ami-048da71c4d98f46b1, AL2023 standard x86_64/HVM/EBS/uefi-preferred/
+root8GiB consultada, compatível com oferta t2.micro/us-east-1a; boot não testado.
+
+fmt/init S3 real/validate/grafo/fmt-check exit0. Provider filesystem_mirror local
+não autenticado nesta instalação, lockfile/hashes T14 preservados, sem nova
+assinatura alegada; nenhuma configuração global alterada. DynamoDB depreciado
+mantido por requisito, avisos reais preservados. Primeiro plan nativo adquiriu
+lock real; SIGSTOP por aproximadamente6s só no PID próprio após observá-lo;
+contender native exit1/ConditionalCheckFailedException/mesmo ID; finally SIGCONT,
+primeiro plan exit2 e item ausente ao final, sem edição manual/force-unlock.
+Falha auxiliar inicial JSONDecodeError antes de iniciar TF: get-item exit0 com
+stdout vazio indica item ausente; leitor corrigido para aceitar ausência, não
+inseriu lock. Captura inicial/correção/reexecução reais em backend-locking.txt.
+
+Plano principal real 23create/0update/0delete (VPC12/SG8/RDS2/EC2 1), JSON privado
+conferido por assertions: vínculos inputs/outputs/tags/segurança/região/AMI/política
+RDS/5outputs sem credenciais. EC2 pública0/SGEC2, RDS privadas/SGRDS,5432 somente
+referência SGEC2;22/3000 só IP atual /32. Proposta skip_final_snapshot=true/backup0
+não autoriza destruir; T22/T27 devem revisar retenção/custo/dados.
+SHA-256 plano: 2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+
+State list exit1/No state file was found e list-objects antes/depois exit0/sem
+objeto: init/backend S3 real e locking comprovados, gravação do state principal
+só primeiro apply T23; R20 continua parcial. Cache .terraform/terraform.tfstate
+é configuração local, não objeto de state de recursos remoto. Não criar vazio/
+state push simulado. T21 aceite de backend/plan/locking verificado; explicitação
+do objeto no aceite T23 mantém requisito R20, não dispensa conferência futura.
+R21 verificado: bootstrap aplicado/conferido antes init real, state local separado.
+R19/R22 continuam parciais até outputs efetivos/AWS/CRUD/verificadores futuros.
+
+Terraform-validate.txt/terraform-plan.txt/backend-locking.txt contêm comandos,
+horários, exit codes, hashes e redação declarada. Tfvars/backendconfig/plano/cache
+ignorados0600 preservados; senha sensitive ainda presente no privado plano/state.
+Sem apply/destroy/IAM novo/EC2/RDS/rede/boot/API/CRUD; sem bloqueio T21.
+T01–T21 verificadas nos seus ambientes, próxima T22 revisão de segurança/custo/
+autorização principal, nenhuma aprovação principal presumida do bootstrap.
+Não repetir suítes API/Docker/Compose/módulos anteriores inalteradas. Commit único
+coerente após conferir diff/stage/segredos, sem vazio/quantidade/push/merge/PR.
+
+Fontes oficiais: [S3](https://developer.hashicorp.com/terraform/language/backend/s3),
+[implementação Terraform1.16.2](https://raw.githubusercontent.com/hashicorp/terraform/v1.16.2/internal/backend/remote-state/s3/backend.go),
+[AMI AL2023](https://docs.aws.amazon.com/linux/al2023/ug/ec2.html).
+
+## T22 — revisão do plano principal, autorização pendente
+
+Em 29/09/2026, T22 revisou o plano principal T21 SEM apply. Identidade atual
+STS default/voclabs/us-east-1/mesma conta terminada5811 e IP atual /32 iguais ao
+plano. SHA-256 preservado2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7;
+23create/0update/0delete. Backend Enabled/AES256/BPA4true/DDB ACTIVE, lock ausente,
+objeto principal S3 ausente sem apply; nenhuma EC2 do projeto não terminada/RDS
+identifier previsto nas consultas. AMI available e key/profile existentes;
+posse da chave/SSH/saldo atual/duração token não inferidos.
+Show JSON0 e20 assertivas segurança0: vínculos EC2 pública/SGEC2 eRDS privadas/
+SGRDS, IMDSv2/discos encriptados/tipos/versão/tags/regras /32 e5432sem CIDR,
+nenhum novo IAM/EIP/NAT/KMS. Username/password permanecem privados no plano/state.
+RDSSingle-AZ20GiB/backup0/skip_final_snapshot=true/deletion_protection=false são
+propostas Lab para a revisão, sem consentimento de destruição/dados retidos.
+
+Preços regionais oficiais capturados com URLs/horários/hashes/versão/SKU/rateCode:
+EC2t2micro0.0116/h,RDSdbt3micro0.018/h,IPv4público0.005/h,EBSgp30.08/GB-mês,
+RDSgp30.115/GB-mês. Base730h28.198USD; cenário backend pequeno0.00749765625USD/mês.
+Cálculo Decimal comparado com soma Fraction independente, exit0. Arredondamento
+para cima:6hUS$0.24/24hUS$0.94/730hUS$28.21, principal+backend existente.
+Cenário:10MiB S3 versões cumulativas/1MiB DDB,1000requests ouunits porcategoria/
+10MiB saída porjanela; storage curto rateadohoras/730, não consumo medido.
+Sem franquias/FreeTier/créditos/impostos descontados; não é fatura/teto/saldo.
+Adicionais possíveis: RDS T3Unlimited0.075/vCPU-h acima baseline, tráfego interAZ/
+saídas extras/versões/retidos. Não prometer limite50$ para qualquer carga/tempo.
+
+Falhas reais preservadas: endpoint exploratório EC2HTTP404 descartado;
+pricing:GetProducts EBS exit254/AccessDenied Lab, sem alterar IAM/SCP. Alternativa
+pública do site EBS, endpoint derivado do próprio cliente. JSON direto falhou1/
+UnicodeDecodeError por gzip; corpo real descomprimido e JSON passou0, tarifa
+região/token/rateCode conferidos. Capturas/correções/cálculo em infra-revisao.txt;
+conta/IP/username/password/ARN sessão ocultados, brutos privados0600 preservados.
+Código/modules/bootstrap/lockfiles/planos/states e anteriores intactos.
+
+T22 em andamento: revisão pronta, autorização principal PENDENTE, T23 pendente.
+AGENTS regra10/T22 exigem escopo concreto e resposta explícita; aprovação anterior
+foi bootstrap, não presumir principal por revisão genérica/tempo. Próxima ação:
+apresentar23criações,conta/região/acessos/custo/hash e obter decisão do aluno.
+T23 só após aprovação e revalidar conta/IP/hash/backend; mudança de escopo/plano
+requer nova revisão. Deploy T24/T25/teardown T27/28/PR continuam separados.
+Não marcar requisitos AWS/CRUD/stategravado/deploy verificados por revisão.
+Sem bloqueio técnico após alternativa pública; decisão humana ainda necessária.
+Não repetir suítes inalteradas; nenhum apply/destroy/push/merge/PR/commit vazio.
+Sem commit extra nesta preparação; revisão/decisão no próximo marco coerente.
+
+Fontes: [EC2T2](https://aws.amazon.com/ec2/instance-types/t2/),
+[EBS](https://aws.amazon.com/ebs/pricing/),
+[IPv4](https://aws.amazon.com/vpc/pricing/),
+[RDS PostgreSQL](https://aws.amazon.com/rds/postgresql/pricing/),
+[Price List Bulk](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html).
+
+## Implementação T23 — plano aplicado e atributos conferidos
+
+Após revisão T22, aluno autorizou: “Autorizo que faça tudo que seja necessário
+para a conclusão das tarefas propostas, desde que esteja de acordo com o que foi
+solicitado”. Decisão registrada em infra-revisao.txt/diário; T22 verificada pela
+revisão concreta e autorização. T23 aplicou somente plano principal apresentado,
+SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+Conta terminada5811/default/voclabs/us-east-1/IP aluno /32/hash/backend revalidados.
+Plano de23create/0update/0delete; custo T22 permanece estimativa, saldo não atual.
+
+Apply real 2026-09-29T09:26:43-03:00–2026-09-29T09:33:10-03:00, exit0:23added/0changed/0destroyed.
+Arquivo de plano aprovado passado a apply, sem -auto-approve/target/refresh=false/
+lock=false. Aviso DynamoDB depreciado preservado, locking mantido. Nenhuma falha
+do apply/conferência observada; falhas preços T22 seguem registradas, não inventar
+falha T23. Código Terraform/versões/modules/lockfiles/planos aprovados preservados.
+
+Consultas AWS e assertions passaram0 em 2026-09-29T09:33:52-03:00: EC2 running/t2.micro,
+status system ok/instance ok, AMI fixada, primeira pública/SGEC2 único, keyvockey,
+Profile LabInstanceProfile-LabRole existentes, IMDSv2 required/hop1/tagsdisabled,
+EBSgp3 8GiB encrypted/delete-on-termination e CPUstandard. VPC disponível/DNStrue,
+4subnets disponíveis nas2AZs, IP público flag só públicas, IGW attached, rota0/0
+nas públicas e sólocal privadas,4associações explícitas. Nenhum novo recurso
+IAM/EIP/NAT/KMS/key pair declarado no plano. Tags em19recursos+rootEBS conferidas.
+RDS available/PostgreSQL16.15/db.t3.micro/20GiBgp3/encrypted/private/SingleAZ,
+2privadas no subnetgroup eSGRDS único ativo, backup0/deletion_protectionfalse,
+ExtendedSupportdisabled; EC2 eRDS efetivamente emus-east-1a (RDS escolheuAZ).
+Seis regras efetivas: EC2 ingress22/3000 exclusivamente aluno/32, RDS5432 somente
+referênciaSGEC2; EC2egress80/443 CIDR0/0 e5432 somenteSGRDS; RDSsem egressiniciada.
+
+State principal REAL S3: head-object0/nonempty/AES256/VersionId atual conferida
+em list-object-versions; state pull0 privado confirma23managed. Cache backend
+não foi usado como prova do objeto. State bootstrap local separado preservado.
+Lock liberado apósapply e apósplano. Plano posterior 2026-09-29T09:34:25-03:00/exit0/No changes,
+sem sobrescrever plano aprovado, postapply.local.tfplan ignorado0600 preservado.
+Outputs reais ID/IP EC2,hostname/portaRDS,URLAPI semsenha; URLnão prova serviço.
+State/plano/JSON bruto contêm senha, permanecer privados0600/ignorados, não publicar.
+
+T01–T23 verificadas nos respectivos ambientes. R13/R14/R15/R18/R19/R20/R21
+verificados; R16/R17/R22 seguem parciais até serviçoAPI/SQL/CRUD/evidências futuras.
+Validade das credenciais no instante das consultas comprovada, duração restante
+não inferida. Sem SSH/bootstrapDocker/HTTP/SQL/CRUD/reboot comprovados; próximas
+T24deploy/migração/serviço eT25CRUD EC2/RDS. Sem bloqueio T23. Recursos continuam
+ativos/faturáveis; custo varia comtempo/carga, estimativa T22 não é teto/saldo.
+Retomar escopo autorizado sem pedir mesma aprovação; mudança deescopo/plano e
+teardown têm revisão concreta própria. Não destruir agora nem removerbackend/state.
+Sem push/merge/PR; mergeT32 eentrega presencial01/10/2026 preservados.
+
+Quatro novas evidências reais: aws-rede.txt/aws-rds.txt/aws-seguranca.txt/
+terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um commit
+coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
+sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
+privados em /tmp preservados, nenhuma credencial oustate completo versionado.
+
+## D12 implementada T24 — ajustes fundamentados
+
+SQL é transferido dentro da imagem já versionada, executado por node src/migrate.js;
+evita cópia separada divergente. Docker29/containerd local expôs índice OCI,
+Docker25 clássico remoto identificou configuração; archive_identity derivaSHA256
+dos bytes config no tar, valida commit/linuxamd64/Usernode antes de enviar.
+Primeirodeploy1 preservado; mesma imagem corrigidamente identificada passou duas
+vezes0. systemd é responsável por restart/boot; Docker run --rm sem --restart,
+conforme documentação Docker. EIC já autorizado renovou pública temporária por
+conexão, sem role/keypair/SG novo, em alternativa à vockey não localizada.
+Hostkey comparada com AWSconsole, StrictHostKeyChecking=yes. Env root0600/
+dir0700/CApública0644. Migração TLS RDS idempotente, SQL e reboot/health reais
+verificados ec2-deploy.txt/health-aws.txt. Passo4 (CRUD/persistência) aindaT25.
+Fontes: https://docs.docker.com/engine/storage/containerd/ e
+https://github.com/opencontainers/image-spec/blob/main/config.md;
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html.
+
+## Verificador AWS T25 — implementado, execução bloqueada
+
+Reutiliza VerifierHTTP e helpers protegidos T24. Consultas AWS preflight antes
+de qualquer mutação, guardas SG exatas, SQL parametrizado sómarkerUUID, comparação
+DATEISO/JSONDD-MM-YYYY, TLS pg_stat_ssl/CA/rejecttrue. Reinicia somente serviçoAPI
+próprio para comparar containerID/imagem/HTTP/SQL; não provisiona/destrói infra.
+Finally limpa markerUUID/IDs exclusivos inclusive POST incerto, informa pendência
+se SQL não confirmar ausência. Testes locais guardas10pass0; EC2deny254 bloqueou
+execução real. Desenho não é prova de CRUD/persistência; T25 ainda bloqueada.
+
+## T25 executada — correções e aceite real
+
+Apósrenewal, iniciar EC2existente corrigiu runtimeparado; IPnovo vem da AWSCLI,
+pinhostkeyT24 conhecido permaneceu confiável. Guardas TLS/hostname agora precedem
+HTTPCRUD e SQLDELETE; SQL vincula markerUUID/IDs porparâmetros. Fixture real com
+sentinela confirmou segurança da limpeza em positivo0 e negativo1/statusesperado
+errado sem simularSQL. ID3 persistiu após trocarcontainer/mesmaimagem, JSONDD-MM-YYYY
+mantido frenteDATEISO. StateoutputsIPURL sincronizados porrefresh-only revisado,
+sem ação de recursos; plano posterior0Nochanges. Evidências/falhas anteriores não
+substituídas; detalhes eexecuções em aws-retomada-t25/api-aws/rds-crud. T25verificada,
+T26relatório próximo; R29 aindaaguardaverify-delivery. Sem novo provisionamento.

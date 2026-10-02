@@ -1,0 +1,62 @@
+T08 — saúde e indisponibilidade real do banco
+Data: 2026-09-28T19:57:15-03:00
+Comando executado: npm --prefix app test
+Trechos exatos de stdout da mesma execução; saída integral em api-local.txt.
+Banco de teste UUID/labels/porta conferidos antes de pause/unpause/stop; sem mocks.
+
+# Subtest: health com PostgreSQL disponível retorna 200 e somente status/database, sem cache
+ok 27 - health com PostgreSQL disponível retorna 200 e somente status/database, sem cache
+  ---
+  duration_ms: 7.37059
+  type: 'test'
+  ...
+# GET /health com conexão real -> 200 {"status":"ok","database":"ok"}.
+# API nativa iniciada em subprocesso; HTTP real e PostgreSQL real, sem mocks.
+# API encerrada com SIGTERM, código 0.
+# Subtest: erro SQL inesperado mantém 500 genérico e restaura a tabela exclusiva
+ok 46 - erro SQL inesperado mantém 500 genérico e restaura a tabela exclusiva
+  ---
+  duration_ms: 137.003935
+  type: 'test'
+  ...
+# Tabela temporariamente renomeada no banco exclusivo: erro SQL real -> 500 genérico, sem SQL/stack.
+# Subtest: health retorna 503 dentro do prazo quando PostgreSQL é pausado e volta a 200 após retomar
+ok 47 - health retorna 503 dentro do prazo quando PostgreSQL é pausado e volta a 200 após retomar
+  ---
+  duration_ms: 2184.912752
+  type: 'test'
+  ...
+# Docker pause confirmado; GET /health -> 503 em 2008 ms (prazo 2000 ms).
+# Docker unpause; GET /health -> 200 com nova consulta real.
+# Conexão ociosa com PostgreSQL foi interrompida.
+# Subtest: banco encerrado de verdade retorna 503 uniforme no CRUD; entradas inválidas continuam 400
+ok 48 - banco encerrado de verdade retorna 503 uniforme no CRUD; entradas inválidas continuam 400
+  ---
+  duration_ms: 363.468614
+  type: 'test'
+  ...
+# Antes da indisponibilidade: POST -> 201 com gravação real.
+# GET /reservas com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# GET /reservas/37 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# POST /reservas com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# PUT /reservas/37 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# DELETE /reservas/37 com PostgreSQL encerrado -> 503 BANCO_INDISPONIVEL.
+# Docker stop/remove confirmado; health 503; validação pré-SQL continuou 400 sem banco.
+1..48
+# tests 48
+# suites 0
+# pass 48
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5244.495116
+Limpeza confirmada: container de teste removido; dados temporários descartados.
+
+EXIT CODE observado da suíte: 0
+
+Conferência após a suíte
+Data: 2026-09-28T19:59:16-03:00
+Comando: docker ps -a com filtros de labels do projeto e de teste
+Containers encontrados: 0
+EXIT CODE: 0

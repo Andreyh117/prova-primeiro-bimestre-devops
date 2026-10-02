@@ -1,0 +1,202 @@
+
+T11 — execução real em 2026-09-28T22:41:48-03:00
+Ambiente: Docker Compose local, projeto UUID e env privado em /tmp; sem AWS.
+Comando: npm --prefix app run test:compose
+Transcrição real com espaços finais removidos para git diff --check.
+SHA-256 da captura integral original: 7f2652d41787f8481d9fa93568de83d92f806d112d049c3ce0b7d24d0e453806.
+stdout desta fase:
+
+> prova-primeiro-bimestre-devops@0.1.0 test:compose
+> node test/run-compose.js
+
+=== T11 configuração/subida/ps ===
+Data/hora real: 2026-09-29T01:41:48.900Z; projeto exclusivo prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa; ambiente local, sem AWS.
+Comando: docker 'compose' 'version'
+stdout:
+Docker Compose version v5.5.1
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env.missing' 'config' '--quiet'
+stdout:
+(vazio)
+stderr:
+error while interpolating services.api.environment.PGPASSWORD: required variable POSTGRES_PASSWORD is missing a value: Defina POSTGRES_PASSWORD no .env
+error while interpolating services.db.environment.POSTGRES_PASSWORD: required variable POSTGRES_PASSWORD is missing a value: Defina POSTGRES_PASSWORD no .env
+
+Exit code real: 1
+PASSOU: senha ausente rejeitada sem criar serviços ou divulgar credenciais.
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'config' '--quiet'
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: config expandida conferida só em memória; api/db, ambiente coerente, bridge, healthchecks e service_healthy.
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'create' '--build'
+stdout:
+#1 [internal] load local bake definitions
+#1 reading from stdin 649B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 688B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#3 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 406B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 913B done
+#5 DONE 0.0s
+
+#6 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#6 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#6 DONE 0.0s
+
+#7 [dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [dependencies 3/4] COPY package.json package-lock.json ./
+#8 DONE 0.0s
+
+#9 [dependencies 4/4] RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+#9 1.741
+#9 1.741 added 82 packages in 1s
+#9 DONE 1.8s
+
+#10 [runtime 3/6] COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+#10 CACHED
+
+#11 [runtime 4/6] COPY --chown=node:node package.json package-lock.json ./
+#11 DONE 0.0s
+
+#12 [runtime 5/6] COPY --chown=node:node src ./src
+#12 DONE 0.0s
+
+#13 [runtime 6/6] COPY --chown=node:node sql ./sql
+#13 DONE 0.0s
+
+#14 exporting to image
+#14 exporting layers 0.1s done
+#14 exporting manifest sha256:5dc30988ff60cc100536b22deb91cd2d45ed9af046c7e18b894aafcf63452e75 done
+#14 exporting config sha256:62a6b4b91e780f0984166d20e54f07a573a60ffbaa36297873435b80ec860baa
+#14 exporting config sha256:62a6b4b91e780f0984166d20e54f07a573a60ffbaa36297873435b80ec860baa done
+#14 exporting attestation manifest sha256:61eebc237dd2ef452ca6d049b14028088b013c04bf0c75c610d19e4506233840 done
+#14 exporting manifest list sha256:c77102689cd4450d97cc764416bf5f9a23303de0005ecf268d234db75a7751dc done
+#14 naming to docker.io/library/prova-reservas:local done
+#14 unpacking to docker.io/library/prova-reservas:local 0.1s done
+#14 DONE 0.2s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+
+stderr:
+ Image prova-reservas:local Building
+ Image prova-reservas:local Built
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Creating
+ Volume prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data Creating
+ Volume prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data Creating
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Creating
+ Volume prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data Created
+ Volume prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data Created
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Created
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Created
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Creating
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Created
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Creating
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Created
+
+Exit code real: 0
+Pré-condição real: containers db/api criados e parados; volume exclusivo novo, sem banco externo.
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'up' '--build' '--wait' '--wait-timeout' '60'
+stdout:
+#1 [internal] load local bake definitions
+#1 reading from stdin 649B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 688B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 406B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 387B done
+#5 DONE 0.0s
+
+#6 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#6 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#6 DONE 0.0s
+
+#7 [runtime 4/6] COPY --chown=node:node package.json package-lock.json ./
+#7 CACHED
+
+#8 [dependencies 2/4] WORKDIR /app
+#8 CACHED
+
+#9 [dependencies 3/4] COPY package.json package-lock.json ./
+#9 CACHED
+
+#10 [dependencies 4/4] RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+#10 CACHED
+
+#11 [runtime 5/6] COPY --chown=node:node src ./src
+#11 CACHED
+
+#12 [runtime 3/6] COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+#12 CACHED
+
+#13 [runtime 6/6] COPY --chown=node:node sql ./sql
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:5dc30988ff60cc100536b22deb91cd2d45ed9af046c7e18b894aafcf63452e75 done
+#14 exporting config sha256:62a6b4b91e780f0984166d20e54f07a573a60ffbaa36297873435b80ec860baa done
+#14 exporting attestation manifest sha256:25c6eca1571d11244c8aad36d24df535b19d41e4ddc17265030b31bfd0064c01 0.0s done
+#14 exporting manifest list sha256:08e7cfcb583b74f78b3d6b4af704b8b44cd5ad03d3fe61699b9ad693a87c27ec 0.0s done
+#14 naming to docker.io/library/prova-reservas:local done
+#14 unpacking to docker.io/library/prova-reservas:local 0.0s done
+#14 DONE 0.1s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s
+
+stderr:
+ Image prova-reservas:local Building
+ Image prova-reservas:local Built
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Starting
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Started
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Waiting
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Healthy
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Starting
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Started
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Waiting
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Waiting
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Healthy
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Healthy
+
+Exit code real: 0
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'ps'
+stdout:
+NAME                                                            IMAGE                                                                              COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1   sha256:c77102689cd4450d97cc764416bf5f9a23303de0005ecf268d234db75a7751dc            "docker-entrypoint.s…"   api       6 seconds ago   Up 1 second (healthy)    127.0.0.1:32775->3000/tcp
+prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1    postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea   "docker-entrypoint.s…"   db        6 seconds ago   Up 4 seconds (healthy)   5432/tcp
+
+stderr:
+(vazio)
+Exit code real: 0
+stderr geral:
+(vazio)
+Exit code real da execução completa: 0

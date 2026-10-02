@@ -1,0 +1,7 @@
+# Copie para terraform.tfvars (ignorado), substitua todos os placeholders.
+# Credenciais e session token ficam no perfil AWS local, nunca neste arquivo.
+aws_region        = "us-east-1"
+aws_profile       = "default"
+aws_account_id    = "SUBSTITUA_PELO_ID_DA_CONTA_DO_LAB"
+state_bucket_name = "prova-6325231-tfstate-SUBSTITUA_POR_SUFIXO_UNICO"
+lock_table_name   = "prova-6325231-tflock-SUBSTITUA_POR_SUFIXO_UNICO"

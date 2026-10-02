@@ -1,0 +1,304 @@
+T19 — módulo RDS: validação LOCAL, sem provisionamento AWS
+Registro documental: 2026-09-29T08:27:50-03:00
+HEAD inicial 7755f73; feature feat/api-reservas limpa, 14 commits reais/0 merges, main preservada.
+Terraform =1.16.2 / hashicorp/aws =6.65.0; lockfile bootstrap readonly/copias idênticas.
+Root /tmp/devops-t19-rds-t62k8elf: código/testes e lockfile, nenhum state/tfvars real copiado.
+Ambiente remove AWS_*, TF_VAR_*, TF_CLI_ARGS*, TF_LOG*; config AWS=/dev/null e IMDS desabilitado.
+Init filesystem mirror usa cache existente: unauthenticated, sem novo download assinado.
+Todos os runs usam provider mock + command=plan. Credenciais de fixture são fictícias/públicas e não devem ser usadas na AWS.
+Dois recursos definidos: DB subnet group e DB instance; 11 inputs/3 outputs. Nenhum recurso criado aqui.
+PostgreSQL 16.15 (observada T13; disponibilidade atual só no preflight futuro), db.t3.micro, gp3 20GiB sem autoscale, Single-AZ.
+publicly_accessible=false/storage_encrypted=true, duas subnets explícitas distintas e um único SG RDS.
+Não comprova AZ/rotas privadas pelo formato de ID: root T21 deve ligar output privado VPC e SG RDS; conferência AWS T23.
+username/password sensitive sem default, password sensitive no schema; outputs identifier/hostname(address)/port, nenhum segredo.
+Sensitive oculta saída usual, NÃO remove senha do state ou plano binário; arquivos reais protegidos/ignorados.
+Sem IAM/KMS próprios/Secrets Manager/Enhanced Monitoring. Encriptação usará chave AWS gerenciada; permissões reais futuras.
+Política: backup_retention_period=0/delete_automated_backups=true/deletion_protection=false propostos para Lab temporário.
+skip_final_snapshot obrigatório sem default: true exige final_snapshot_identifier=null; false exige nome explícito.
+Essas configurações e fixtures NÃO autorizam destroy/descarte/retenção; revisão/custo/consentimento T22/T27/T28 necessários.
+Primeiro test exit1: password conflita com manage_master_user_password=false; 0 passed/1 failed/16 skipped.
+Corrigido omitindo manage_master_user_password; senha sensível preservada; retry 17 passed/0 failed.
+Validate estático inicial passou e não detectou o conflito encontrado pelo plan mock; ambas execuções preservadas.
+Sem consultas AWS, plan principal/apply/destroy, escrita backend remoto ou SQL/conectividade real RDS.
+Fontes primárias consultadas nesta etapa:
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/db_instance.html.markdown
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html
+https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html
+Tentativas de leitura db_subnet_group.html.markdown pelo navegador retornaram Internal Error duas vezes;
+contrato subnet group conferido por documentação AWS e schema real do provider, sem presumir aquela página lida.
+Saídas seguintes são capturas reais: ANSI removido, máscara de conta de 12 dígitos e espaços finais normalizados somente na publicação.
+Logs brutos/hashes preservados em /tmp; código/teste não acessa credenciais reais.
+
+=== Captura real: fmt ===
+Início: 2026-09-29T08:21:48-03:00
+Fim: 2026-09-29T08:21:48-03:00
+Comando: terraform fmt -recursive infra/modules/rds
+Exit code: 0
+SHA-256 bruto: c8341d75e86b56b0bca2b63d1a1c8796129eabbbe4f6ad992d018d80d3cc6b88
+infra/modules/rds/main.tf
+infra/modules/rds/tests/database.tftest.hcl
+infra/modules/rds/variables.tf
+
+=== Captura real: init ===
+Início: 2026-09-29T08:21:58-03:00
+Fim: 2026-09-29T08:22:01-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf init -backend=false -input=false -no-color -lockfile=readonly
+Exit code: 0
+SHA-256 bruto: 6d30e26ea90ceadc491849d802cf9a78716019bf37c937140d62fe4d8b576017
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (unauthenticated)
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+=== Captura real: validate ===
+Início: 2026-09-29T08:22:01-03:00
+Fim: 2026-09-29T08:22:05-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf validate -no-color
+Exit code: 0
+SHA-256 bruto: f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1
+Success! The configuration is valid.
+
+
+=== Captura real: test ===
+Início: 2026-09-29T08:22:05-03:00
+Fim: 2026-09-29T08:22:08-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf test -no-color
+Exit code: 1
+SHA-256 bruto: bfb5e311e77a881167138946bc85c2f12c4d85450c41a3d009be31a72ee7e5e2
+tests/database.tftest.hcl... in progress
+  run "private_rds_contract"... fail
+
+Error: Conflicting configuration arguments
+
+  with aws_db_instance.this,
+  on main.tf line 15, in resource "aws_db_instance" "this":
+  15:   password               = var.password
+
+"password": conflicts with manage_master_user_password
+
+Error: Conflicting configuration arguments
+
+  with aws_db_instance.this,
+  on main.tf line 41, in resource "aws_db_instance" "this":
+  41:   manage_master_user_password         = false
+
+"manage_master_user_password": conflicts with password
+  run "explicit_retention_and_inputs"... skip
+  run "reject_one_subnet"... skip
+  run "reject_repeated_subnets"... skip
+  run "reject_bad_subnet"... skip
+  run "reject_bad_sg"... skip
+  run "reject_wrong_class"... skip
+  run "reject_other_major"... skip
+  run "reject_bad_identifier"... skip
+  run "reject_bad_dbname"... skip
+  run "reject_bad_username"... skip
+  run "reject_short_password"... skip
+  run "reject_slash_password"... skip
+  run "reject_space_password"... skip
+  run "reject_missing_owner"... skip
+  run "reject_unneeded_snapshot"... skip
+  run "reject_missing_final_snapshot"... skip
+tests/database.tftest.hcl... tearing down
+tests/database.tftest.hcl... fail
+
+Failure! 0 passed, 1 failed, 16 skipped.
+
+=== Captura real: fmt-retry2 ===
+Início: 2026-09-29T08:22:31-03:00
+Fim: 2026-09-29T08:22:31-03:00
+Comando: terraform fmt -recursive infra/modules/rds
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: validate-retry2 ===
+Início: 2026-09-29T08:22:31-03:00
+Fim: 2026-09-29T08:22:36-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf validate -no-color
+Exit code: 0
+SHA-256 bruto: f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1
+Success! The configuration is valid.
+
+
+=== Captura real: test-retry2 ===
+Início: 2026-09-29T08:22:36-03:00
+Fim: 2026-09-29T08:22:39-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf test -no-color
+Exit code: 0
+SHA-256 bruto: 09dbfdea98b3f2f5a07f38c3603eca8bd7e3ca7456cb9fdac8b361a5c466af41
+tests/database.tftest.hcl... in progress
+  run "private_rds_contract"... pass
+  run "explicit_retention_and_inputs"... pass
+  run "reject_one_subnet"... pass
+  run "reject_repeated_subnets"... pass
+  run "reject_bad_subnet"... pass
+  run "reject_bad_sg"... pass
+  run "reject_wrong_class"... pass
+  run "reject_other_major"... pass
+  run "reject_bad_identifier"... pass
+  run "reject_bad_dbname"... pass
+  run "reject_bad_username"... pass
+  run "reject_short_password"... pass
+  run "reject_slash_password"... pass
+  run "reject_space_password"... pass
+  run "reject_missing_owner"... pass
+  run "reject_unneeded_snapshot"... pass
+  run "reject_missing_final_snapshot"... pass
+tests/database.tftest.hcl... tearing down
+tests/database.tftest.hcl... pass
+
+Success! 17 passed, 0 failed.
+
+=== Captura real: fmt-check ===
+Início: 2026-09-29T08:23:02-03:00
+Fim: 2026-09-29T08:23:02-03:00
+Comando: terraform fmt -check -recursive infra
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: graph ===
+Início: 2026-09-29T08:23:03-03:00
+Fim: 2026-09-29T08:23:07-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf graph -type=plan
+Exit code: 0
+SHA-256 bruto: 01d8fd923aaa779cf9bbc25bf4976ba70b3d5f019b9b220a79fd24e813702e97
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_db_instance.this (expand)" [label = "aws_db_instance.this", shape = "box"]
+		"[root] aws_db_subnet_group.private (expand)" [label = "aws_db_subnet_group.private", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"]" [label = "provider[\"registry.terraform.io/hashicorp/aws\"]", shape = "diamond"]
+		"[root] var.db_name" [label = "var.db_name", shape = "note"]
+		"[root] var.engine_version" [label = "var.engine_version", shape = "note"]
+		"[root] var.final_snapshot_identifier" [label = "var.final_snapshot_identifier", shape = "note"]
+		"[root] var.identifier" [label = "var.identifier", shape = "note"]
+		"[root] var.instance_class" [label = "var.instance_class", shape = "note"]
+		"[root] var.password" [label = "var.password", shape = "note"]
+		"[root] var.private_subnet_ids" [label = "var.private_subnet_ids", shape = "note"]
+		"[root] var.rds_sg_id" [label = "var.rds_sg_id", shape = "note"]
+		"[root] var.skip_final_snapshot" [label = "var.skip_final_snapshot", shape = "note"]
+		"[root] var.tags" [label = "var.tags", shape = "note"]
+		"[root] var.username" [label = "var.username", shape = "note"]
+		"[root] aws_db_instance.this (expand)" -> "[root] aws_db_subnet_group.private (expand)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.db_name (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.engine_version (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.final_snapshot_identifier (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.instance_class (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.password (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.rds_sg_id (validation)"
+		"[root] aws_db_instance.this (expand)" -> "[root] var.username (validation)"
+		"[root] aws_db_subnet_group.private (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_db_subnet_group.private (expand)" -> "[root] var.identifier (validation)"
+		"[root] aws_db_subnet_group.private (expand)" -> "[root] var.private_subnet_ids (validation)"
+		"[root] aws_db_subnet_group.private (expand)" -> "[root] var.tags (validation)"
+		"[root] output.hostname (expand)" -> "[root] aws_db_instance.this (expand)"
+		"[root] output.identifier (expand)" -> "[root] aws_db_instance.this (expand)"
+		"[root] output.port (expand)" -> "[root] aws_db_instance.this (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_db_instance.this (expand)"
+		"[root] root" -> "[root] output.hostname (expand)"
+		"[root] root" -> "[root] output.identifier (expand)"
+		"[root] root" -> "[root] output.port (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)"
+		"[root] var.db_name (validation)" -> "[root] var.db_name"
+		"[root] var.engine_version (validation)" -> "[root] var.engine_version"
+		"[root] var.final_snapshot_identifier (validation)" -> "[root] var.final_snapshot_identifier"
+		"[root] var.final_snapshot_identifier (validation)" -> "[root] var.skip_final_snapshot"
+		"[root] var.identifier (validation)" -> "[root] var.identifier"
+		"[root] var.instance_class (validation)" -> "[root] var.instance_class"
+		"[root] var.password (validation)" -> "[root] var.password"
+		"[root] var.private_subnet_ids (validation)" -> "[root] var.private_subnet_ids"
+		"[root] var.rds_sg_id (validation)" -> "[root] var.rds_sg_id"
+		"[root] var.tags (validation)" -> "[root] var.tags"
+		"[root] var.username (validation)" -> "[root] var.username"
+	}
+}
+
+=== Schema real: resumo derivado (saída extensa não publicada) ===
+Início: 2026-09-29T08:23:03-03:00
+Fim: 2026-09-29T08:23:09-03:00
+Comando: terraform -chdir=/tmp/devops-t19-rds-t62k8elf providers schema -json
+Exit code: 0
+SHA-256 bruto: e452930af65383de8dee2ebb74e1a8c82eb1ca16bddc420f012b897a4edde6fe
+{
+  "checked_at": "2026-09-29T08:24:15-03:00",
+  "exit_code": 0,
+  "graph_acyclic": true,
+  "direct_references_checked": 8,
+  "resources": "somente aws_db_subnet_group.private + aws_db_instance.this",
+  "subnet_binding": "dois inputs distintos; root T21 deverá usar output privado VPC; AZ/rotas reais não comprovadas aqui",
+  "rds_sg_binding": "único ID var.rds_sg_id; regras SG RDS validadas localmente T18, AWS futura",
+  "password": "input sensitive/sem default; recurso password sensitive no schema; nenhuma credencial em outputs",
+  "outputs": "identifier, hostname(address), port; sem password/username",
+  "extra_services": "sem IAM/KMS próprios/Secrets Manager/Enhanced Monitoring",
+  "snapshot_policy": "skip_final_snapshot obrigatório e coerente com final_snapshot_identifier; somente proposta, não autoriza destroy",
+  "copies_and_lockfile": "bytes idênticos/readonly",
+  "test_result": "17 passed, 0 failed; provider mock e command=plan, sem AWS",
+  "first_failure": "test1: password conflita com manage_master_user_password=false; omissão do argumento corrigiu; validate estático sozinho não revelou esse conflito",
+  "limits": "disponibilidade versão/região, KMS gerenciado/permissões, AZ/privacidade, endpoint real e SQL/conectividade exigem T21/T23–T25"
+}
+
+=== SHA-256 de código/testes validados ===
+28c7ee35fd4ae7d521bef65e5f67260809214f4773a9eda75afa9918c8ee4052  infra/modules/rds/main.tf
+028d2ce6582efb2bc96ae7cf647c2f7591f7eddf0c4c77c501c04ed0b7796a60  infra/modules/rds/outputs.tf
+88381f0146b0de3a79fd388d676d5d96a03de756f7e9357049d0e253be02418d  infra/modules/rds/tests/database.tftest.hcl
+dc382127dbdb484028d147bbea1060398eb4e2492b627ee1d10d489ba72145dd  infra/modules/rds/variables.tf
+a3d3144293dec6f52bfb3073db2cbc3b0d80a88e0b4ff8bbaa6b9778649e0c08  infra/modules/rds/versions.tf
+
+T19 local verificada; R17/R18/R19/R22 em andamento, não comprova RDS disponível ou CRUD na nuvem.
+Sem bloqueio de T19; próxima T20 módulo EC2. Root/plano T21, atributos AWS T23, SQL/CRUD T24/T25 futuros.
+
+=== Conferência de escopo/Git/segredos/documentos (local) ===
+{
+  "checked_at": "2026-09-29T08:29:15-03:00",
+  "exit_code": 0,
+  "phase": "before",
+  "head": "7755f736adc1800e35aa03963e3000979016036f",
+  "scope": [
+    "AGENTS.md",
+    "README.md",
+    "docs/diario-ia.md",
+    "specs/design.md",
+    "specs/requirements.md",
+    "specs/tasks.md",
+    "evidencias/rds-validate.txt",
+    "infra/modules/rds/main.tf",
+    "infra/modules/rds/variables.tf",
+    "infra/modules/rds/outputs.tf",
+    "infra/modules/rds/versions.tf",
+    "infra/modules/rds/tests/database.tftest.hcl"
+  ],
+  "previous_files_preserved_sha256": 68,
+  "diary_agents_history": "prefixos preservados",
+  "tasks": "T01–T19 verificadas, T20–T34 pendentes/34 IDs únicos",
+  "requirements": "32 IDs únicos, R17/R18/R19/R22 parciais, R16 pendente",
+  "secrets": "scanner delimitado sem achados, conta/IP privados ausentes; arquivos privados ignorados/0600",
+  "markdown_newlines_whitespace": "passou, inclusive arquivos novos",
+  "local_validation": "fmt/init/validate/grafo/schema0, 17 testes mock/plan0; falha inicial test1 preservada",
+  "copies_lockfile": "idênticos antes da limpeza, provider versões preservadas",
+  "git": "14 commits reais Conventional Commits/0 merges, feature/main preservadas",
+  "aws": "nenhuma chamada/provisionamento; root principal ainda futuro T21"
+}
+
+=== Limpeza local real após conferência ===
+{
+  "checked_at": "2026-09-29T08:30:06-03:00",
+  "exit_code": 0,
+  "removed_only": "/tmp/devops-t19-rds-t62k8elf",
+  "state_plan_before_cleanup": "nenhum (busca recursiva)",
+  "original_provider_cache": "inode/tamanho/mtime idênticos; rmtree não seguiu symlink",
+  "bootstrap_state_plan_tfvars": "não removidos",
+  "raw_logs_metadata": "preservados em /tmp"
+}

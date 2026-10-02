@@ -1,0 +1,17 @@
+[Unit]
+Description=API de reservas da prova DevOps
+Requires=docker.service
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/prova-reservas/image.env
+ExecStart=/usr/bin/docker run --rm --name prova-reservas-api --label prova.owner=6325231 --label org.opencontainers.image.revision=${SOURCE_COMMIT} --env-file /etc/prova-reservas/api.env --mount type=bind,src=/opt/prova-reservas/rds-ca.pem,dst=/etc/ssl/certs/rds-ca.pem,readonly --publish 3000:3000 --cap-drop ALL --security-opt no-new-privileges=true ${IMAGE_ID}
+ExecStop=/usr/bin/docker stop -t 20 prova-reservas-api
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

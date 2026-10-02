@@ -1,0 +1,35 @@
+T28 — destroy principal autorizado e executado
+Conferência registrada: 2026-09-29T22:14:06-03:00
+Conta: Learner Lab us-east-1, perfil default/role voclabs, sufixo 5811.
+Autorização: aluno respondeu literalmente "autorizo excluir sem snapshot"
+após ver plano bc76e83d...e0925b2, 23 exclusões e impacto sobre RDS/dados.
+Escopo: EC2/disco raiz, RDS e infraestrutura de rede/SG do root principal.
+Backend S3/DynamoDB/versionamentos fora do plano e preservado para T29/T30.
+
+Plano aprovado: infra/destroy-t27.tfplan ignorado/0600; SHA-256
+bc76e83d340fe0bb00c925c5eb9e8afa3a3ae0aee2daa57fe268a6b8560925b2.
+Preflight imediato: conta completa comparada ao tfvars privado sem publicar,
+role/região corretas, show JSON 23 actions delete, RDS
+skip_final_snapshot=true/final_snapshot_identifier=null. Plano novo de
+confirmação havia demonstrado mesmos 23 endereços/ações/IDs/política.
+
+Comando real: terraform -chdir=infra apply -input=false -no-color
+-lock-timeout=60s destroy-t27.tfplan
+Início observado: 2026-09-29T22:07:02-03:00. Exit 0. Saída final exata:
+Apply complete! Resources: 0 added, 0 changed, 23 destroyed.
+Log privado /tmp/prova-t28-destroy.raw modo 0600: 23 eventos Destroying,
+23 Destruction complete, zero linhas Error:. O plano salvo aprovado foi
+aplicado diretamente; -auto-approve NÃO foi usado.
+
+Terraform state list exit0/zero endereços; state pull exit0/zero recursos
+e zero outputs, serial6. State principal remoto não foi apagado. Cópia
+privada0600 do state final em /tmp/prova-t28-main-final.tfstate, SHA-256
+e4053a550c802141f9b6c30ffcf7c52d378c38f79dcf06ce1cadacec89e90b20.
+Cópia privada0600 do state bootstrap em
+/tmp/prova-t28-backend-bootstrap.tfstate, SHA-256
+d6bd2dc633d1702eac6b760ac710cd24b2499302f5836e016a6d59a0c72fa74d.
+Cópias não entram em Git nem substituem state original.
+
+Ausência efetiva por serviço em aws-pos-destroy.txt. Nenhum snapshot final
+criado, como autorizado. T29/T30 ainda precisam revisar/apagar o backend
+e as versões de state em escopo separado; não executar aqui.

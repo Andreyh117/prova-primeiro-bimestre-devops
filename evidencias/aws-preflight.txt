@@ -1,0 +1,527 @@
+T13 — preflight do Learner Lab, consultas de leitura e compatibilidade local
+Ambiente: us-east-1; perfil default; conta mascarada; nenhum recurso criado.
+Aceite: identidade/Lab/saldo, AZs/EC2/RDS/key/profile/IP/CIDRs, versões e DynamoDB.
+Este validate pertence a uma SONDA em /tmp, não aos módulos infra futuros.
+Não comprova apply, deploy, custo executado, TLS/RDS/SSH nem locking efetivo.
+
+Confirmações reais do aluno durante T13:
+"Sim, é o learner lab da prova, o saldo tem 0$ usados de 50$"
+"Somente meu IP atual (/32)"
+Saldo é informação humana do painel, não medição da API/custo do projeto.
+Conta completa e IP/CIDRs observados somente em infra/preflight.local.json 0600,
+ignorado antes de criar; nunca incluir credenciais ou chave privada nele/Git.
+
+Normalização declarada: espaços finais por linha e sequências ANSI removidos das
+transcrições abaixo; comandos, conteúdo/erros/exit codes preservados. SHA-256 do
+original indicado em cada fonte /tmp; respostas extensas AWS são delimitadas.
+
+Data/hora da coleta desta evidência: 2026-09-28T23:32:13.837110-03:00
+
+Comando real: ["terraform", "version", "-json"]
+stdout:
+{
+  "terraform_version": "1.16.2",
+  "platform": "linux_amd64",
+  "provider_selections": {},
+  "terraform_outdated": true
+}
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando real: ["aws", "--version"]
+stdout:
+aws-cli/2.35.6 Python/3.14.5 Linux/7.0.0-34-generic exe/x86_64.linuxmint.22
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando real: ["python3", "--version"]
+stdout:
+Python 3.12.3
+stderr:
+(vazio)
+Exit code real: 0
+
+Contexto observado sem valores secretos: {"AWS_PROFILE": "default", "regiao_configurada": "us-east-1", "access_key_no_ambiente": false, "secret_key_no_ambiente": false, "session_token_no_ambiente": false, "session_token_no_perfil": true, "arquivo_credentials_existe": true, "arquivo_config_existe": true}
+
+Comando real anterior: aws sts get-caller-identity --region us-east-1 --output json --no-cli-pager --cli-connect-timeout 5 --cli-read-timeout 10
+Exit code real: 0
+Resposta sanitizada: {"Account": "********5811", "role": "voclabs", "tipo": "assumed-role", "UserId": "[OMITIDO]", "sessao": "[OMITIDA]"}
+Fonte completa da identidade: somente /tmp/devops-t13-identity.local.json privado 0600.
+
+
+=== Consultas AWS reais ===
+Original completo: /tmp/devops-t13-aws-readonly.txt
+SHA-256: affc37549d814cbaea9f2a77fdaa1129d4b1739dc5c4e2d3bb573a4fc5e1c3ab
+
+Data/hora real: 2026-09-28T23:23:22.740920-03:00
+Somente chamadas de leitura em us-east-1, perfil default observado, conta omitida.
+
+Comando: ["aws", "ec2", "describe-availability-zones", "--filters", "Name=zone-type,Values=availability-zone", "Name=state,Values=available", "--query", "AvailabilityZones[].{name:ZoneName,id:ZoneId,state:State,opt_in:OptInStatus}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+stdout selecionado real:
+[
+  {
+    "name": "us-east-1a",
+    "id": "use1-az4",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  },
+  {
+    "name": "us-east-1b",
+    "id": "use1-az6",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  },
+  {
+    "name": "us-east-1c",
+    "id": "use1-az1",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  },
+  {
+    "name": "us-east-1d",
+    "id": "use1-az2",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  },
+  {
+    "name": "us-east-1e",
+    "id": "use1-az3",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  },
+  {
+    "name": "us-east-1f",
+    "id": "use1-az5",
+    "state": "available",
+    "opt_in": "opt-in-not-required"
+  }
+]
+
+Comando: ["aws", "rds", "describe-db-engine-versions", "--engine", "postgres", "--query", "DBEngineVersions[].{version:EngineVersion,status:Status,major:MajorEngineVersion}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+Resposta extensa omitida aqui, mantida integralmente no original acima. A combinação exata está na consulta específica abaixo.
+
+Comando: ["aws", "rds", "describe-orderable-db-instance-options", "--engine", "postgres", "--db-instance-class", "db.t3.micro", "--vpc", "--query", "OrderableDBInstanceOptions[].{engine_version:EngineVersion,class:DBInstanceClass,storage:StorageType,min_storage:MinStorageSize,max_storage:MaxStorageSize,encryption:SupportsStorageEncryption,azs:AvailabilityZones[].Name}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+Resposta extensa omitida aqui, mantida integralmente no original acima. A combinação exata está na consulta específica abaixo.
+
+Comando: ["aws", "ec2", "describe-instance-type-offerings", "--location-type", "availability-zone", "--filters", "Name=instance-type,Values=t2.micro", "--query", "InstanceTypeOfferings[].{type:InstanceType,az:Location}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+stdout selecionado real:
+[
+  {
+    "type": "t2.micro",
+    "az": "us-east-1d"
+  },
+  {
+    "type": "t2.micro",
+    "az": "us-east-1e"
+  },
+  {
+    "type": "t2.micro",
+    "az": "us-east-1f"
+  },
+  {
+    "type": "t2.micro",
+    "az": "us-east-1b"
+  },
+  {
+    "type": "t2.micro",
+    "az": "us-east-1a"
+  },
+  {
+    "type": "t2.micro",
+    "az": "us-east-1c"
+  }
+]
+
+Comando: ["aws", "ec2", "describe-key-pairs", "--query", "KeyPairs[].{name:KeyName,id:KeyPairId,type:KeyType,fingerprint:KeyFingerprint}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+stdout selecionado real:
+[
+  {
+    "name": "vockey",
+    "id": "key-00e765d5268c418b3",
+    "type": "rsa",
+    "fingerprint": "56:3e:bd:09:d4:9e:0e:79:30:df:0a:8b:13:38:8d:a3:18:59:bc:60"
+  }
+]
+
+Comando: ["aws", "iam", "get-instance-profile", "--instance-profile-name", "LabInstanceProfile", "--query", "InstanceProfile.{name:InstanceProfileName,roles:Roles[].RoleName}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+Exit code real: 0
+stderr: (vazio)
+stdout selecionado real:
+{
+  "name": "LabInstanceProfile",
+  "roles": [
+    "LabRole"
+  ]
+}
+Consulta HTTPS real checkip.amazonaws.com: IPv4 válido; valor mantido somente em arquivo privado 0600, sem publicar localização/IP.
+
+
+=== Captura devops-t13-rds-selected.txt ===
+SHA-256 original: 3961aca6e52c7e3c4d868a4afde098af7ea01e5382c19101fcd78ad3c6b5519f
+Data/hora real: 2026-09-28T23:27:10.558276-03:00
+Comando real: ["aws", "rds", "describe-orderable-db-instance-options", "--engine", "postgres", "--engine-version", "16.15", "--db-instance-class", "db.t3.micro", "--vpc", "--query", "OrderableDBInstanceOptions[?StorageType=='gp3'].{engine:Engine,engine_version:EngineVersion,class:DBInstanceClass,storage:StorageType,min_storage:MinStorageSize,encryption:SupportsStorageEncryption,azs:AvailabilityZones[].Name}", "--region", "us-east-1", "--output", "json", "--no-cli-pager", "--cli-connect-timeout", "5", "--cli-read-timeout", "15"]
+stdout real:
+[
+    {
+        "engine": "postgres",
+        "engine_version": "16.15",
+        "class": "db.t3.micro",
+        "storage": "gp3",
+        "min_storage": 20,
+        "encryption": true,
+        "azs": [
+            "us-east-1a",
+            "us-east-1b",
+            "us-east-1c",
+            "us-east-1d",
+            "us-east-1f"
+        ]
+    }
+]
+
+stderr real:
+(vazio)
+Exit code real: 0
+
+
+=== Captura devops-t13-terraform-attempt-1.txt ===
+SHA-256 original: 925858dab60faf129dfdc13223d9378d6d714f383800e5ab49f5fd13f318f443
+Data/hora real: 2026-09-28T23:24:58.945040-03:00
+
+Configuração isolada em /tmp/devops-t13-terraform-ls0expqv; backend NÃO inicializado; sem credenciais/plan/apply/AWS.
+
+HCL real da sonda, nomes fictícios explicitamente não criados:
+terraform {
+  required_version = "= 1.16.2"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "= 6.65.0"
+    }
+  }
+  backend "s3" {
+    bucket         = "preflight-nao-criado"
+    key            = "preflight/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "preflight-lock-nao-criado"
+  }
+}
+provider "aws" {
+  region = "us-east-1"
+}
+resource "aws_dynamodb_table" "schema_probe" {
+  name         = "preflight-nao-criado"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+
+Comando: ["terraform", "fmt"]; cwd /tmp/devops-t13-terraform-ls0expqv
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "fmt", "-check"]; cwd /tmp/devops-t13-terraform-ls0expqv
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "init", "-backend=false", "-input=false", "-no-color"]; cwd /tmp/devops-t13-terraform-ls0expqv
+stdout:
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "6.65.0"...
+stderr:
+
+Error: Failed to query available provider packages
+
+Could not retrieve the list of available versions for provider hashicorp/aws:
+no available releases match the given constraints 6.65.0
+
+To see which modules are currently depending on hashicorp/aws and what
+versions are specified, run the following command:
+    terraform providers
+Exit code real: 1
+
+
+=== Captura devops-t13-terraform-attempt-2.txt ===
+SHA-256 original: 7a4b2ab0d7efead0d9c70f72dd769f3f680952eec0dc4228c3ebaa60447b7bfb
+Data/hora real: 2026-09-28T23:26:28.145934-03:00
+
+Configuração isolada em /tmp/devops-t13-terraform-hzvr1c9e; backend NÃO inicializado; sem credenciais/plan/apply/AWS.
+
+HCL real da sonda, nomes fictícios explicitamente não criados:
+terraform {
+  required_version = "= 1.16.2"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "= 6.65.0"
+    }
+  }
+  backend "s3" {
+    bucket         = "preflight-nao-criado"
+    key            = "preflight/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "preflight-lock-nao-criado"
+  }
+}
+provider "aws" {
+  region = "us-east-1"
+}
+resource "aws_dynamodb_table" "schema_probe" {
+  name         = "preflight-nao-criado"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+
+Comando: ["terraform", "fmt"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "fmt", "-check"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "init", "-backend=false", "-input=false", "-no-color"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "6.65.0"...
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (signed by HashiCorp)
+
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "validate", "-no-color"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+Success! The configuration is valid.
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: terraform providers schema -json (JSON conferido em memória)
+Exit code real: 1
+
+
+=== Captura devops-t13-schema-diagnostic.txt ===
+SHA-256 original: 4ef6ea75c13144c1fbf6e91410f9f8fde069d055b077c1e503f72f6ca285046c
+Comando: terraform providers schema -json; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+stderr: ╷
+│ Error: Backend initialization required, please run "terraform init"
+│
+│ Reason: Initial configuration of the requested backend "s3"
+│
+│ The "backend" is the interface that Terraform uses to store state,
+│ perform operations, etc. If this message is showing up, it means that the
+│ Terraform configuration you're using is using a custom configuration for
+│ the Terraform backend.
+│
+│ Changes to backend configurations require reinitialization. This allows
+│ Terraform to set up the new configuration, copy existing state, etc. Please
+│ run
+│ "terraform init" with either the "-reconfigure" or "-migrate-state" flags
+│ to
+│ use the current configuration.
+│
+│ If the change reason above is incorrect, please verify your configuration
+│ hasn't changed and try again. At this point, no changes to your existing
+│ configuration or state have been made.
+╵
+
+Exit code real: 1
+
+
+=== Captura devops-t13-schema-final.txt ===
+SHA-256 original: 8860c2a3a079bb9d23d1c89cb609f5b369a2038502d827aa1673501ba07366e6
+Data/hora real: 2026-09-28T23:28:40.528781-03:00
+
+Corrigir sonda apenas: remover backend S3 do root temporário de leitura de schema. Nenhum init de backend remoto/contato AWS; configuração da sonda:
+terraform {
+  required_version = "= 1.16.2"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "= 6.65.0"
+    }
+  }
+}
+provider "aws" {
+  region = "us-east-1"
+}
+resource "aws_dynamodb_table" "schema_probe" {
+  name         = "preflight-nao-criado"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+
+Comando: ["terraform", "fmt", "-check"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "init", "-backend=false", "-input=false", "-no-color"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Using previously-installed hashicorp/aws v6.65.0
+
+Terraform has been successfully initialized!
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: ["terraform", "validate", "-no-color"]; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout:
+Success! The configuration is valid.
+stderr:
+(vazio)
+Exit code real: 0
+
+Comando: terraform providers schema -json; cwd /tmp/devops-t13-terraform-hzvr1c9e
+stdout JSON conferido em memória; stderr: (vazio)
+Exit code real: 0
+
+PASSOU: schema real AWS 6.65.0 contém tabela DynamoDB/billing_mode/hash_key/attribute(name,type) e engine_version/instance_class/storage_encrypted/publicly_accessible em RDS; não equivale a locking ativo ou deploy.
+
+Lockfile gerado real, SHA-256 11d5f66e2ef34be8c31d88adb53b1c8e94a12dbbe647c6250fb5a746f525d0c8:
+# This file is maintained automatically by "terraform init".
+# Manual edits may be lost in future updates.
+
+provider "registry.terraform.io/hashicorp/aws" {
+  version     = "6.65.0"
+  constraints = "6.65.0"
+  hashes = [
+    "h1:RjeO6m/SvlhGUCDrwTdj99kJhKl/rC1zE9B5mi3YhVw=",
+    "zh:15b5bd81119965363893197b3b6065bdf46888b93c536623fd113b5505c375be",
+    "zh:16409fd045116a31b28adce98fcaaa56a7c01487369713e4a2a04af1cfa96fa3",
+    "zh:422ea20ef4be8e5b942118d1da61cbde818cadb512ec1132306d65120f983917",
+    "zh:42cda6703a6a51585c2cb2b8b3ab3a7c80a3ee08838138be8ecaa6b97b1d74d8",
+    "zh:718a880d81bfd9af7e297ed3d7bf98d1febebe8b9ebe3333854a4c17f2c4de09",
+    "zh:74e538a8ff4ea27b2040be426cdd2b952725883f5b45c8c03b27eff7d82b40f8",
+    "zh:876bf62e56a41e0c7a514652e22a41246e7c1d67be3b2c1b68553fa3a8dae6d7",
+    "zh:8d571e06d78b91b28faa7fafee99dee920d4f7a50f07ec9cd21695a385bcc0d5",
+    "zh:93154e33f4cbd39825a92a230642082e7b2b8b058c27cf93588ee6824aa1c294",
+    "zh:935f9523c940dc5795ce8afac37aa8a2ed06c0012196ab39b1de2ea26acc129e",
+    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
+    "zh:9bffe18e907e04d98d7d6b9a6a4c2381448e365441df423e90e1eeaf3a79fd2f",
+    "zh:9ddfdefef226c8ff3c8de03d8df23ab3199fed9f0684618a62489e0e90a21cab",
+    "zh:9eab3abf041fe8e1ce5959fda9c20ddfaf331b7c29ff707e914451abce7841af",
+    "zh:ed749702f6c56b26a390a52bfd31d3bdf7f0af800bc16244276ca71d6f541e87",
+    "zh:f304df223a0bc3e840a806a5dffb75e6b2b75c879053dc4ebd0228484923ee59",
+  ]
+}
+
+
+Conferência real: diretório/cache da sonda /tmp/devops-t13-terraform-hzvr1c9e removido.
+
+Conferência real: diretório/cache da sonda /tmp/devops-t13-terraform-ls0expqv removido.
+
+
+Sobre as falhas da sonda: primeiro init retornou 1 por versão indisponível;
+Registry HTTPS listou 6.65.0, e segundo init na mesma versão/instalação direct
+retornou 0. Causa da primeira divergência não comprovada. Sem troca de versão.
+Na captura attempt-2, o logger escreveu "JSON conferido em memória" antes de
+examinar o retorno 1 de providers schema: nessa tentativa não houve JSON nem
+conferência de schema. Diagnóstico real: backend S3 não inicializado. Sonda de
+schema corrigida somente em /tmp, sem declaração S3, sem configurar recursos
+reais, passou init/validate/schema 0. Não inicializar S3 antes de T16.
+A leitura final de schema e seus campos foi realmente conferida em memória.
+
+
+=== Registry e suporte backend no código oficial ===
+
+{
+  "time": "2026-09-28T23:25:36.323403-03:00",
+  "url": "https://registry.terraform.io/v1/providers/hashicorp/aws/versions",
+  "http_date": "Tue, 29 Sep 2026 02:25:36 GMT",
+  "stable_6_recent": [
+    "6.57.1",
+    "6.58.0",
+    "6.59.0",
+    "6.60.0",
+    "6.61.0",
+    "6.62.0",
+    "6.63.0",
+    "6.64.0",
+    "6.65.0",
+    "6.66.0"
+  ],
+  "requested_6_65_0_present": true
+}
+Decisão final: fixar 6.65.0 já validada, sem atualização desnecessária para 6.66.0.
+
+{
+  "checked_at": "2026-09-28T23:32:09.729399-03:00",
+  "url": "https://raw.githubusercontent.com/hashicorp/terraform/v1.16.2/internal/backend/remote-state/s3/backend.go",
+  "sha256": "5d9c08001aad1b07806e257a49979d3d2963db4a6c852b6902eb0c3e6502068f",
+  "snippet": "\"dynamodb_table\": {\n\t\t\t\tType:        cty.String,\n\t\t\t\tOptional:    true,\n\t\t\t\tDescription: \"DynamoDB table for state locking and consistency\",\n\t\t\t\tDeprecated:  true,\n\t\t\t},",
+  "backend_field_used": true,
+  "scope": "Suporte do argumento no código oficial da versão; locking efetivo ainda depende do backend real futuro."
+}
+
+
+Decisões verificadas/propostas para os roots futuros:
+Terraform = 1.16.2; hashicorp/aws = 6.65.0, lockfile em cada root ao criar T14/T21.
+Região us-east-1; AZs us-east-1a/use1-az4 e us-east-1b/use1-az6 disponíveis.
+EC2 t2.micro ofertada nessas AZs; key pair existente vockey; LabInstanceProfile
+existente com LabRole, sem criar IAM. RDS postgres 16.15/db.t3.micro/gp3/20GiB
+suporta encriptação e ambas AZs; subnet group privado e Single-AZ propostos.
+SSH/API somente IP atual /32 confirmado pelo aluno, valor fora da evidência.
+Não inferir posse/funcionamento da chave privada SSH a partir de describe-key-pairs.
+Não inferir duração restante do token a partir do STS; revalidar antes dos planos.
+DynamoDB obrigatório preservado: LockID String, PAY_PER_REQUEST e dynamodb_table
+no backend futuro; argumento depreciado ainda existe no código v1.16.2.
+Nenhum locking foi exercitado aqui. Antes de apply, haverá plano/conta/recursos/
+custos/autorização nas tarefas T15/T22. Nenhum apply/destroy/plan nesta T13.
+
+Conferências finais filesystem locais: preflight.local.json 0600/ignorado;
+sem credenciais, arquivo privado não é tfvars/state/plan. Sondas/cache em /tmp
+removidos, lockfile temporário preservado como origem para roots futuros.

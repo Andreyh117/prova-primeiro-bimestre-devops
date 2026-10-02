@@ -1,0 +1,316 @@
+T18 — security-group: validação LOCAL, sem execução AWS
+Registro documental: 2026-09-29T08:13:21-03:00
+Início HEAD 2645a5f; feat/api-reservas, 13 commits reais/0 merges; main preservada.
+Terraform 1.16.2 / hashicorp/aws 6.65.0; versões e lockfile anteriores preservados.
+Root isolado /tmp/devops-t18-security-p6zqjwho com cópia exata do módulo/teste.
+Nenhum state/tfvars/bootstrap privado copiado. AWS_* / TF_VAR_* / TF_CLI_ARGS* / TF_LOG* removidos do ambiente;
+AWS_CONFIG_FILE e AWS_SHARED_CREDENTIALS_FILE=/dev/null, AWS_EC2_METADATA_DISABLED=true.
+Init usa filesystem mirror do cache bootstrap e lockfile readonly: unauthenticated, sem novo download assinado.
+Todos os runs terraform test usam provider mock + command=plan; IPs RFC 5737 e VPC fictícia SOMENTE nos testes.
+Sem plan principal, API AWS, apply, destroy, backend remoto, EC2/RDS provisionados ou teste de conectividade.
+Conferência de código: 2 SGs + entrada 22 + entrada(s) 3000 + entrada RDS 5432 + saídas EC2 80/443/5432.
+Um host API = oito instâncias previstas em sete blocos; não são recursos criados.
+Entrada RDS5432 <- SG EC2; saída EC25432 -> SG RDS, sem CIDRs/prefix lists nessas duas regras.
+Sem ingress/egress inline, saída iniciada RDS, protocolo -1, IPv6 público, IAM ou ignore_changes.
+DNS AmazonProvidedDNS não é filtrado por SG. Respostas a conexões permitidas são stateful;
+esses comportamentos AWS foram consultados em documentação, NÃO testados na nuvem aqui.
+Fontes primárias consultadas nesta etapa:
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/security_group.html.markdown
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/vpc_security_group_ingress_rule.html.markdown
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/vpc_security_group_egress_rule.html.markdown
+https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html
+https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html
+Correção real: primeiro fmt exit 2 Invalid expression no teste multiple_approved_hosts;
+expressão multilinha recebeu parênteses. fmt retry 0; nenhuma guarda de segurança relaxada.
+Saídas abaixo copiadas das execuções; sequências ANSI removidas, máscara de conta de 12 dígitos aplicada
+e seis espaços finais de linhas decorativas normalizados após diff-check staged; logs brutos preservados.
+Hashes abaixo correspondem à saída bruta preservada em /tmp; espaços finais de seis linhas normalizados apenas na publicação, sem alterar logs brutos/hashes.
+
+=== Captura real: fmt ===
+Início: 2026-09-29T08:07:45-03:00
+Fim: 2026-09-29T08:07:45-03:00
+Comando: terraform fmt -recursive infra/modules/security-group
+Exit code: 2
+SHA-256 bruto: e6be45a98dce67290a0d7081a05f5a9dea1d1d0829318ce5478b83b3c36bdea8
+╷
+│ Error: Invalid expression
+│
+│   on infra/modules/security-group/tests/security.tftest.hcl line 74, in run "multiple_approved_hosts":
+│   74:     condition = length(aws_vpc_security_group_ingress_rule.api) == 2 &&
+│   75:       toset([for rule in aws_vpc_security_group_ingress_rule.api : rule.cidr_ipv4]) == var.api_allowed_cidrs &&
+│
+│ Expected the start of an expression, but found an invalid expression token.
+╵
+
+╷
+│ Error: Argument or block definition required
+│
+│   on infra/modules/security-group/tests/security.tftest.hcl line 75, in run "multiple_approved_hosts":
+│   75:       toset([for rule in aws_vpc_security_group_ingress_rule.api : rule.cidr_ipv4]) == var.api_allowed_cidrs &&
+│
+│ An argument or block definition is required here. To set an argument, use
+│ the equals sign "=" to introduce the argument value.
+╵
+
+╷
+│ Error: Argument or block definition required
+│
+│   on infra/modules/security-group/tests/security.tftest.hcl line 76, in run "multiple_approved_hosts":
+│   76:       aws_vpc_security_group_ingress_rule.ssh.cidr_ipv4 == var.ssh_cidr && aws_security_group.rds.vpc_id == var.vpc_id
+│
+│ An argument or block definition is required here. To set an argument, use
+│ the equals sign "=" to introduce the argument value.
+╵
+
+
+
+=== Captura real: fmt-retry2 ===
+Início: 2026-09-29T08:08:01-03:00
+Fim: 2026-09-29T08:08:01-03:00
+Comando: terraform fmt -recursive infra/modules/security-group
+Exit code: 0
+SHA-256 bruto: a673d00a605b6f82d225ba0c0b31d171200a4199f5ad69e0e818cb0db76cf00d
+infra/modules/security-group/tests/security.tftest.hcl
+
+
+=== Captura real: init ===
+Início: 2026-09-29T08:08:09-03:00
+Fim: 2026-09-29T08:08:12-03:00
+Comando: terraform -chdir=/tmp/devops-t18-security-p6zqjwho init -backend=false -input=false -no-color -lockfile=readonly
+Exit code: 0
+SHA-256 bruto: 6d30e26ea90ceadc491849d802cf9a78716019bf37c937140d62fe4d8b576017
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (unauthenticated)
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+
+=== Captura real: validate ===
+Início: 2026-09-29T08:08:20-03:00
+Fim: 2026-09-29T08:08:24-03:00
+Comando: terraform -chdir=/tmp/devops-t18-security-p6zqjwho validate -no-color
+Exit code: 0
+SHA-256 bruto: f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1
+Success! The configuration is valid.
+
+
+
+=== Captura real: fmt-check ===
+Início: 2026-09-29T08:08:19-03:00
+Fim: 2026-09-29T08:08:19-03:00
+Comando: terraform fmt -check -recursive infra
+Exit code: 0
+SHA-256 bruto: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+
+=== Captura real: graph ===
+Início: 2026-09-29T08:08:21-03:00
+Fim: 2026-09-29T08:08:25-03:00
+Comando: terraform -chdir=/tmp/devops-t18-security-p6zqjwho graph -type=plan
+Exit code: 0
+SHA-256 bruto: c33eebac3920ac152d39a907db4c427c2c5e2fc1b410ce216c2c1adc0084c5e8
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_security_group.ec2 (expand)" [label = "aws_security_group.ec2", shape = "box"]
+		"[root] aws_security_group.rds (expand)" [label = "aws_security_group.rds", shape = "box"]
+		"[root] aws_vpc_security_group_egress_rule.postgres (expand)" [label = "aws_vpc_security_group_egress_rule.postgres", shape = "box"]
+		"[root] aws_vpc_security_group_egress_rule.web (expand)" [label = "aws_vpc_security_group_egress_rule.web", shape = "box"]
+		"[root] aws_vpc_security_group_ingress_rule.api (expand)" [label = "aws_vpc_security_group_ingress_rule.api", shape = "box"]
+		"[root] aws_vpc_security_group_ingress_rule.postgres (expand)" [label = "aws_vpc_security_group_ingress_rule.postgres", shape = "box"]
+		"[root] aws_vpc_security_group_ingress_rule.ssh (expand)" [label = "aws_vpc_security_group_ingress_rule.ssh", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"]" [label = "provider[\"registry.terraform.io/hashicorp/aws\"]", shape = "diamond"]
+		"[root] var.api_allowed_cidrs" [label = "var.api_allowed_cidrs", shape = "note"]
+		"[root] var.name" [label = "var.name", shape = "note"]
+		"[root] var.ssh_cidr" [label = "var.ssh_cidr", shape = "note"]
+		"[root] var.tags" [label = "var.tags", shape = "note"]
+		"[root] var.vpc_id" [label = "var.vpc_id", shape = "note"]
+		"[root] aws_security_group.ec2 (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_security_group.ec2 (expand)" -> "[root] var.name (validation)"
+		"[root] aws_security_group.ec2 (expand)" -> "[root] var.tags (validation)"
+		"[root] aws_security_group.ec2 (expand)" -> "[root] var.vpc_id (validation)"
+		"[root] aws_security_group.rds (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_security_group.rds (expand)" -> "[root] var.name (validation)"
+		"[root] aws_security_group.rds (expand)" -> "[root] var.tags (validation)"
+		"[root] aws_security_group.rds (expand)" -> "[root] var.vpc_id (validation)"
+		"[root] aws_vpc_security_group_egress_rule.postgres (expand)" -> "[root] aws_security_group.ec2 (expand)"
+		"[root] aws_vpc_security_group_egress_rule.postgres (expand)" -> "[root] aws_security_group.rds (expand)"
+		"[root] aws_vpc_security_group_egress_rule.web (expand)" -> "[root] aws_security_group.ec2 (expand)"
+		"[root] aws_vpc_security_group_ingress_rule.api (expand)" -> "[root] aws_security_group.ec2 (expand)"
+		"[root] aws_vpc_security_group_ingress_rule.api (expand)" -> "[root] var.api_allowed_cidrs (validation)"
+		"[root] aws_vpc_security_group_ingress_rule.postgres (expand)" -> "[root] aws_security_group.ec2 (expand)"
+		"[root] aws_vpc_security_group_ingress_rule.postgres (expand)" -> "[root] aws_security_group.rds (expand)"
+		"[root] aws_vpc_security_group_ingress_rule.ssh (expand)" -> "[root] aws_security_group.ec2 (expand)"
+		"[root] aws_vpc_security_group_ingress_rule.ssh (expand)" -> "[root] var.ssh_cidr (validation)"
+		"[root] output.ec2_sg_id (expand)" -> "[root] aws_vpc_security_group_egress_rule.postgres (expand)"
+		"[root] output.ec2_sg_id (expand)" -> "[root] aws_vpc_security_group_egress_rule.web (expand)"
+		"[root] output.ec2_sg_id (expand)" -> "[root] aws_vpc_security_group_ingress_rule.api (expand)"
+		"[root] output.ec2_sg_id (expand)" -> "[root] aws_vpc_security_group_ingress_rule.ssh (expand)"
+		"[root] output.rds_sg_id (expand)" -> "[root] aws_vpc_security_group_ingress_rule.postgres (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_vpc_security_group_egress_rule.postgres (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_vpc_security_group_egress_rule.web (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_vpc_security_group_ingress_rule.api (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_vpc_security_group_ingress_rule.postgres (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_vpc_security_group_ingress_rule.ssh (expand)"
+		"[root] root" -> "[root] output.ec2_sg_id (expand)"
+		"[root] root" -> "[root] output.rds_sg_id (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)"
+		"[root] var.api_allowed_cidrs (validation)" -> "[root] var.api_allowed_cidrs"
+		"[root] var.name (validation)" -> "[root] var.name"
+		"[root] var.ssh_cidr (validation)" -> "[root] var.ssh_cidr"
+		"[root] var.tags (validation)" -> "[root] var.tags"
+		"[root] var.vpc_id (validation)" -> "[root] var.vpc_id"
+	}
+}
+
+
+=== Captura real: test ===
+Início: 2026-09-29T08:08:32-03:00
+Fim: 2026-09-29T08:08:36-03:00
+Comando: terraform -chdir=/tmp/devops-t18-security-p6zqjwho test -no-color
+Exit code: 0
+SHA-256 bruto: 5074f87bbe0663399c1ee0bafea493ad89fec9d5b9c5c1b98874d6f9fbec18a5
+tests/security.tftest.hcl... in progress
+  run "security_contract"... pass
+  run "multiple_approved_hosts"... pass
+  run "reject_bad_vpc"... pass
+  run "reject_ssh_public"... pass
+  run "reject_ssh_network"... pass
+  run "reject_ssh_ipv6"... pass
+  run "reject_ssh_malformed"... pass
+  run "reject_empty_api"... pass
+  run "reject_api_public"... pass
+  run "reject_api_network"... pass
+  run "reject_api_ipv6"... pass
+  run "reject_api_malformed"... pass
+  run "reject_reserved_name"... pass
+  run "reject_missing_owner"... pass
+tests/security.tftest.hcl... tearing down
+tests/security.tftest.hcl... pass
+
+Success! 14 passed, 0 failed.
+
+
+=== Schema real (resumo derivado, saída extensa não publicada) ===
+Início: 2026-09-29T08:08:59-03:00
+Fim: 2026-09-29T08:09:05-03:00
+Comando: terraform -chdir=/tmp/devops-t18-security-p6zqjwho providers schema -json
+Exit code: 0
+SHA-256 bruto: e452930af65383de8dee2ebb74e1a8c82eb1ca16bddc420f012b897a4edde6fe
+{
+  "checked_at": "2026-09-29T08:10:01-03:00",
+  "exit_code": 0,
+  "graph_acyclic": true,
+  "checked_direct_edges": 12,
+  "postgres_directions": "entrada RDS <- SG EC2, saída EC2 -> SG RDS; referências somente ID SG",
+  "inline_rules": "nenhuma; sem conflito com recursos de regras separados",
+  "output_dependencies": "EC2 aguarda quatro blocos de regras próprios; RDS aguarda entrada PostgreSQL",
+  "resource_blocks": 7,
+  "instances_single_api_host": 8,
+  "schema": {
+    "aws_security_group": {
+      "tags_optional": true
+    },
+    "aws_vpc_security_group_ingress_rule": {
+      "tags_optional": true,
+      "cidr_ipv4_optional": true,
+      "cidr_ipv6_optional": true,
+      "prefix_list_id_optional": true,
+      "referenced_security_group_id_optional": true
+    },
+    "aws_vpc_security_group_egress_rule": {
+      "tags_optional": true,
+      "cidr_ipv4_optional": true,
+      "cidr_ipv6_optional": true,
+      "prefix_list_id_optional": true,
+      "referenced_security_group_id_optional": true
+    }
+  },
+  "copies_and_readonly_lockfile": "bytes idênticos",
+  "local_test_result": "14 passed, 0 failed; todos command=plan/mock",
+  "aws_execution": "não executada; nenhum state/plan no root de validação",
+  "dns": "AWS não filtra AmazonProvidedDNS por SG; não há regra TCP/UDP 53 externa",
+  "rds_egress": "nenhuma regra de saída iniciada; respostas permitidas pela natureza stateful, ainda sem teste AWS"
+}
+
+=== SHA-256 dos arquivos validados ===
+7a77f0029e0c2c2fd6fc4b1d5242f9528ed607ed0f9767fe658267e88396b0f1  infra/modules/security-group/main.tf
+c0f7e23753e5bdeb2061bcb56d6a752ccab9b62878b2e306c118c0bec2a975ee  infra/modules/security-group/outputs.tf
+1817d07e2037070708d6f67df541409c8d3c98e53c166fcfae56f9db7e7a7168  infra/modules/security-group/tests/security.tftest.hcl
+72a76043b39a1723476eb7e60ca016d432a51aa2d6f2b71a96b783a0cd37b708  infra/modules/security-group/variables.tf
+a3d3144293dec6f52bfb3073db2cbc3b0d80a88e0b4ff8bbaa6b9778649e0c08  infra/modules/security-group/versions.tf
+
+Resultado: T18 local verificada; R15/R19/R22 em andamento, plano composto T21 e execução AWS T23 pendentes.
+Próxima tarefa T19: módulo RDS privado. Sem bloqueio de T18; aplicação/cloud ainda não executadas.
+
+=== Conferência final de escopo/documentos/segredos/Git (local) ===
+{
+  "checked_at": "2026-09-29T08:13:49-03:00",
+  "result": "PASSOU",
+  "files_scope": [
+    "AGENTS.md",
+    "README.md",
+    "docs/diario-ia.md",
+    "specs/design.md",
+    "specs/requirements.md",
+    "specs/tasks.md",
+    "evidencias/security-group-validate.txt",
+    "infra/modules/security-group/main.tf",
+    "infra/modules/security-group/variables.tf",
+    "infra/modules/security-group/outputs.tf",
+    "infra/modules/security-group/versions.tf",
+    "infra/modules/security-group/tests/security.tftest.hcl"
+  ],
+  "previous_files_preserved_sha256": 62,
+  "guide_api_docker_compose_bootstrap_and_previous_evidence": "intactos por SHA-256",
+  "diary_agents_history": "prefixos anteriores idênticos",
+  "private_files": "ignorados/0600, fora do stage",
+  "sensitive_scan": "sem achados nos padrões/valores delimitados; não prova ausência universal",
+  "tasks": "T01–T18 verificadas; T19–T34 pendentes, 34 IDs únicos",
+  "requirements": "32 IDs únicos; R14/R15/R19/R20/R21/R22/R31 em andamento",
+  "markdown_links_fences_newlines": "PASSOU",
+  "diff_check_exit_code": 0,
+  "terraform": "init0/fmt0/validate0/grafo0/14 testes LOCAIS mock0, sem AWS",
+  "copies_and_lockfile_identical": true,
+  "raw_captures_hashes": "preservados incluindo fmt inicial falhado",
+  "state_plan_in_temporary_root": "nenhum",
+  "git_before_commit": "13 commits/0 merges, feature/main preservados"
+}
+
+=== Limpeza local real após conferência ===
+{
+  "checked_at": "2026-09-29T08:14:59-03:00",
+  "exit_code": 0,
+  "removed_only": "/tmp/devops-t18-security-p6zqjwho",
+  "state_plan_in_root": "nenhum, confirmado recursivamente antes da remoção",
+  "original_provider_cache": "inode/tamanho/mtime idênticos após limpeza; rmtree não segue symlink",
+  "bootstrap_state_plan_tfvars": "não removidos",
+  "raw_logs_metadata": "preservados em /tmp"
+}
+
+=== Falha real na revisão de whitespace do stage ===
+{
+  "started": "2026-09-29T08:16:16-03:00",
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "exit_code": 2,
+  "raw_sha256": "a519ed9caf536fcd4cef493969a046a0a03aafb340ec32b0d7b242ef5c7c0336",
+  "sanitized_output": "evidencias/security-group-validate.txt:36: trailing whitespace.\n+│ \nevidencias/security-group-validate.txt:40: trailing whitespace.\n+│ \nevidencias/security-group-validate.txt:46: trailing whitespace.\n+│ \nevidencias/security-group-validate.txt:49: trailing whitespace.\n+│ \nevidencias/security-group-validate.txt:56: trailing whitespace.\n+│ \nevidencias/security-group-validate.txt:59: trailing whitespace.\n+│ \n"
+}
+Correção: seis linhas decorativas da falha fmt tinham espaços finais; somente esses espaços removidos.
+A captura bruta fmt e seu hash permanecem intactos; nenhum código/teste Terraform mudou.

@@ -1,0 +1,39 @@
+T24 — /health HTTP externo na EC2 com SQL real no RDS privado.
+29/09/2026, Learner Lab us-east-1/conta terminada5811, origem /32 aprovada.
+Python3 urllib.request: GET http://13.220.113.41:3000/health, timeout10s.
+A rota existente executa SELECT1 via pool pg; não é resposta estática de deploy.
+TLS/RDS/serviço/UID/permissões/schema comprovados em ec2-deploy.txt.
+Hash do corpo HTTP bruto, horários/status e corpo real abaixo. Nenhum segredo.
+
+### health-first
+Captura real: devops-t24-health-first.json
+started: "2026-09-29T10:05:04-03:00"
+finished: "2026-09-29T10:05:05-03:00"
+exit_code: 0
+sha256: "68fd26fd028c249fb77980d91904c5713a103acb2f179ad7dfcd5164b708ae39"
+url: "http://13.220.113.41:3000/health"
+http_status: 200
+Corpo real: {"status":"ok","database":"ok"}
+
+### health-repeat
+Captura real: devops-t24-health-repeat.json
+started: "2026-09-29T10:07:32-03:00"
+finished: "2026-09-29T10:07:33-03:00"
+exit_code: 0
+sha256: "68fd26fd028c249fb77980d91904c5713a103acb2f179ad7dfcd5164b708ae39"
+url: "http://13.220.113.41:3000/health"
+http_status: 200
+Corpo real: {"status":"ok","database":"ok"}
+
+### health-after-reboot
+Captura real: devops-t24-health-after-reboot.json
+started: "2026-09-29T10:08:26-03:00"
+finished: "2026-09-29T10:08:26-03:00"
+exit_code: 0
+sha256: "68fd26fd028c249fb77980d91904c5713a103acb2f179ad7dfcd5164b708ae39"
+url: "http://13.220.113.41:3000/health"
+http_status: 200
+Corpo real: {"status":"ok","database":"ok"}
+
+Três GET200, databaseok; reboot retornou serviço automaticamente.
+CRUD/seis rotas e persistência de reserva AWS continuam T25. Sem simulação.

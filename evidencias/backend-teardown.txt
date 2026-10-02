@@ -1,0 +1,136 @@
+T29 — revisão do backend antes da limpeza (29/09/2026, us-east-1)
+
+Escopo executado: consultas AWS de leitura, inspeção dos states e plan -destroy
+do bootstrap. Nenhum apply, delete-object, delete-bucket, delete-table ou
+alteração de IAM/SCP foi executado em T29. A autorização anterior abrangia
+somente o destroy principal T28, não o backend.
+
+Identidade: perfil default, role voclabs, conta Learner Lab terminada em 5811;
+conta completa comparada com a configuração privada, sem publicá-la.
+Principal: terraform state pull exit 0, zero resources/outputs após T28.
+Bootstrap: state local infra/backend/terraform.tfstate disponível, 0600,
+quatro recursos managed. Cópias privadas fora do Git, ambas 0600:
+/tmp/prova-t28-main-final.tfstate, SHA-256
+e4053a550c802141f9b6c30ffcf7c52d378c38f79dcf06ce1cadacec89e90b20;
+/tmp/prova-t28-backend-bootstrap.tfstate, SHA-256
+d6bd2dc633d1702eac6b760ac710cd24b2499302f5836e016a6d59a0c72fa74d.
+São cópias temporárias de recuperação, não arquivos versionados; devem ser
+preservadas até confirmar T30 e então decidir retenção local final.
+
+Bucket exclusivo prova-6325231-tfstate-e373b51f3467, região us-east-1,
+versionamento Enabled, AES256 e quatro bloqueios públicos true; tags Project/
+Owner conferidas. Objeto de state atual: chave única
+prova-primeiro-bimestre-devops/terraform.tfstate, head-object exit 0,
+VersionId presente, AES256. list-object-versions: seis versões da mesma chave,
+zero delete markers, 257210 bytes somados; list-objects-v2: um objeto atual,
+mesma chave; zero uploads multipart abertos. A AWS CLI omitiu KeyCount na
+resposta list-objects-v2. A primeira leitura interpretou incorretamente o
+campo omitido como zero objetos; head-object, Contents e a repetição da
+listagem confirmaram um. Nenhuma versão mudou por causa dessa correção.
+Manifesto privado de versões/IDs para conferência: /tmp/prova-t29-backend-versions.json,
+0600, SHA-256 0d8fa472d368998512b36cde5d73c599b89beb56a2579946f29b88c6e1a892d6.
+É uma fotografia; re-listar antes de qualquer exclusão, sem confiar em IDs
+antigos se a AWS mostrar mudanças.
+
+Tabela exclusiva prova-6325231-tflock-e373b51f3467: ACTIVE, on-demand,
+LockID String. Scan retornou somente um item de checksum com sufixo -md5;
+nenhum item Info/lock ativo observado naquele instante. Revalidar imediatamente
+antes da limpeza; leitura pontual não garante ausência futura de lock.
+
+Plano real: terraform -chdir=infra/backend plan -destroy -input=false -no-color
+-detailed-exitcode -var-file=terraform.tfvars
+-out=backend-destroy-t29.tfplan
+Exit 2 esperado (mudanças), 0 add, 0 change, 4 destroy. show -json exit 0;
+quatro ações exclusivamente delete: aws_dynamodb_table.locks,
+aws_s3_bucket_public_access_block.state,
+aws_s3_bucket_server_side_encryption_configuration.state e
+aws_s3_bucket_versioning.state. Plano binário ignorado/0600,
+SHA-256 247b450b91c3ba8548d33910040e833ac4905a68ad670ecc086449a5d60f54c6.
+Saída bruta privada /tmp/prova-t29-backend-plan.raw, 0600. O bucket físico
+não integra o plano: em T16 foi mantido fora do state managed por SCP que
+nega GetBucketObjectLockConfiguration. Sua exclusão exige AWS CLI separada.
+
+Proposta para T30, sujeita a autorização separada: (1) confirmar conta/região,
+state principal vazio, bootstrap local íntegro e ausência de lock; re-listar
+chaves, versões e marcadores; (2) excluir permanentemente as seis versões
+identificadas da única chave de state, desde que o inventário permaneça igual;
+(3) aplicar o plano Terraform de quatro exclusões, conferindo integridade e
+escopo; (4) excluir por CLI somente o bucket físico próprio, depois de vazio;
+(5) confirmar bucket/tabela ausentes e preservar os states privados até fechar
+a auditoria. Se surgir outra chave, versão, marker ou lock, interromper e
+revisar o escopo; não excluir recursos de outros projetos. A exclusão dessas
+versões perde o histórico remoto de state. O state final do principal já está
+vazio, mas suas cópias privadas de recuperação devem continuar disponíveis
+até a conclusão. Não usar force_destroy, -lock=false ou -auto-approve.
+
+O backend remanescente pode consumir créditos do Learner Lab até T30; este
+inventário não mede cobrança real nem saldo atual. A revisão T15 estimou
+aproximadamente US$0,01/mês para um cenário hipotético de 10 MiB S3, 1 MiB
+DynamoDB, 1.000 unidades/requisições por categoria e 10 MiB de saída; o uso
+observado de 257210 bytes de versões S3 não equivale à fatura. O custo real
+varia com armazenamento, requisições e tempo; não há garantia de custo zero.
+
+Fontes oficiais consultadas:
+https://docs.aws.amazon.com/cli/latest/reference/s3api/list-object-versions.html
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html
+https://docs.aws.amazon.com/cli/latest/reference/s3api/delete-object.html
+https://aws.amazon.com/s3/pricing/
+https://aws.amazon.com/dynamodb/pricing/
+
+Estado: T29 em andamento até decisão explícita do aluno; T30 não iniciada.
+
+
+T30 — limpeza autorizada e efetiva (29/09/2026, aprox. 22:27–22:34 -03:00)
+
+Decisão humana recebida: “Sim, autorizo esse escopo de limpeza.” O pedido
+incluía explicitamente seis versões, quatro recursos managed e o bucket
+físico, na conta do Learner Lab terminada em 5811/us-east-1, com states
+privados preservados. Nenhuma ampliação de escopo foi necessária.
+
+Preflight real, antes de mutações: STS mesma conta/voclabs/us-east-1; state
+principal remoto 0 recursos/outputs; bootstrap local 4 managed; SHA-256 do
+plano e manifesto idênticos aos aprovados. AWS S3: seis VersionIds exatamente
+iguais ao manifesto, única chave e 257210 bytes, zero markers, um objeto atual,
+AES256; bucket/região/ownership conferidos. DynamoDB ACTIVE, somente item
+LockID ...-md5 com Digest, sem Info/lock. `show -json` confirmou quatro ações
+exclusivamente delete. Preflight final exit 0.
+
+Duas assertivas preparatórias falharam antes de qualquer mutação e foram
+corrigidas: a primeira exigia ARN terminado em /voclabs, mas a role real usa
+assumed-role/voclabs/...; a segunda exigia LockID igual à chave + -md5, mas
+inclui o prefixo do bucket. STS e scan mostraram os valores reais sem publicar
+conta completa ou IDs; após correção, todas as checagens passaram. Nenhuma
+versão/recurso havia sido excluído durante essas falhas.
+
+Seis chamadas AWS CLI `s3api delete-object --version-id` com bucket/key/owner
+conferidos retornaram 0 e ecoaram os VersionIds esperados, sem DeleteMarker.
+Leitura seguinte: zero Versions, zero DeleteMarkers e zero objetos atuais.
+Log privado /tmp/prova-t30-deletions.json, 0600, SHA-256
+224e1b151e7748a89e03be9a844a40b07f22676c1f78bba9b2045af4d720baf1.
+Não versionar log com IDs de versão.
+
+`terraform -chdir=infra/backend apply -input=false -no-color
+backend-destroy-t29.tfplan` retornou 0, sem -auto-approve. Log: quatro linhas
+Destroying e quatro Destruction complete; `Apply complete! Resources: 0
+added, 0 changed, 4 destroyed.`; zero Error. Log bruto privado
+/tmp/prova-t30-backend-apply.raw, 0600, SHA-256
+44355736ed5e4df25c02a5412e12e078803d3457d9801db76d44101333717b86.
+State local do bootstrap 0600, zero managed; `terraform state list` sem
+endereços, exit 0. Não foi usado -lock=false nem alteração IAM/SCP.
+
+Antes de excluir o bucket físico por CLI: STS na mesma conta, state bootstrap
+zero, versões/markers/objetos/uploads multipart todos zero e tags Project/
+Owner do projeto. `aws s3api delete-bucket` com --expected-bucket-owner
+retornou 0. Verificação independente: `head-bucket` 404 e bucket ausente em
+`list-buckets`; DynamoDB `describe-table` ResourceNotFoundException e tabela
+ausente em `list-tables`. Cópia privada final do state principal preservada
+em /tmp/prova-t28-main-final.tfstate com hash conferido e zero recursos;
+cópia privada do bootstrap pré-teardown também preservada/hash conferido.
+O state local pós-teardown permanece ignorado/0600, SHA-256
+a69fcd4bb215438507e15d14c0bd2013e634ed27d89194739c37fc7fbffe6743.
+
+Resultado T30: backend S3/DynamoDB deste projeto removido e ausência confirmada
+na conta verificada. As cópias locais privadas permanecem para auditoria;
+não afirmar limpeza de outros recursos/contas por essas consultas. Nenhum
+push, merge ou PR realizado. T30A (contribuição pessoal do aluno) é a próxima
+tarefa; não escrever essa vivência por ele.

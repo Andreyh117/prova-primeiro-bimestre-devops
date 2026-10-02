@@ -1,0 +1,27 @@
+T07 — falhas controladas do servidor e limpeza
+Data: 2026-09-28T19:34:02-03:00
+
+Comando: npm --prefix app start
+Caso: PORT inválida; variáveis PG* ausentes somente no subprocesso
+
+> prova-primeiro-bimestre-devops@0.1.0 start
+> node src/server.js
+
+PORT deve ser uma porta de 1 a 65535.
+EXIT CODE observado: 1
+RESULTADO: PASSOU — falha esperada, sem conexão configurada.
+
+Comando: npm --prefix app start
+Caso: Variáveis PG* ausentes somente no subprocesso; PORT padrão
+
+> prova-primeiro-bimestre-devops@0.1.0 start
+> node src/server.js
+
+PGHOST é obrigatório.
+EXIT CODE observado: 1
+RESULTADO: PASSOU — falha esperada, sem conexão configurada.
+
+Comando: docker ps -a com filtros de labels do projeto e de teste
+Containers encontrados: 0
+EXIT CODE: 0
+RESULTADO: PASSOU — nenhum container de teste remanescente.

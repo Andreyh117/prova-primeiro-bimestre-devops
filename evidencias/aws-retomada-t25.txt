@@ -1,0 +1,853 @@
+T25 — retomada após credenciais atualizadas, auditoria e recuperação autorizadas.
+29/09/2026. Conta aprovada terminada5811/default/voclabs/us-east-1 atual.
+Usuário: credenciais atualizadas; conferir/reparar tarefas anteriores antes T25.
+Mesma EC2 i-0f4b59a8181537b78 encontrada stopped; RDS available/private/encrypted.
+AWS informa User initiated (2026-09-29 15:46:58 GMT); causa/autoria não comprovadas.
+Start somente da instância existente0/waitrunning0/waitstatusok0, sem recriação,
+novo IAM/SG/recurso/destroy; refresh-only de state revisado abaixo. Novo IPv4 público54.234.84.228; anterior
+13.220.113.41 é histórico. API/Docker voltaram automaticamente da imagemT24.
+Resources ativos/faturáveis; estimativaT22 continua cenário, não saldo/teto/fatura.
+Falhas históricas T16SCP/ObjectLock e T24CRLF/digestOCI constam nas evidências
+anteriores e foram corrigidas naquela execução; não alegar ausência de falhas.
+
+Auditoria auxiliar inicialmente falhou1 porque exigiu running e encontrou stopped;
+AWSDescribeInstances0. Depois falhou1 porque exigiu checksok imediatamente após
+start, quando ambos eram initializing; DescribeInstanceStatus0. Capturas originais
+privadas preservadas. Wait explícito resolveu; não eram falhas API/provider.
+Nova console AWS0 não continha fingerprint; auxiliarassert1 recusou atualizarpin.
+ssh-keyscan0 encontrou EXACTAMENTE mesma hostkeyT24 já autenticada por console
+AWS daquela execução. Leitor corrigido para reutilizar pin confiável persistente,
+com comparação da chave/consoleT24; não desabilitar StrictHostKeyChecking.
+Known_hosts privado0600 acrescentou associação do IPnovo, nenhuma chave alterada.
+
+S3 Enabled/AES256/quatrobloqueios/regionus-east1, stateprincipalnonempty/VersionId/
+AES256 e23managed revalidados. DDBACTIVE/PAY_PER_REQUEST/LockIDString; itemlock
+principal ausente antes/depois do plano. Plan detailedexit2 esperado: ZERO ações
+sobre recursos, sóoutputsapi_url/ec2_public_ip atualizados pelo novoIP. Drift
+computadoEC2ip/dns,RDSdomain_dns_ips/enabled_cloudwatch_logs_exports eSGs inline
+lidos após regras separadas; regras managed foram no-op e guardas AWSexatas
+passaram. Não publicar showJSON/statepull completos pois contêm senhas. Após revisar plano concreto refresh-only/hash/conta/região/custo, aplicado
+somente sincronismo de state conforme autorização de corrigir tarefas anteriores.
+Refresh-only0/zeroaçõesrecursos, nova versão S3AES256/IPURLcorretos/lockliberado.
+Script T25 obtém endpoint/IP correntes pela AWS CLI, sem depender desse cache.
+Não sobrescrever planos aprovados/state/backend. Nenhuma mudança de configuração
+Terraform necessária. ServiçoAPIenabled/active/UID1000/mesmaimagem/manifesto/
+envroot0600/dir0700/CA0644/TLSv1.3/health200 revalidados antes do CRUD.
+Redação declarada: conta/ARN/sessão/usuário/senha/IP de origem ocultados. Brutos
+/metadados0600 em/tmp; hashes do bruto original, não do texto sanitizado.
+
+### audit-initial-ec2
+started: "2026-09-29T12:55:31-03:00"
+finished: "2026-09-29T12:55:33-03:00"
+command: ["aws", "ec2", "describe-instances", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "a7c6637b46cf3fddb115688e7ab3014f6705790e49a7b7714dd403a84f8347cf"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+EC2 i-0f4b59a8181537b78 stopped, tags do projeto/Owner6325231/t2.micro confirmados.
+
+### recovery-rds
+started: "2026-09-29T12:56:39-03:00"
+finished: "2026-09-29T12:56:41-03:00"
+command: ["aws", "rds", "describe-db-instances", "--db-instance-identifier", "prova-6325231-rds", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "f95f106a26246c9ee8663b35f8b8d2a12546285a983942e8524f123b504b194c"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+RDS prova-6325231-rds available/private/encrypted; sem alteração.
+
+### recovery-start
+started: "2026-09-29T12:57:01-03:00"
+finished: "2026-09-29T12:57:04-03:00"
+command: ["aws", "ec2", "start-instances", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1"]
+exit_code: 0
+sha256: "91fcb5dfe671a23c5c5f88a04145171154391565a66030a187cf45dcac92f440"
+{
+    "StartingInstances": [
+        {
+            "InstanceId": "i-0f4b59a8181537b78",
+            "CurrentState": {
+                "Code": 0,
+                "Name": "pending"
+            },
+            "PreviousState": {
+                "Code": 80,
+                "Name": "stopped"
+            }
+        }
+    ]
+}
+
+
+### recovery-wait-running
+started: "2026-09-29T12:57:04-03:00"
+finished: "2026-09-29T12:57:21-03:00"
+command: ["aws", "ec2", "wait", "instance-running", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+
+### audit-warming-ec2-status
+started: "2026-09-29T12:57:50-03:00"
+finished: "2026-09-29T12:57:52-03:00"
+command: ["aws", "ec2", "describe-instance-status", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "3f0ddcfa698500c7ae7e05bbb82ec14db9372bcfe237eb29c35b8bc0e72178cf"
+{
+    "InstanceStatuses": [
+        {
+            "AvailabilityZone": "us-east-1a",
+            "AvailabilityZoneId": "use1-az4",
+            "Operator": {
+                "Managed": false,
+                "HiddenByDefault": false
+            },
+            "InstanceId": "i-0f4b59a8181537b78",
+            "InstanceState": {
+                "Code": 16,
+                "Name": "running"
+            },
+            "InstanceStatus": {
+                "Details": [
+                    {
+                        "Name": "reachability",
+                        "Status": "initializing"
+                    }
+                ],
+                "Status": "initializing"
+            },
+            "SystemStatus": {
+                "Details": [
+                    {
+                        "Name": "reachability",
+                        "Status": "initializing"
+                    }
+                ],
+                "Status": "initializing"
+            }
+        }
+    ]
+}
+
+
+### recovery-pin
+checked_at: "2026-09-29T12:59:51-03:00"
+exit_code: 0
+{"checked_at": "2026-09-29T12:59:51-03:00", "host": "54.234.84.228", "fingerprint": "SHA256:vwVjnxeAfoWhqsgZX3VWC7S14HbagY8URvsPdtxgGHo", "same_key_as_t24": true, "trusted_t24_console_match": true, "current_console_contains_fingerprint": false, "known_hosts_mode": "0600", "exit_code": 0}
+
+### recovery-wait-status
+started: "2026-09-29T12:59:51-03:00"
+finished: "2026-09-29T12:59:53-03:00"
+command: ["aws", "ec2", "wait", "instance-status-ok", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+
+### audit-ec2-status
+started: "2026-09-29T13:00:11-03:00"
+finished: "2026-09-29T13:00:13-03:00"
+command: ["aws", "ec2", "describe-instance-status", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "924350814116ccabc12e2d8ff8767e670395aae64adb29b88d5e225dc9141a92"
+{
+    "InstanceStatuses": [
+        {
+            "AvailabilityZone": "us-east-1a",
+            "AvailabilityZoneId": "use1-az4",
+            "Operator": {
+                "Managed": false,
+                "HiddenByDefault": false
+            },
+            "InstanceId": "i-0f4b59a8181537b78",
+            "InstanceState": {
+                "Code": 16,
+                "Name": "running"
+            },
+            "InstanceStatus": {
+                "Details": [
+                    {
+                        "Name": "reachability",
+                        "Status": "passed"
+                    }
+                ],
+                "Status": "ok"
+            },
+            "SystemStatus": {
+                "Details": [
+                    {
+                        "Name": "reachability",
+                        "Status": "passed"
+                    }
+                ],
+                "Status": "ok"
+            }
+        }
+    ]
+}
+
+
+### audit-s3-versioning
+started: "2026-09-29T13:00:13-03:00"
+finished: "2026-09-29T13:00:17-03:00"
+command: ["aws", "s3api", "get-bucket-versioning", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "e0d7fcfe6b2ca7b3376e1af42cfbf309d2ee91d4cd664565f9b73c4816079f22"
+{
+    "Status": "Enabled"
+}
+
+
+### audit-s3-encryption
+started: "2026-09-29T13:00:17-03:00"
+finished: "2026-09-29T13:00:19-03:00"
+command: ["aws", "s3api", "get-bucket-encryption", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "9dcbf5a9219555f282511d108aea0d88f078e8824b9fdd397160394bd3c2a213"
+{
+    "ServerSideEncryptionConfiguration": {
+        "Rules": [
+            {
+                "ApplyServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "AES256"
+                },
+                "BucketKeyEnabled": false,
+                "BlockedEncryptionTypes": {
+                    "EncryptionType": [
+                        "SSE-C"
+                    ]
+                }
+            }
+        ]
+    }
+}
+
+
+### audit-s3-public
+started: "2026-09-29T13:00:19-03:00"
+finished: "2026-09-29T13:00:21-03:00"
+command: ["aws", "s3api", "get-public-access-block", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "31f1f0a092cfdc6587c931923da09fc537545478aca3c5dcc2c060b73a91e4d9"
+{
+    "PublicAccessBlockConfiguration": {
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": true,
+        "RestrictPublicBuckets": true
+    }
+}
+
+
+### audit-s3-region
+started: "2026-09-29T13:00:21-03:00"
+finished: "2026-09-29T13:00:22-03:00"
+command: ["aws", "s3api", "get-bucket-location", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "c91914411f90553792f3dfb1803f7c51ada8a48fadfb74f817af5f86a8b061ff"
+{
+    "LocationConstraint": null
+}
+
+
+### audit-s3-state
+started: "2026-09-29T13:00:22-03:00"
+finished: "2026-09-29T13:00:24-03:00"
+command: ["aws", "s3api", "head-object", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--key", "prova-primeiro-bimestre-devops/terraform.tfstate", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "39693afa54261f9d3de73108f7d15e20a66cffc0100d50d00ef992d0257859f3"
+{
+    "AcceptRanges": "bytes",
+    "LastModified": "2026-09-29T12:33:10+00:00",
+    "ContentLength": 62855,
+    "ETag": "\"3f5d716ac61628b3cd6783e699734439\"",
+    "VersionId": "q3n1Kl7rA1wbvqJtyFL2Z8BI2yB16hTg",
+    "ContentType": "application/json",
+    "ServerSideEncryption": "AES256",
+    "Metadata": {}
+}
+
+
+### audit-ddb
+started: "2026-09-29T13:00:24-03:00"
+finished: "2026-09-29T13:00:26-03:00"
+command: ["aws", "dynamodb", "describe-table", "--table-name", "prova-6325231-tflock-e373b51f3467", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "8ce15cf77ab8a8bf68e385248f6d06e35a86340bd5d57e578df85e81f4052a69"
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "LockID",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "prova-6325231-tflock-e373b51f3467",
+        "KeySchema": [
+            {
+                "AttributeName": "LockID",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2026-09-29T00:31:21.513000-03:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 0,
+            "WriteCapacityUnits": 0
+        },
+        "TableSizeBytes": 131,
+        "ItemCount": 1,
+        "TableArn": "arn:aws:dynamodb:us-east-1:[DADO_PRIVADO_OCULTADO]:table/prova-6325231-tflock-e373b51f3467",
+        "TableId": "b7c1c155-4190-4c96-8925-07dc86ad13e7",
+        "BillingModeSummary": {
+            "BillingMode": "PAY_PER_REQUEST",
+            "LastUpdateToPayPerRequestDateTime": "2026-09-29T00:31:21.513000-03:00"
+        },
+        "DeletionProtectionEnabled": false,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 12000,
+            "WriteUnitsPerSecond": 4000,
+            "Status": "ACTIVE"
+        }
+    }
+}
+
+
+### audit-lock
+started: "2026-09-29T13:00:26-03:00"
+finished: "2026-09-29T13:00:27-03:00"
+command: ["aws", "dynamodb", "get-item", "--table-name", "prova-6325231-tflock-e373b51f3467", "--key", "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+
+### audit-lock-after
+started: "2026-09-29T13:00:49-03:00"
+finished: "2026-09-29T13:00:50-03:00"
+command: ["aws", "dynamodb", "get-item", "--table-name", "prova-6325231-tflock-e373b51f3467", "--key", "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+
+### audit-state-pull
+started: "2026-09-29T13:00:27-03:00"
+finished: "2026-09-29T13:00:31-03:00"
+command: ["terraform", "-chdir=infra", "state", "pull"]
+exit_code: 0
+sha256: "8c7aae16e457e652a6e1daee31d890c60eeeaebbac19c5809f52cc47a4a42a80"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+State privado:23managed; sem publicar conteúdo/senha.
+
+### audit-plan
+started: "2026-09-29T13:00:31-03:00"
+finished: "2026-09-29T13:00:44-03:00"
+command: ["terraform", "-chdir=infra", "plan", "-detailed-exitcode", "-out=/tmp/devops-t25-audit.tfplan"]
+exit_code: 2
+sha256: "b5df28600b38b2305c3880cf07326039cfd2e36d9494e73053c77c1dda024380"
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+Acquiring state lock. This may take a few moments...
+[0m[1mdata.aws_ami.selected: Reading...[0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-02f929ba0204c6c07][0m
+[0m[1mdata.aws_ami.selected: Read complete after 0s [id=ami-048da71c4d98f46b1][0m
+[0m[1mmodule.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-077afb6dd7f8bdfbd][0m
+[0m[1mmodule.vpc.aws_route_table.private: Refreshing state... [id=rtb-061c1854c7a479bbb][0m
+[0m[1mmodule.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-04fd3c6ae447925bf][0m
+[0m[1mmodule.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-0493e2731c46fff3b][0m
+[0m[1mmodule.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0ca900230f70ab9a1][0m
+[0m[1mmodule.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-0c20867ed9b442235][0m
+[0m[1mmodule.security_group.aws_security_group.ec2: Refreshing state... [id=sg-04c0129a3f542812b][0m
+[0m[1mmodule.security_group.aws_security_group.rds: Refreshing state... [id=sg-0622ad42cefbb6b38][0m
+[0m[1mmodule.vpc.aws_route_table.public: Refreshing state... [id=rtb-0e6d609d1cf0f2953][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.ssh: Refreshing state... [id=sgr-093ef5bfd93c88a78][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["443"]: Refreshing state... [id=sgr-04a8b2a7f3339361f][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.api["[DADO_PRIVADO_OCULTADO]"]: Refreshing state... [id=sgr-0902c70576fa9e6fc][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["80"]: Refreshing state... [id=sgr-09a3c976a6a925952][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.postgres: Refreshing state... [id=sgr-0c0f6fdf5ee43d180][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.postgres: Refreshing state... [id=sgr-0d1aae7a6704f7969][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-03b0623fda6316131][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-00cf853ae7765dcc4][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-0cf278fe785731c97][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-0b93c5ec17f1a879d][0m
+[0m[1mmodule.rds.aws_db_subnet_group.private: Refreshing state... [id=prova-6325231-rds-private][0m
+[0m[1mmodule.ec2.aws_instance.this: Refreshing state... [id=i-0f4b59a8181537b78][0m
+[0m[1mmodule.rds.aws_db_instance.this: Refreshing state... [id=db-QTAZ223JJM6K7VAWI5MAR57ENA][0m
+
+[1m[36mNote:[0m[1m Objects have changed outside of Terraform
+[0m
+Terraform detected the following changes made outside of Terraform since the
+last "terraform apply" which may have affected this plan:
+
+[1m  # module.ec2.aws_instance.this[0m has changed
+[0m  [33m~[0m[0m resource "aws_instance" "this" {
+        id                                   = "i-0f4b59a8181537b78"
+      [33m~[0m[0m public_ip                            = "13.220.113.41" [33m->[0m[0m "54.234.84.228"
+        tags                                 = {
+            "Environment" = "learner-lab"
+            "Name"        = "prova-6325231-api"
+            "Owner"       = "6325231"
+            "Project"     = "prova-primeiro-bimestre-devops"
+        }
+        [90m# (40 unchanged attributes hidden)[0m[0m
+
+        [90m# (9 unchanged blocks hidden)[0m[0m
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the
+relevant attributes using ignore_changes, the following plan may include
+actions to undo or respond to these changes.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Changes to Outputs:
+  [33m~[0m[0m api_url         = "http://13.220.113.41:3000" [33m->[0m[0m "http://54.234.84.228:3000"
+  [33m~[0m[0m ec2_public_ip   = "13.220.113.41" [33m->[0m[0m "54.234.84.228"
+
+You can apply this plan to save these new output values to the Terraform
+state, without changing any real infrastructure.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: /tmp/devops-t25-audit.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "/tmp/devops-t25-audit.tfplan"
+
+
+### audit-plan-json
+started: "2026-09-29T13:00:44-03:00"
+finished: "2026-09-29T13:00:48-03:00"
+command: ["terraform", "-chdir=infra", "show", "-json", "/tmp/devops-t25-audit.tfplan"]
+exit_code: 0
+sha256: "ecb340601fe787c2c0f0e86c6baa2ae96ef44ed928ab87c8d9de2f5eeee4a116"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+Todasresource_changes:no-op; outputsapi_url/ec2_public_ip:update.
+[
+  {
+    "address": "module.ec2.aws_instance.this",
+    "changed_fields": [
+      "public_dns",
+      "public_ip"
+    ],
+    "planned_resource_action": "no-op"
+  },
+  {
+    "address": "module.rds.aws_db_instance.this",
+    "changed_fields": [
+      "domain_dns_ips",
+      "enabled_cloudwatch_logs_exports"
+    ],
+    "planned_resource_action": "no-op"
+  },
+  {
+    "address": "module.security_group.aws_security_group.ec2",
+    "changed_fields": [
+      "egress",
+      "ingress"
+    ],
+    "planned_resource_action": "no-op"
+  },
+  {
+    "address": "module.security_group.aws_security_group.rds",
+    "changed_fields": [
+      "ingress"
+    ],
+    "planned_resource_action": "no-op"
+  }
+]
+
+### readonly
+started: "2026-09-29T13:00:45-03:00"
+finished: "2026-09-29T13:01:13-03:00"
+command: ["python3", "-B", "/tmp/devops-t25-readonly.py"]
+exit_code: 0
+sha256: "d0e7e7af81c5ce8c1fc34b0d4a11b0ce825880181bedd62d1be8bd2cc2728df1"
+{"preflight": "ok", "instance": "i-0f4b59a8181537b78", "ec2": "running/t2.micro", "rds": "available/16.15/db.t3.micro/private/encrypted", "sg": "22/3000 somente /32 aprovado;5432 somente SGEC2", "subnets_rds": "duas privadas/duas AZs"}
+Runtime após start: {"container_id": "085e18d4d46f7725beecfd0c883c77bf48fc55f1f429b5da54c1b3e5cb9f9bec", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "uid": 1000}
+SQL: {"host": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com", "database": "reservas", "rejectUnauthorized": true, "tls": {"ssl": true, "version": "TLSv1.3", "cipher": "TLS_AES_256_GCM_SHA384"}, "rows": [], "removed": []}
+PASSOU: GET /health -> 200
+enabled
+active
+700 root root /etc/prova-reservas
+600 root root /etc/prova-reservas/api.env
+600 root root /etc/prova-reservas/image.env
+644 root root /opt/prova-reservas/rds-ca.pem
+{
+  "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456",
+  "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88",
+  "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518",
+  "ca_sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "unit_sha256": "ba2ee2c48115f73e3fd4247142b4f09e7c1e09d7bee360db9024e842f38ae85f"
+}
+
+T24 revalidada: mesma imagem/manifesta, serviço automático, SQL TLS/health200, sem escrita em reservas.
+
+
+### refresh-plan
+started: "2026-09-29T13:08:52-03:00"
+finished: "2026-09-29T13:09:07-03:00"
+command: ["terraform", "-chdir=infra", "plan", "-refresh-only", "-detailed-exitcode", "-out=/tmp/devops-t25-refresh-only.tfplan"]
+exit_code: 2
+sha256: "6b5d7bf7f412758fe36ea827c3d6972c3697ed1bcd5d4d9539da1bf05cc80033"
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+Acquiring state lock. This may take a few moments...
+[0m[1mdata.aws_ami.selected: Reading...[0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-02f929ba0204c6c07][0m
+[0m[1mdata.aws_ami.selected: Read complete after 1s [id=ami-048da71c4d98f46b1][0m
+[0m[1mmodule.vpc.aws_route_table.private: Refreshing state... [id=rtb-061c1854c7a479bbb][0m
+[0m[1mmodule.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-077afb6dd7f8bdfbd][0m
+[0m[1mmodule.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0ca900230f70ab9a1][0m
+[0m[1mmodule.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-0c20867ed9b442235][0m
+[0m[1mmodule.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-0493e2731c46fff3b][0m
+[0m[1mmodule.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-04fd3c6ae447925bf][0m
+[0m[1mmodule.security_group.aws_security_group.ec2: Refreshing state... [id=sg-04c0129a3f542812b][0m
+[0m[1mmodule.security_group.aws_security_group.rds: Refreshing state... [id=sg-0622ad42cefbb6b38][0m
+[0m[1mmodule.vpc.aws_route_table.public: Refreshing state... [id=rtb-0e6d609d1cf0f2953][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.postgres: Refreshing state... [id=sgr-0d1aae7a6704f7969][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["80"]: Refreshing state... [id=sgr-09a3c976a6a925952][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.ssh: Refreshing state... [id=sgr-093ef5bfd93c88a78][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.postgres: Refreshing state... [id=sgr-0c0f6fdf5ee43d180][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.api["[DADO_PRIVADO_OCULTADO]"]: Refreshing state... [id=sgr-0902c70576fa9e6fc][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["443"]: Refreshing state... [id=sgr-04a8b2a7f3339361f][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-0b93c5ec17f1a879d][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-0cf278fe785731c97][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-00cf853ae7765dcc4][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-03b0623fda6316131][0m
+[0m[1mmodule.rds.aws_db_subnet_group.private: Refreshing state... [id=prova-6325231-rds-private][0m
+[0m[1mmodule.ec2.aws_instance.this: Refreshing state... [id=i-0f4b59a8181537b78][0m
+[0m[1mmodule.rds.aws_db_instance.this: Refreshing state... [id=db-QTAZ223JJM6K7VAWI5MAR57ENA][0m
+
+[1m[36mNote:[0m[1m Objects have changed outside of Terraform
+[0m
+Terraform detected the following changes made outside of Terraform since the
+last "terraform apply" which may have affected this plan:
+
+[1m  # module.ec2.aws_instance.this[0m has changed
+[0m  [33m~[0m[0m resource "aws_instance" "this" {
+        id                                   = "i-0f4b59a8181537b78"
+      [33m~[0m[0m public_dns                           = "ec2-13-220-113-41.compute-1.amazonaws.com" [33m->[0m[0m "ec2-54-234-84-228.compute-1.amazonaws.com"
+      [33m~[0m[0m public_ip                            = "13.220.113.41" [33m->[0m[0m "54.234.84.228"
+        tags                                 = {
+            "Environment" = "learner-lab"
+            "Name"        = "prova-6325231-api"
+            "Owner"       = "6325231"
+            "Project"     = "prova-primeiro-bimestre-devops"
+        }
+        [90m# (39 unchanged attributes hidden)[0m[0m
+
+        [90m# (9 unchanged blocks hidden)[0m[0m
+    }
+
+[1m  # module.rds.aws_db_instance.this[0m has changed
+[0m  [33m~[0m[0m resource "aws_db_instance" "this" {
+      [32m+[0m[0m domain_dns_ips                        = []
+      [32m+[0m[0m enabled_cloudwatch_logs_exports       = []
+        id                                    = "db-QTAZ223JJM6K7VAWI5MAR57ENA"
+        tags                                  = {
+            "Environment" = "learner-lab"
+            "Name"        = "prova-6325231-rds"
+            "Owner"       = "6325231"
+            "Project"     = "prova-primeiro-bimestre-devops"
+        }
+        [90m# (73 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.security_group.aws_security_group.ec2[0m has changed
+[0m  [33m~[0m[0m resource "aws_security_group" "ec2" {
+      [33m~[0m[0m egress                 = [
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = [
+                  [32m+[0m[0m "0.0.0.0/0",
+                ]
+              [32m+[0m[0m description      = "HTTP or HTTPS for installation and artifacts"
+              [32m+[0m[0m from_port        = 443
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = []
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 443
+            },
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = [
+                  [32m+[0m[0m "0.0.0.0/0",
+                ]
+              [32m+[0m[0m description      = "HTTP or HTTPS for installation and artifacts"
+              [32m+[0m[0m from_port        = 80
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = []
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 80
+            },
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = []
+              [32m+[0m[0m description      = "PostgreSQL only to the private RDS security group"
+              [32m+[0m[0m from_port        = 5432
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = [
+                  [32m+[0m[0m "sg-0622ad42cefbb6b38",
+                ]
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 5432
+            },
+        ]
+        id                     = "sg-04c0129a3f542812b"
+      [33m~[0m[0m ingress                = [
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = [
+                  [32m+[0m[0m "[DADO_PRIVADO_OCULTADO]",
+                ]
+              [32m+[0m[0m description      = "API from an approved IPv4 host"
+              [32m+[0m[0m from_port        = 3000
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = []
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 3000
+            },
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = [
+                  [32m+[0m[0m "[DADO_PRIVADO_OCULTADO]",
+                ]
+              [32m+[0m[0m description      = "SSH from the approved student IPv4 host"
+              [32m+[0m[0m from_port        = 22
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = []
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 22
+            },
+        ]
+        name                   = "prova-6325231-ec2-f2ac64e1b7abb033ccc3bdd70c"
+        tags                   = {
+            "Environment" = "learner-lab"
+            "Name"        = "prova-6325231-ec2"
+            "Owner"       = "6325231"
+            "Project"     = "prova-primeiro-bimestre-devops"
+        }
+        [90m# (8 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.security_group.aws_security_group.rds[0m has changed
+[0m  [33m~[0m[0m resource "aws_security_group" "rds" {
+        id                     = "sg-0622ad42cefbb6b38"
+      [33m~[0m[0m ingress                = [
+          [32m+[0m[0m {
+              [32m+[0m[0m cidr_blocks      = []
+              [32m+[0m[0m description      = "PostgreSQL only from the API EC2 security group"
+              [32m+[0m[0m from_port        = 5432
+              [32m+[0m[0m ipv6_cidr_blocks = []
+              [32m+[0m[0m prefix_list_ids  = []
+              [32m+[0m[0m protocol         = "tcp"
+              [32m+[0m[0m security_groups  = [
+                  [32m+[0m[0m "sg-04c0129a3f542812b",
+                ]
+              [32m+[0m[0m self             = false
+              [32m+[0m[0m to_port          = 5432
+            },
+        ]
+        name                   = "prova-6325231-rds-719631031c990c8d0957ab0b02"
+        tags                   = {
+            "Environment" = "learner-lab"
+            "Name"        = "prova-6325231-rds"
+            "Owner"       = "6325231"
+            "Project"     = "prova-primeiro-bimestre-devops"
+        }
+        [90m# (9 unchanged attributes hidden)[0m[0m
+    }
+
+
+This is a refresh-only plan, so Terraform will not take any actions to undo
+these. If you were expecting these changes then you can apply this plan to
+record the updated values in the Terraform state without changing any remote
+objects.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Changes to Outputs:
+  [33m~[0m[0m api_url         = "http://13.220.113.41:3000" [33m->[0m[0m "http://54.234.84.228:3000"
+  [33m~[0m[0m ec2_public_ip   = "13.220.113.41" [33m->[0m[0m "54.234.84.228"
+
+You can apply this plan to save these new output values to the Terraform
+state, without changing any real infrastructure.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: /tmp/devops-t25-refresh-only.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "/tmp/devops-t25-refresh-only.tfplan"
+
+
+### refresh-json
+started: "2026-09-29T13:09:07-03:00"
+finished: "2026-09-29T13:09:10-03:00"
+command: ["terraform", "-chdir=infra", "show", "-json", "/tmp/devops-t25-refresh-only.tfplan"]
+exit_code: 0
+sha256: "a427386cc69ba187fd2b210403a9ff3711b1f0781b56a5c26702e41129701810"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+Plano refresh-only: nenhuma resource_changes; outputsIP/URL:update; SHA25644452c91203ddaa5513b10947d6521273ad8d657c1d15c41f3161d5edea921b2.
+
+### refresh-apply
+started: "2026-09-29T13:09:54-03:00"
+finished: "2026-09-29T13:10:03-03:00"
+command: ["terraform", "-chdir=infra", "apply", "/tmp/devops-t25-refresh-only.tfplan"]
+exit_code: 0
+sha256: "d89f9277df4b714a101946e25760d1157bb9564386e36b17f46395651978b0c1"
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+Acquiring state lock. This may take a few moments...
+[0m[1m[32m
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0mapi_url = "http://54.234.84.228:3000"
+ec2_instance_id = "i-0f4b59a8181537b78"
+ec2_public_ip = "54.234.84.228"
+rds_endpoint = "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com"
+rds_port = 5432
+
+
+### refresh-outputs
+started: "2026-09-29T13:10:03-03:00"
+finished: "2026-09-29T13:10:07-03:00"
+command: ["terraform", "-chdir=infra", "output", "-json"]
+exit_code: 0
+sha256: "eb6b522fadb692651914b8622c276a1090890c9d8ea5b53973637ebd5afac1e6"
+{
+  "api_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "http://54.234.84.228:3000"
+  },
+  "ec2_instance_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "i-0f4b59a8181537b78"
+  },
+  "ec2_public_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "54.234.84.228"
+  },
+  "rds_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com"
+  },
+  "rds_port": {
+    "sensitive": false,
+    "type": "number",
+    "value": 5432
+  }
+}
+
+
+### refresh-state-head
+started: "2026-09-29T13:10:07-03:00"
+finished: "2026-09-29T13:10:09-03:00"
+command: ["aws", "s3api", "head-object", "--bucket", "prova-6325231-tfstate-e373b51f3467", "--key", "prova-primeiro-bimestre-devops/terraform.tfstate", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "ec2fa6a777aab39f79bb8d55804a33b63793d0de2dfa98fa65580e665023dda9"
+{
+    "AcceptRanges": "bytes",
+    "LastModified": "2026-09-29T16:10:04+00:00",
+    "ContentLength": 65568,
+    "ETag": "\"9ea76d3c143b55fa1d297a07ffdbaec2\"",
+    "VersionId": "LyzJuS_5Jv4EeUdpDUdEBQOQC4wTPCm7",
+    "ContentType": "application/json",
+    "ServerSideEncryption": "AES256",
+    "Metadata": {}
+}
+
+
+### refresh-lock-after
+started: "2026-09-29T13:10:09-03:00"
+finished: "2026-09-29T13:10:11-03:00"
+command: ["aws", "dynamodb", "get-item", "--table-name", "prova-6325231-tflock-e373b51f3467", "--key", "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+
+### postrefresh-plan
+started: "2026-09-29T13:10:52-03:00"
+finished: "2026-09-29T13:11:07-03:00"
+command: ["terraform", "-chdir=infra", "plan", "-detailed-exitcode", "-out=/tmp/devops-t25-postrefresh.tfplan"]
+exit_code: 0
+sha256: "da4ed610062343d0642af2424aa0109e94246cd394c445bcea4b4e15425ffb20"
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+Acquiring state lock. This may take a few moments...
+[0m[1mdata.aws_ami.selected: Reading...[0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-02f929ba0204c6c07][0m
+[0m[1mdata.aws_ami.selected: Read complete after 1s [id=ami-048da71c4d98f46b1][0m
+[0m[1mmodule.vpc.aws_route_table.private: Refreshing state... [id=rtb-061c1854c7a479bbb][0m
+[0m[1mmodule.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-077afb6dd7f8bdfbd][0m
+[0m[1mmodule.vpc.aws_subnet.private[1]: Refreshing state... [id=subnet-0c20867ed9b442235][0m
+[0m[1mmodule.vpc.aws_subnet.public[1]: Refreshing state... [id=subnet-0ca900230f70ab9a1][0m
+[0m[1mmodule.vpc.aws_subnet.public[0]: Refreshing state... [id=subnet-04fd3c6ae447925bf][0m
+[0m[1mmodule.vpc.aws_subnet.private[0]: Refreshing state... [id=subnet-0493e2731c46fff3b][0m
+[0m[1mmodule.security_group.aws_security_group.rds: Refreshing state... [id=sg-0622ad42cefbb6b38][0m
+[0m[1mmodule.security_group.aws_security_group.ec2: Refreshing state... [id=sg-04c0129a3f542812b][0m
+[0m[1mmodule.vpc.aws_route_table.public: Refreshing state... [id=rtb-0e6d609d1cf0f2953][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[0]: Refreshing state... [id=rtbassoc-0cf278fe785731c97][0m
+[0m[1mmodule.vpc.aws_route_table_association.private[1]: Refreshing state... [id=rtbassoc-0b93c5ec17f1a879d][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-00cf853ae7765dcc4][0m
+[0m[1mmodule.vpc.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-03b0623fda6316131][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.postgres: Refreshing state... [id=sgr-0c0f6fdf5ee43d180][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.ssh: Refreshing state... [id=sgr-093ef5bfd93c88a78][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.api["[DADO_PRIVADO_OCULTADO]"]: Refreshing state... [id=sgr-0902c70576fa9e6fc][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_ingress_rule.postgres: Refreshing state... [id=sgr-0d1aae7a6704f7969][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["443"]: Refreshing state... [id=sgr-04a8b2a7f3339361f][0m
+[0m[1mmodule.security_group.aws_vpc_security_group_egress_rule.web["80"]: Refreshing state... [id=sgr-09a3c976a6a925952][0m
+[0m[1mmodule.rds.aws_db_subnet_group.private: Refreshing state... [id=prova-6325231-rds-private][0m
+[0m[1mmodule.ec2.aws_instance.this: Refreshing state... [id=i-0f4b59a8181537b78][0m
+[0m[1mmodule.rds.aws_db_instance.this: Refreshing state... [id=db-QTAZ223JJM6K7VAWI5MAR57ENA][0m
+
+[0m[1m[32mNo changes.[0m[1m Your infrastructure matches the configuration.[0m
+
+[0mTerraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...
+
+
+### postrefresh-state
+started: "2026-09-29T13:11:07-03:00"
+finished: "2026-09-29T13:11:11-03:00"
+command: ["terraform", "-chdir=infra", "state", "pull"]
+exit_code: 0
+sha256: "1b8991cd00de76c6343893a17194210d308a4ad0d8bc9ce363ba7b8933e806d3"
+Saída exibida em resumo declarado; bruto privado/hash preservados:
+State privado23managed, outputs correntes; sem publicar conteúdo/senha.
+
+Auditoria e recuperação concluídas antes do CRUD T25. Configuração de infraestrutura
+preservada, IAM/profile/keypair/VPC/SG/RDS/S3/DDB próprios inalterados. Somente
+start da EC2 existente/associação local de hostkey para IPnovo e refresh-only
+autorizado de state. Histórico de
+problemas/correções preservado. Cloudstatus atual de T25 abaixo em api-aws.txt/
+rds-crud.txt; não reaplicar/recriar para reparar expiração ou runtimeparado.
+Fontes: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html

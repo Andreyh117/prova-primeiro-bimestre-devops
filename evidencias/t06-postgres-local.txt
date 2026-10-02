@@ -1,0 +1,131 @@
+T06 — teste real PostgreSQL local
+Data: 2026-09-28T16:17:59-03:00
+Comando: npm --prefix app test
+
+> prova-primeiro-bimestre-devops@0.1.0 test
+> node test/run-postgres.js
+
+Imagem PostgreSQL fixada: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+Banco real: postgres (PostgreSQL) 16.15; acesso em 127.0.0.1:32768; senha não exibida.
+Schema de reservas aplicado com sucesso.
+TAP version 13
+# Subtest: configuração incompleta é rejeitada antes de tentar conexão padrão
+ok 1 - configuração incompleta é rejeitada antes de tentar conexão padrão
+  ---
+  duration_ms: 2.647272
+  type: 'test'
+  ...
+# Subtest: porta inválida e modo TLS ambíguo não viram configuração silenciosa
+ok 2 - porta inválida e modo TLS ambíguo não viram configuração silenciosa
+  ---
+  duration_ms: 0.598587
+  type: 'test'
+  ...
+# Subtest: TLS exige CA legível e preserva verificação do certificado
+ok 3 - TLS exige CA legível e preserva verificação do certificado
+  ---
+  duration_ms: 1.436608
+  type: 'test'
+  ...
+# Subtest: schema contém somente as quatro colunas, tipos e identidade aprovados
+ok 4 - schema contém somente as quatro colunas, tipos e identidade aprovados
+  ---
+  duration_ms: 75.285857
+  type: 'test'
+  ...
+# Subtest: parâmetros preservam apóstrofo e conteúdo SQL como texto
+ok 5 - parâmetros preservam apóstrofo e conteúdo SQL como texto
+  ---
+  duration_ms: 8.342415
+  type: 'test'
+  ...
+# Subtest: linha confirmada é lida por uma segunda conexão real
+ok 6 - linha confirmada é lida por uma segunda conexão real
+  ---
+  duration_ms: 22.906504
+  type: 'test'
+  ...
+# Subtest: DATE mantém dia, mês e ano na leitura explícita DD-MM-YYYY
+ok 7 - DATE mantém dia, mês e ano na leitura explícita DD-MM-YYYY
+  ---
+  duration_ms: 15.422846
+  type: 'test'
+  ...
+# Subtest: reaplicar o schema preserva uma linha existente e seu ID
+ok 8 - reaplicar o schema preserva uma linha existente e seu ID
+  ---
+  duration_ms: 8.655332
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita cliente ausente
+ok 9 - NOT NULL rejeita cliente ausente
+  ---
+  duration_ms: 5.515249
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita data ausente
+ok 10 - NOT NULL rejeita data ausente
+  ---
+  duration_ms: 4.299467
+  type: 'test'
+  ...
+# Subtest: NOT NULL rejeita status ausente
+ok 11 - NOT NULL rejeita status ausente
+  ---
+  duration_ms: 3.923206
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita cliente vazio
+ok 12 - CHECK rejeita cliente vazio
+  ---
+  duration_ms: 5.737905
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita cliente somente espaços
+ok 13 - CHECK rejeita cliente somente espaços
+  ---
+  duration_ms: 3.552393
+  type: 'test'
+  ...
+# Subtest: VARCHAR(120) aceita exatamente 120 caracteres Unicode
+ok 14 - VARCHAR(120) aceita exatamente 120 caracteres Unicode
+  ---
+  duration_ms: 4.359879
+  type: 'test'
+  ...
+# Subtest: VARCHAR(120) rejeita cliente com 121 caracteres
+ok 15 - VARCHAR(120) rejeita cliente com 121 caracteres
+  ---
+  duration_ms: 4.278727
+  type: 'test'
+  ...
+# Subtest: CHECK rejeita status fora da lista aprovada
+ok 16 - CHECK rejeita status fora da lista aprovada
+  ---
+  duration_ms: 4.354286
+  type: 'test'
+  ...
+# Subtest: DATE rejeita dia impossível no calendário
+ok 17 - DATE rejeita dia impossível no calendário
+  ---
+  duration_ms: 3.677559
+  type: 'test'
+  ...
+# Subtest: GENERATED ALWAYS rejeita ID informado manualmente
+ok 18 - GENERATED ALWAYS rejeita ID informado manualmente
+  ---
+  duration_ms: 4.026168
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 489.745485
+Limpeza confirmada: container de teste removido; dados temporários descartados.
+
+EXIT CODE: 0

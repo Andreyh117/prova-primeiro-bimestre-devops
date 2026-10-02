@@ -1,0 +1,1000 @@
+T17 — módulo VPC — validação LOCAL em 29/09/2026
+Requisitos R14/R19, decisão D09; Terraform1.16.2/providerAWS6.65.0.
+HEAD inicial a9c3df8, feature limpa, 12 commits/0 merges.
+Pedido: implementar próxima tarefa, validar/corrigir/registrar evidências reais.
+Escopo SOMENTE código VPC e conferência local. Sem API AWS, plan principal,
+apply/destroy, root remoto ou escrita no bucket/DynamoDB nesta tarefa.
+Não comprova VPC implantada, AZs atualmente ofertadas ou permissões do Lab.
+Credenciais/config AWS removidos do ambiente filho, arquivos AWS=/dev/null,
+IMDS disabled. Nenhuma credencial falsa apresentada como real.
+Root temporário com cópia byte a byte dos quatro .tf e teste, sem copiar state
+ou vars privados. Lockfile T14 copiado/readonly; mirror filesystem usa cache
+fixado/checado pelo lockfile. Init diz unauthenticated pela origem filesystem:
+NÃO é novo download assinado nesta etapa, não troca hashes/versões.
+terraform test executa nove casos LOCAIS com provider mock e command=plan;
+mock isola configuração, não prova AWS/IDs reais/deploy/locking/CRUD.
+Saídas abaixo são execuções REAIS do executor local, não plan AWS válido.
+Referências de IDs unknown no plan conferidas pelo grafo nativo da configuração.
+D09: VPC10.20.0.0/16/DNS ativo; públicas10.20.1.0/24 e10.20.2.0/24, privadas
+10.20.11.0/24 e10.20.12.0/24, AZs1a/1b como inputs não sensíveis.
+Duas route tables: pública default0.0.0.0/0->IGW, privada route=[] (local automático
+AWS futuro). Associações explícitas, IP público só públicas. Sem NAT/ALB/IAM/EC2/RDS.
+Tags Project/Environment/Owner/Name em VPC/IGW/subnets/tabelas; associações sem tags.
+Outputs vpc_id/public_subnet_ids/private_subnet_ids. Guardas IPv4 canônico/prefixos
+16–28, dois CIDRs por tipo/duas AZs distintas, contenção/sem sobreposição e tags
+obrigatórias são decisões do projeto, não critérios extras atribuídos ao professor.
+Sandbox inicial falhou mountinfo path is not absolute/1 antes das leituras;
+mesmas leituras escaladas passaram. Não é falha do módulo nem da API.
+Sanitização: contas12 dígitos ocultas se presentes; somente espaços finais
+normalizados. Logs brutos privados em /tmp, hashes abaixo.
+
+
+=== fmt ===
+{
+  "started": "2026-09-29T07:39:36-03:00",
+  "finished": "2026-09-29T07:39:36-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-recursive",
+    "infra/modules/vpc"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "ebef55495f200256d93e4dae8e0037301809851cdfa779ae71546e5db855cb9e",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+infra/modules/vpc/tests/network.tftest.hcl
+
+Exit code real: 0
+
+
+=== init ===
+{
+  "started": "2026-09-29T07:39:49-03:00",
+  "finished": "2026-09-29T07:39:52-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "init",
+    "-backend=false",
+    "-input=false",
+    "-no-color",
+    "-lockfile=readonly"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "6d30e26ea90ceadc491849d802cf9a78716019bf37c937140d62fe4d8b576017",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Installing hashicorp/aws v6.65.0...
+- Installed hashicorp/aws v6.65.0 (unauthenticated)
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+Exit code real: 0
+
+
+=== fmt-check ===
+{
+  "started": "2026-09-29T07:40:02-03:00",
+  "finished": "2026-09-29T07:40:02-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-check",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+
+Exit code real: 0
+
+
+=== validate ===
+{
+  "started": "2026-09-29T07:40:01-03:00",
+  "finished": "2026-09-29T07:40:05-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "validate",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+Success! The configuration is valid.
+
+
+Exit code real: 0
+
+
+=== test ===
+{
+  "started": "2026-09-29T07:40:11-03:00",
+  "finished": "2026-09-29T07:40:15-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "test",
+    "-no-color"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "563157efd5d2a563723137997c642c825704b8a10508b32e73dbe55dc860fe8e",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+tests/network.tftest.hcl... in progress
+  run "network_contract"... fail
+
+Error: Test assertion failed
+
+  on tests/network.tftest.hcl line 33, in run "network_contract":
+  33:     condition = (
+  34:       length(aws_subnet.public) == 2 && length(aws_subnet.private) == 2 &&
+  35:       [for subnet in aws_subnet.public : subnet.availability_zone] == var.availability_zones &&
+  36:       [for subnet in aws_subnet.private : subnet.availability_zone] == var.availability_zones &&
+  37:       [for subnet in aws_subnet.public : subnet.cidr_block] == var.public_subnet_cidrs &&
+  38:       [for subnet in aws_subnet.private : subnet.cidr_block] == var.private_subnet_cidrs &&
+  39:       alltrue([for subnet in aws_subnet.public : subnet.map_public_ip_on_launch]) &&
+  40:       alltrue([for subnet in aws_subnet.private : !subnet.map_public_ip_on_launch])
+  41:     )
+    ├────────────────
+    │ aws_subnet.private is [
+    │     {
+    │       "arn": "(not yet known)",
+    │       "assign_ipv6_address_on_creation": null,
+    │       "availability_zone": "us-east-1a",
+    │       "availability_zone_id": "(not yet known)",
+    │       "cidr_block": "10.20.11.0/24",
+    │       "customer_owned_ipv4_pool": null,
+    │       "enable_dns64": null,
+    │       "enable_lni_at_device_index": null,
+    │       "enable_resource_name_dns_a_record_on_launch": null,
+    │       "enable_resource_name_dns_aaaa_record_on_launch": null,
+    │       "id": "(not yet known)",
+    │       "ipv4_ipam_pool_id": null,
+    │       "ipv4_netmask_length": null,
+    │       "ipv6_cidr_block": "(not yet known)",
+    │       "ipv6_cidr_block_association_id": "(not yet known)",
+    │       "ipv6_ipam_pool_id": null,
+    │       "ipv6_native": null,
+    │       "ipv6_netmask_length": null,
+    │       "map_customer_owned_ip_on_launch": null,
+    │       "map_public_ip_on_launch": false,
+    │       "outpost_arn": null,
+    │       "owner_id": "(not yet known)",
+    │       "private_dns_hostname_type_on_launch": "(not yet known)",
+    │       "region": "(not yet known)",
+    │       "tags": {
+    │         "Environment": "learner-lab",
+    │         "Name": "prova-6325231-private-1",
+    │         "Owner": "6325231",
+    │         "Project": "prova-primeiro-bimestre-devops"
+    │       },
+    │       "tags_all": "(not yet known)",
+    │       "timeouts": null,
+    │       "vpc_id": "(not yet known)"
+    │     },
+    │     {
+    │       "arn": "(not yet known)",
+    │       "assign_ipv6_address_on_creation": null,
+    │       "availability_zone": "us-east-1b",
+    │       "availability_zone_id": "(not yet known)",
+    │       "cidr_block": "10.20.12.0/24",
+    │       "customer_owned_ipv4_pool": null,
+    │       "enable_dns64": null,
+    │       "enable_lni_at_device_index": null,
+    │       "enable_resource_name_dns_a_record_on_launch": null,
+    │       "enable_resource_name_dns_aaaa_record_on_launch": null,
+    │       "id": "(not yet known)",
+    │       "ipv4_ipam_pool_id": null,
+    │       "ipv4_netmask_length": null,
+    │       "ipv6_cidr_block": "(not yet known)",
+    │       "ipv6_cidr_block_association_id": "(not yet known)",
+    │       "ipv6_ipam_pool_id": null,
+    │       "ipv6_native": null,
+    │       "ipv6_netmask_length": null,
+    │       "map_customer_owned_ip_on_launch": null,
+    │       "map_public_ip_on_launch": false,
+    │       "outpost_arn": null,
+    │       "owner_id": "(not yet known)",
+    │       "private_dns_hostname_type_on_launch": "(not yet known)",
+    │       "region": "(not yet known)",
+    │       "tags": {
+    │         "Environment": "learner-lab",
+    │         "Name": "prova-6325231-private-2",
+    │         "Owner": "6325231",
+    │         "Project": "prova-primeiro-bimestre-devops"
+    │       },
+    │       "tags_all": "(not yet known)",
+    │       "timeouts": null,
+    │       "vpc_id": "(not yet known)"
+    │     }
+    │   ]
+    │ aws_subnet.public is [
+    │     {
+    │       "arn": "(not yet known)",
+    │       "assign_ipv6_address_on_creation": null,
+    │       "availability_zone": "us-east-1a",
+    │       "availability_zone_id": "(not yet known)",
+    │       "cidr_block": "10.20.1.0/24",
+    │       "customer_owned_ipv4_pool": null,
+    │       "enable_dns64": null,
+    │       "enable_lni_at_device_index": null,
+    │       "enable_resource_name_dns_a_record_on_launch": null,
+    │       "enable_resource_name_dns_aaaa_record_on_launch": null,
+    │       "id": "(not yet known)",
+    │       "ipv4_ipam_pool_id": null,
+    │       "ipv4_netmask_length": null,
+    │       "ipv6_cidr_block": "(not yet known)",
+    │       "ipv6_cidr_block_association_id": "(not yet known)",
+    │       "ipv6_ipam_pool_id": null,
+    │       "ipv6_native": null,
+    │       "ipv6_netmask_length": null,
+    │       "map_customer_owned_ip_on_launch": null,
+    │       "map_public_ip_on_launch": true,
+    │       "outpost_arn": null,
+    │       "owner_id": "(not yet known)",
+    │       "private_dns_hostname_type_on_launch": "(not yet known)",
+    │       "region": "(not yet known)",
+    │       "tags": {
+    │         "Environment": "learner-lab",
+    │         "Name": "prova-6325231-public-1",
+    │         "Owner": "6325231",
+    │         "Project": "prova-primeiro-bimestre-devops"
+    │       },
+    │       "tags_all": "(not yet known)",
+    │       "timeouts": null,
+    │       "vpc_id": "(not yet known)"
+    │     },
+    │     {
+    │       "arn": "(not yet known)",
+    │       "assign_ipv6_address_on_creation": null,
+    │       "availability_zone": "us-east-1b",
+    │       "availability_zone_id": "(not yet known)",
+    │       "cidr_block": "10.20.2.0/24",
+    │       "customer_owned_ipv4_pool": null,
+    │       "enable_dns64": null,
+    │       "enable_lni_at_device_index": null,
+    │       "enable_resource_name_dns_a_record_on_launch": null,
+    │       "enable_resource_name_dns_aaaa_record_on_launch": null,
+    │       "id": "(not yet known)",
+    │       "ipv4_ipam_pool_id": null,
+    │       "ipv4_netmask_length": null,
+    │       "ipv6_cidr_block": "(not yet known)",
+    │       "ipv6_cidr_block_association_id": "(not yet known)",
+    │       "ipv6_ipam_pool_id": null,
+    │       "ipv6_native": null,
+    │       "ipv6_netmask_length": null,
+    │       "map_customer_owned_ip_on_launch": null,
+    │       "map_public_ip_on_launch": true,
+    │       "outpost_arn": null,
+    │       "owner_id": "(not yet known)",
+    │       "private_dns_hostname_type_on_launch": "(not yet known)",
+    │       "region": "(not yet known)",
+    │       "tags": {
+    │         "Environment": "learner-lab",
+    │         "Name": "prova-6325231-public-2",
+    │         "Owner": "6325231",
+    │         "Project": "prova-primeiro-bimestre-devops"
+    │       },
+    │       "tags_all": "(not yet known)",
+    │       "timeouts": null,
+    │       "vpc_id": "(not yet known)"
+    │     }
+    │   ]
+    │ var.availability_zones is [
+    │     "us-east-1a",
+    │     "us-east-1b"
+    │   ]
+    │ var.private_subnet_cidrs is [
+    │     "10.20.11.0/24",
+    │     "10.20.12.0/24"
+    │   ]
+    │ var.public_subnet_cidrs is [
+    │     "10.20.1.0/24",
+    │     "10.20.2.0/24"
+    │   ]
+
+São duas públicas e duas privadas, alinhadas por AZ/CIDR e IP público.
+
+Error: Unknown condition value
+
+  on tests/network.tftest.hcl line 46, in run "network_contract":
+  46:     condition = (
+  47:       length(aws_route_table.public.route) == 1 &&
+  48:       one(aws_route_table.public.route).cidr_block == "0.0.0.0/0" &&
+  49:       one(aws_route_table.public.route).gateway_id == aws_internet_gateway.this.id &&
+  50:       length(aws_route_table.private.route) == 0 &&
+  51:       alltrue([for a in aws_route_table_association.public : a.route_table_id == aws_route_table.public.id]) &&
+  52:       alltrue([for a in aws_route_table_association.private : a.route_table_id == aws_route_table.private.id]) &&
+  53:       [for a in aws_route_table_association.public : a.subnet_id] == output.public_subnet_ids &&
+  54:       [for a in aws_route_table_association.private : a.subnet_id] == output.private_subnet_ids
+  55:     )
+    ├────────────────
+    │ aws_internet_gateway.this.id is a string
+    │ aws_route_table.private.id is a string
+    │ aws_route_table.private.route is empty set of object
+    │ aws_route_table.public.id is a string
+    │ aws_route_table.public.route is set of object with 1 element
+    │ aws_route_table_association.private is tuple with 2 elements
+    │ aws_route_table_association.public is tuple with 2 elements
+    │ output.private_subnet_ids is tuple with 2 elements
+    │ output.public_subnet_ids is tuple with 2 elements
+
+Condition expression could not be evaluated at this time. This means you have
+executed a `run` block with `command = plan` and one of the values your
+condition depended on is not known until after the plan has been applied.
+Either remove this value from your condition, or execute an `apply` command
+from this `run` block. Alternatively, if there is an override for this value,
+you can make it available during the plan phase by setting `override_during =
+plan` in the `override_` block.
+
+Error: Unknown condition value
+
+  on tests/network.tftest.hcl line 70, in run "network_contract":
+  70:     condition = (
+  71:       output.vpc_id == aws_vpc.this.id &&
+  72:       length(output.public_subnet_ids) == 2 && length(output.private_subnet_ids) == 2
+  73:     )
+    ├────────────────
+    │ aws_vpc.this.id is a string
+    │ output.private_subnet_ids is tuple with 2 elements
+    │ output.public_subnet_ids is tuple with 2 elements
+    │ output.vpc_id is a string
+
+Condition expression could not be evaluated at this time. This means you have
+executed a `run` block with `command = plan` and one of the values your
+condition depended on is not known until after the plan has been applied.
+Either remove this value from your condition, or execute an `apply` command
+from this `run` block. Alternatively, if there is an override for this value,
+you can make it available during the plan phase by setting `override_during =
+plan` in the `override_` block.
+  run "different_cidrs"... skip
+  run "reject_repeated_az"... skip
+  run "reject_single_public_subnet"... skip
+  run "reject_noncanonical_cidr"... skip
+  run "reject_outside_vpc"... skip
+  run "reject_overlapping_subnets"... skip
+  run "reject_ipv6_vpc"... skip
+  run "reject_missing_owner_tag"... skip
+tests/network.tftest.hcl... tearing down
+tests/network.tftest.hcl... fail
+
+Failure! 0 passed, 1 failed, 8 skipped.
+
+Exit code real: 1
+
+
+=== fmt-retry2 ===
+{
+  "started": "2026-09-29T07:41:03-03:00",
+  "finished": "2026-09-29T07:41:03-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-recursive",
+    "infra/modules/vpc"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+
+Exit code real: 0
+
+
+=== test-retry2 ===
+{
+  "started": "2026-09-29T07:41:08-03:00",
+  "finished": "2026-09-29T07:41:12-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "test",
+    "-no-color"
+  ],
+  "exit_code": 1,
+  "raw_sha256": "19ebbe11c1322b7bb11b40956ad8baf163f993247fb0be74c8d5d9734c73361a",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+tests/network.tftest.hcl... in progress
+  run "network_contract"... pass
+  run "different_cidrs"... pass
+  run "reject_repeated_az"... pass
+  run "reject_single_public_subnet"... pass
+  run "reject_noncanonical_cidr"... pass
+  run "reject_outside_vpc"... pass
+  run "reject_overlapping_subnets"... pass
+  run "reject_ipv6_vpc"... fail
+
+Error: Missing expected failure
+
+  on tests/network.tftest.hcl line 130, in run "reject_ipv6_vpc":
+ 130:   expect_failures = [var.vpc_cidr, aws_vpc.this]
+
+The checkable object, aws_vpc.this, was expected to report an error but did
+not.
+  run "reject_missing_owner_tag"... skip
+tests/network.tftest.hcl... tearing down
+tests/network.tftest.hcl... fail
+
+Failure! 7 passed, 1 failed, 1 skipped.
+
+Exit code real: 1
+
+
+=== fmt-retry3 ===
+{
+  "started": "2026-09-29T07:42:00-03:00",
+  "finished": "2026-09-29T07:42:01-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-recursive",
+    "infra/modules/vpc"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+
+Exit code real: 0
+
+
+=== test-retry3 ===
+{
+  "started": "2026-09-29T07:42:06-03:00",
+  "finished": "2026-09-29T07:42:09-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "test",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e29517e2e5b38d03f68a4c45d5e6a70749576d790f987fd8645fed41fb303242",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+tests/network.tftest.hcl... in progress
+  run "network_contract"... pass
+  run "different_cidrs"... pass
+  run "reject_repeated_az"... pass
+  run "reject_single_public_subnet"... pass
+  run "reject_noncanonical_cidr"... pass
+  run "reject_outside_vpc"... pass
+  run "reject_overlapping_subnets"... pass
+  run "reject_ipv6_vpc"... pass
+  run "reject_missing_owner_tag"... pass
+tests/network.tftest.hcl... tearing down
+tests/network.tftest.hcl... pass
+
+Success! 9 passed, 0 failed.
+
+Exit code real: 0
+
+
+=== graph ===
+{
+  "started": "2026-09-29T07:41:36-03:00",
+  "finished": "2026-09-29T07:41:40-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "graph",
+    "-type=plan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "a34664eeb1f9b7a35b8dcca417773049097d05c729a6913386196716edfc5bac",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_internet_gateway.this (expand)" [label = "aws_internet_gateway.this", shape = "box"]
+		"[root] aws_route_table.private (expand)" [label = "aws_route_table.private", shape = "box"]
+		"[root] aws_route_table.public (expand)" [label = "aws_route_table.public", shape = "box"]
+		"[root] aws_route_table_association.private (expand)" [label = "aws_route_table_association.private", shape = "box"]
+		"[root] aws_route_table_association.public (expand)" [label = "aws_route_table_association.public", shape = "box"]
+		"[root] aws_subnet.private (expand)" [label = "aws_subnet.private", shape = "box"]
+		"[root] aws_subnet.public (expand)" [label = "aws_subnet.public", shape = "box"]
+		"[root] aws_vpc.this (expand)" [label = "aws_vpc.this", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"]" [label = "provider[\"registry.terraform.io/hashicorp/aws\"]", shape = "diamond"]
+		"[root] var.availability_zones" [label = "var.availability_zones", shape = "note"]
+		"[root] var.name" [label = "var.name", shape = "note"]
+		"[root] var.private_subnet_cidrs" [label = "var.private_subnet_cidrs", shape = "note"]
+		"[root] var.public_subnet_cidrs" [label = "var.public_subnet_cidrs", shape = "note"]
+		"[root] var.tags" [label = "var.tags", shape = "note"]
+		"[root] var.vpc_cidr" [label = "var.vpc_cidr", shape = "note"]
+		"[root] aws_internet_gateway.this (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_route_table.private (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_route_table.public (expand)" -> "[root] aws_internet_gateway.this (expand)"
+		"[root] aws_route_table_association.private (expand)" -> "[root] aws_route_table.private (expand)"
+		"[root] aws_route_table_association.private (expand)" -> "[root] aws_subnet.private (expand)"
+		"[root] aws_route_table_association.public (expand)" -> "[root] aws_route_table.public (expand)"
+		"[root] aws_route_table_association.public (expand)" -> "[root] aws_subnet.public (expand)"
+		"[root] aws_subnet.private (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_subnet.private (expand)" -> "[root] var.availability_zones (validation)"
+		"[root] aws_subnet.public (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_subnet.public (expand)" -> "[root] var.availability_zones (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] local.subnet_networks (expand)"
+		"[root] aws_vpc.this (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_vpc.this (expand)" -> "[root] var.name (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] var.tags (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] var.vpc_cidr (validation)"
+		"[root] local.subnet_networks (expand)" -> "[root] var.private_subnet_cidrs (validation)"
+		"[root] local.subnet_networks (expand)" -> "[root] var.public_subnet_cidrs (validation)"
+		"[root] output.private_subnet_ids (expand)" -> "[root] aws_subnet.private (expand)"
+		"[root] output.public_subnet_ids (expand)" -> "[root] aws_subnet.public (expand)"
+		"[root] output.vpc_id (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.private (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.public (expand)"
+		"[root] root" -> "[root] output.private_subnet_ids (expand)"
+		"[root] root" -> "[root] output.public_subnet_ids (expand)"
+		"[root] root" -> "[root] output.vpc_id (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)"
+		"[root] var.availability_zones (validation)" -> "[root] var.availability_zones"
+		"[root] var.name (validation)" -> "[root] var.name"
+		"[root] var.private_subnet_cidrs (validation)" -> "[root] var.private_subnet_cidrs"
+		"[root] var.public_subnet_cidrs (validation)" -> "[root] var.public_subnet_cidrs"
+		"[root] var.tags (validation)" -> "[root] var.tags"
+		"[root] var.vpc_cidr (validation)" -> "[root] var.vpc_cidr"
+	}
+}
+
+Exit code real: 0
+
+
+=== fmt-check-retry3 ===
+{
+  "started": "2026-09-29T07:43:13-03:00",
+  "finished": "2026-09-29T07:43:13-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-check",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída REAL do comando local (sanitizada):
+
+Exit code real: 0
+
+
+Correções REAIS das asserções, sem relaxar guardas/topologia:
+Test inicial1: tuple/list de valores iguais exigiu tolist; IDs ficaram unknown
+no plan apesar de override_during=plan. Removidas asserções dependentes desses
+IDs e atributo mock desnecessário; vínculos conferidos por graph0, sem inventar IDs.
+Retry2/1: sete passaram, IPv6 falhou Missing expected failure aws_vpc.this, um skip.
+var.vpc_cidr foi rejeitada antes da precondition; expect_failures corrigido para
+apenas var.vpc_cidr. Retry3/0: nove passaram, zero falhas.
+
+
+Conferência DERIVADA do grafo real/arquivos
+{
+  "checked_at": "2026-09-29T07:43:10-03:00",
+  "result": "PASSOU",
+  "verification": "grafo nativo de configuração local, sem plano/apply/API AWS",
+  "graph_exit_code": 0,
+  "references_checked": [
+    [
+      "aws_internet_gateway.this",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table.private",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table.public",
+      "aws_internet_gateway.this"
+    ],
+    [
+      "aws_subnet.public",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_subnet.private",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table_association.public",
+      "aws_route_table.public"
+    ],
+    [
+      "aws_route_table_association.public",
+      "aws_subnet.public"
+    ],
+    [
+      "aws_route_table_association.private",
+      "aws_route_table.private"
+    ],
+    [
+      "aws_route_table_association.private",
+      "aws_subnet.private"
+    ],
+    [
+      "output.vpc_id",
+      "aws_vpc.this"
+    ],
+    [
+      "output.public_subnet_ids",
+      "aws_subnet.public"
+    ],
+    [
+      "output.private_subnet_ids",
+      "aws_subnet.private"
+    ]
+  ],
+  "private_table_has_no_gateway_dependency": true,
+  "resource_declarations": 8,
+  "instances_by_approved_inputs": {
+    "aws_vpc": 1,
+    "aws_internet_gateway": 1,
+    "aws_subnet": 4,
+    "aws_route_table": 2,
+    "aws_route_table_association": 4
+  },
+  "outputs": [
+    "vpc_id",
+    "public_subnet_ids",
+    "private_subnet_ids"
+  ],
+  "module_scope": "sem provider/backend/data, NAT/ALB/IAM/EC2/RDS; versões herdáveis e fixadas",
+  "source_copy_identical": true,
+  "lockfile_identical_to_bootstrap": true,
+  "standalone_root_state_and_plans": "nenhum arquivo criado",
+  "main_root": "não implementado/inicializado nesta tarefa"
+}
+
+
+Fontes primárias consultadas, provider exato6.65.0:
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/vpc.html.markdown
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/subnet.html.markdown
+https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/route_table.html.markdown
+https://developer.hashicorp.com/terraform/cli/commands/validate
+https://developer.hashicorp.com/terraform/cli/commands/graph
+https://developer.hashicorp.com/terraform/language/tests/mocking
+https://developer.hashicorp.com/terraform/language/functions/cidrhost
+https://docs.aws.amazon.com/vpc/latest/userguide/how-it-works.html
+Conclusão: T17 verificada LOCALMENTE, sem bloqueio restante. R14/R19/R22 parciais:
+plano compostoT21/implantaçãoAWS T23 futuros. Próxima T18, security-group.
+Sem suites API/Docker/Compose repetidas, bootstrap/state anteriores preservados.
+
+Revisão final de outputs: depender das associações torna rede pronta antes
+dos consumidores; scope só T17, sem AWS. Novas capturas REAIS após mudança:
+
+=== fmt-retry4 ===
+{
+  "started": "2026-09-29T07:52:18-03:00",
+  "finished": "2026-09-29T07:52:18-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-recursive",
+    "infra/modules/vpc"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída real local:
+
+Exit code real: 0
+
+=== validate-retry4 ===
+{
+  "started": "2026-09-29T07:52:25-03:00",
+  "finished": "2026-09-29T07:52:29-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "validate",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f7997225125835fdd14060ac776d273f394b874f9a481b9e2122c83dc8adc5c1",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída real local:
+Success! The configuration is valid.
+
+
+Exit code real: 0
+
+=== graph-retry4 ===
+{
+  "started": "2026-09-29T07:52:24-03:00",
+  "finished": "2026-09-29T07:52:28-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "graph",
+    "-type=plan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "4946838df473fa6c1dcd981b499afbdab36f94d863150717d59d7308bcbbbae6",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída real local:
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] aws_internet_gateway.this (expand)" [label = "aws_internet_gateway.this", shape = "box"]
+		"[root] aws_route_table.private (expand)" [label = "aws_route_table.private", shape = "box"]
+		"[root] aws_route_table.public (expand)" [label = "aws_route_table.public", shape = "box"]
+		"[root] aws_route_table_association.private (expand)" [label = "aws_route_table_association.private", shape = "box"]
+		"[root] aws_route_table_association.public (expand)" [label = "aws_route_table_association.public", shape = "box"]
+		"[root] aws_subnet.private (expand)" [label = "aws_subnet.private", shape = "box"]
+		"[root] aws_subnet.public (expand)" [label = "aws_subnet.public", shape = "box"]
+		"[root] aws_vpc.this (expand)" [label = "aws_vpc.this", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"]" [label = "provider[\"registry.terraform.io/hashicorp/aws\"]", shape = "diamond"]
+		"[root] var.availability_zones" [label = "var.availability_zones", shape = "note"]
+		"[root] var.name" [label = "var.name", shape = "note"]
+		"[root] var.private_subnet_cidrs" [label = "var.private_subnet_cidrs", shape = "note"]
+		"[root] var.public_subnet_cidrs" [label = "var.public_subnet_cidrs", shape = "note"]
+		"[root] var.tags" [label = "var.tags", shape = "note"]
+		"[root] var.vpc_cidr" [label = "var.vpc_cidr", shape = "note"]
+		"[root] aws_internet_gateway.this (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_route_table.private (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_route_table.public (expand)" -> "[root] aws_internet_gateway.this (expand)"
+		"[root] aws_route_table_association.private (expand)" -> "[root] aws_route_table.private (expand)"
+		"[root] aws_route_table_association.private (expand)" -> "[root] aws_subnet.private (expand)"
+		"[root] aws_route_table_association.public (expand)" -> "[root] aws_route_table.public (expand)"
+		"[root] aws_route_table_association.public (expand)" -> "[root] aws_subnet.public (expand)"
+		"[root] aws_subnet.private (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_subnet.private (expand)" -> "[root] var.availability_zones (validation)"
+		"[root] aws_subnet.public (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] aws_subnet.public (expand)" -> "[root] var.availability_zones (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] local.subnet_networks (expand)"
+		"[root] aws_vpc.this (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"]"
+		"[root] aws_vpc.this (expand)" -> "[root] var.name (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] var.tags (validation)"
+		"[root] aws_vpc.this (expand)" -> "[root] var.vpc_cidr (validation)"
+		"[root] local.subnet_networks (expand)" -> "[root] var.private_subnet_cidrs (validation)"
+		"[root] local.subnet_networks (expand)" -> "[root] var.public_subnet_cidrs (validation)"
+		"[root] output.private_subnet_ids (expand)" -> "[root] aws_route_table_association.private (expand)"
+		"[root] output.public_subnet_ids (expand)" -> "[root] aws_route_table_association.public (expand)"
+		"[root] output.vpc_id (expand)" -> "[root] aws_vpc.this (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.private (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)" -> "[root] aws_route_table_association.public (expand)"
+		"[root] root" -> "[root] output.private_subnet_ids (expand)"
+		"[root] root" -> "[root] output.public_subnet_ids (expand)"
+		"[root] root" -> "[root] output.vpc_id (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/aws\"] (close)"
+		"[root] var.availability_zones (validation)" -> "[root] var.availability_zones"
+		"[root] var.name (validation)" -> "[root] var.name"
+		"[root] var.private_subnet_cidrs (validation)" -> "[root] var.private_subnet_cidrs"
+		"[root] var.public_subnet_cidrs (validation)" -> "[root] var.public_subnet_cidrs"
+		"[root] var.tags (validation)" -> "[root] var.tags"
+		"[root] var.vpc_cidr (validation)" -> "[root] var.vpc_cidr"
+	}
+}
+
+Exit code real: 0
+
+=== test-retry4 ===
+{
+  "started": "2026-09-29T07:52:32-03:00",
+  "finished": "2026-09-29T07:52:36-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "test",
+    "-no-color"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e29517e2e5b38d03f68a4c45d5e6a70749576d790f987fd8645fed41fb303242",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída real local:
+tests/network.tftest.hcl... in progress
+  run "network_contract"... pass
+  run "different_cidrs"... pass
+  run "reject_repeated_az"... pass
+  run "reject_single_public_subnet"... pass
+  run "reject_noncanonical_cidr"... pass
+  run "reject_outside_vpc"... pass
+  run "reject_overlapping_subnets"... pass
+  run "reject_ipv6_vpc"... pass
+  run "reject_missing_owner_tag"... pass
+tests/network.tftest.hcl... tearing down
+tests/network.tftest.hcl... pass
+
+Success! 9 passed, 0 failed.
+
+Exit code real: 0
+
+Conferência DERIVADA do grafo final:
+{
+  "checked_at": "2026-09-29T07:53:21-03:00",
+  "result": "PASSOU",
+  "verification": "grafo nativo de configuração local, sem plano/apply/API AWS",
+  "graph_exit_code": 0,
+  "references_checked": [
+    [
+      "aws_internet_gateway.this",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table.private",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table.public",
+      "aws_internet_gateway.this"
+    ],
+    [
+      "aws_subnet.public",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_subnet.private",
+      "aws_vpc.this"
+    ],
+    [
+      "aws_route_table_association.public",
+      "aws_route_table.public"
+    ],
+    [
+      "aws_route_table_association.public",
+      "aws_subnet.public"
+    ],
+    [
+      "aws_route_table_association.private",
+      "aws_route_table.private"
+    ],
+    [
+      "aws_route_table_association.private",
+      "aws_subnet.private"
+    ],
+    [
+      "output.vpc_id",
+      "aws_vpc.this"
+    ],
+    [
+      "output.public_subnet_ids",
+      "aws_route_table_association.public"
+    ],
+    [
+      "output.private_subnet_ids",
+      "aws_route_table_association.private"
+    ]
+  ],
+  "private_table_has_no_gateway_dependency": true,
+  "resource_declarations": 8,
+  "instances_by_approved_inputs": {
+    "aws_vpc": 1,
+    "aws_internet_gateway": 1,
+    "aws_subnet": 4,
+    "aws_route_table": 2,
+    "aws_route_table_association": 4
+  },
+  "outputs": [
+    "vpc_id",
+    "public_subnet_ids",
+    "private_subnet_ids"
+  ],
+  "module_scope": "sem provider/backend/data, NAT/ALB/IAM/EC2/RDS; versões herdáveis e fixadas",
+  "source_copy_identical": true,
+  "lockfile_identical_to_bootstrap": true,
+  "standalone_root_state_and_plans": "nenhum arquivo criado",
+  "main_root": "não implementado/inicializado nesta tarefa",
+  "subnet_outputs_wait_for_route_associations": true,
+  "graph_sha256": "4946838df473fa6c1dcd981b499afbdab36f94d863150717d59d7308bcbbbae6"
+}
+
+=== fmt-check final após revisão dos outputs ===
+{
+  "started": "2026-09-29T07:54:34-03:00",
+  "finished": "2026-09-29T07:54:34-03:00",
+  "command": [
+    "terraform",
+    "fmt",
+    "-check",
+    "-recursive",
+    "infra"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "environment": "sem credenciais/config AWS, IMDS desabilitado; provider mock somente no terraform test; filesystem mirror/lockfile fixados"
+}
+Saída real local (vazia):
+
+Exit code real: 0
+
+Schema real do provider: conferência DERIVADA de suporte a tags
+{
+  "checked_at": "2026-09-29T07:54:42-03:00",
+  "command": [
+    "terraform",
+    "-chdir=/tmp/devops-t17-vpc-sauavl8u",
+    "providers",
+    "schema",
+    "-json"
+  ],
+  "exit_code": 0,
+  "stdout_sha256": "e452930af65383de8dee2ebb74e1a8c82eb1ca16bddc420f012b897a4edde6fe",
+  "conferencia_derivada_do_schema_real": {
+    "aws_vpc": true,
+    "aws_internet_gateway": true,
+    "aws_subnet": true,
+    "aws_route_table": true,
+    "aws_route_table_association": false
+  },
+  "provider": "AWS6.65.0 cache/lockfile fixado",
+  "note": "schema confirma tags nas quatro categorias taggáveis; associação não tem campo tags; sem API AWS"
+}
+
+Conferência real de escopo/preservação/privacidade: resumo DERIVADO
+{
+  "checked_at": "2026-09-29T07:56:24-03:00",
+  "result": "PASSOU",
+  "files_scope": [
+    "AGENTS.md",
+    "README.md",
+    "docs/diario-ia.md",
+    "specs/design.md",
+    "specs/requirements.md",
+    "specs/tasks.md",
+    "evidencias/vpc-validate.txt",
+    "infra/modules/vpc/main.tf",
+    "infra/modules/vpc/variables.tf",
+    "infra/modules/vpc/outputs.tf",
+    "infra/modules/vpc/versions.tf",
+    "infra/modules/vpc/tests/network.tftest.hcl"
+  ],
+  "previous_files_preserved_sha256": 56,
+  "guide_api_docker_compose_bootstrap_and_previous_evidence": "intactos por SHA-256",
+  "diary_agents_history": "prefixos anteriores idênticos",
+  "private_files": "ignorados/0600, fora do stage",
+  "sensitive_scan": "sem achados nos padrões/valores delimitados; não prova ausência universal",
+  "tasks": "T01–T17 verificadas; T18–T34 pendentes, 34 IDs únicos",
+  "requirements": "32 IDs únicos; R14/R19/R20/R21/R22/R31 em andamento",
+  "markdown_links_fences_newlines": "PASSOU",
+  "diff_check_exit_code": 0,
+  "terraform": "init0/fmt0/validate0/grafo0/9 testes LOCAIS mock0, sem AWS",
+  "copies_and_lockfile_identical": true,
+  "raw_captures_hashes": "preservados incluindo duas execuções de testes falhadas",
+  "state_plan_in_temporary_root": "nenhum",
+  "git_before_commit": "12 commits/0 merges, feature/main preservados"
+}
+
+Limpeza real somente do root temporário próprio após validação
+{
+  "checked_at": "2026-09-29T07:58:09-03:00",
+  "result": "PASSOU",
+  "temporary_root_removed": "/tmp/devops-t17-vpc-sauavl8u",
+  "bootstrap_provider_cache_preserved": true,
+  "raw_captures_and_reports_retained_in_tmp": true,
+  "aws_resources_or_bootstrap_state_deleted": false
+}

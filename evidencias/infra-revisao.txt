@@ -1,0 +1,923 @@
+T22 — revisão concreta do plano principal, 29/09/2026 (-03:00).
+HEAD inicial598e0d9, feat/api-reservas limpa;17 commits reais/zero merges.
+Esta revisão está pronta; decisão humana pendente. T22 em andamento/T23 pendente.
+Sem apply/destroy/deploy/push/PR. Código Terraform/planos/states/lockfiles preservados.
+Conceito: plan descreve mudanças propostas, revisão avalia segurança e custo,
+a autorização vincula escopo concreto antes de provisionar recursos faturáveis.
+Regra10 AGENTS.md exige apresentar plano/conta/região/recursos/acessos/custo e
+obter autorização para esse escopo; anterior aprovação refere-se ao bootstrap.
+Revisão genérica não é autorização principal; não presumir pelo tempo decorrido.
+
+PLANO CONCRETO PARA DECISÃO
+Conta Learner Lab terminada5811, default/voclabs, região us-east-1.
+Terraform1.16.2/providerAWS6.65.0, infra/infra.tfplan privado0600/ignorado.
+SHA-256: 2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7
+23 criações, zero alterações/exclusões:
+-12 rede: VPC10.20.0.0/16, IGW,4subnets em us-east-1a/b,
+  2tabelas de rotas e4associações. Públicas10.20.1.0/24 e10.20.2.0/24;
+  privadas10.20.11.0/24 e10.20.12.0/24 sem rota internet/NAT.
+-8segurança:2SG,3ingress(22,3000,5432),3egress(80,443,5432).
+  SSH/API exclusivamente IP IPv4 atual do aluno /32, mesmo plano T21.
+  PostgreSQL só do SG EC2 para SG RDS, sem CIDR público; saída EC2 web80/443
+  para0.0.0.0/0 e5432 exclusivamente SG RDS; RDS sem saída iniciada.
+-2RDS: DB subnet group com as duas privadas e PostgreSQL16.15 db.t3.micro
+  Single-AZ/20GiB gp3/encriptado/privado, identifier prova-6325231-rds.
+  Proposta Lab sem backups automáticos retidos/snapshot final/deletion protection;
+  skip_final_snapshot=true/final_snapshot_identifier=null; consentimento de
+  provisionamento não autoriza destruir dados nem executar teardown.
+-1EC2: prova-6325231-api,t2.micro,primeira pública us-east-1a/IP público dinâmico,
+  AMIami-048da71c4d98f46b1 Amazon AL2023x86_64/HVM/EBS/uefi-preferred/root8GiB.
+  EBSgp3 8GiB encriptado/delete_on_termination,IMDSv2 obrigatório/CPUstandard.
+  Key vockey/ProfileLabInstanceProfile comLabRole EXISTENTES. Nenhum IAM/EIP/NAT/
+  KMS/key pair novo. User-data só instala Docker/prepara diretórios, sem senha/API
+  ou PostgreSQL local. Deploy/HTTP/SQL efetivos terão T24/T25 próprias etapas.
+Tags Project=prova-primeiro-bimestre-devops/Environment=learner-lab/Owner6325231.
+Backend S3 próprio versionado/AES256/BPA4true eDDB LockID real já existentes;
+init principal ocorreu após bootstrap, lock ausente hoje. Objeto principal S3
+inexistente sem apply, gravação/verificação T23; config local de backend não é
+state remoto de recursos. State bootstrap separado local protegido preservado.
+Root inputs/outputs e referências EC2 pública/SGEC2 eRDS privadas/SGRDS conferidos.
+Credenciais temporárias fora do repo; username/password privados sensitive,
+mas continuam no plano/state; não publicar JSON/state/cache/plano/vars.
+Só rds_port5432 conhecida no plano; IDs/IP/endpoint/api_url dependem de apply.
+Saldo atual do painel/duração token/posse chave privada/SSH não verificados.
+Aplicar só depois da resposta explícita, revalidando identidade/hash/IP/backend;
+se plano/escopo/acessos/custo mudar, revisar novamente antes de aplicar.
+
+TESTES REAIS DA REVISÃO
+{
+  "checked_at": "2026-09-29T09:12:12-03:00",
+  "exit_code": 0,
+  "head": "598e0d9ed6865680a035e1b769dd126eb25f8f59",
+  "plan_sha256": "2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7",
+  "plan_unchanged": true,
+  "identity": "default/voclabs/us-east-1/mesma conta terminada5811",
+  "current_ip": "mesmo /32 privado do plano; SSH/API somente aluno",
+  "actions": "23 create,0 update,0 delete; plano T21 preservado",
+  "backend": "S3 Enabled/AES256/BPA4true; DDB ACTIVE, lock ausente; objeto state principal ausente sem apply",
+  "aws_before": "nenhuma EC2 do projeto não terminada, RDS de identificador previsto ausente",
+  "ami": "AMI concreta ainda available/Amazon/x86_64",
+  "key_profile": "vockey/LabInstanceProfile-LabRole existentes, posse chave/SSH não testados",
+  "authorization": "pendente; revisão genérica e aprovação bootstrap não substituem aprovação principal",
+  "capture_names": [
+    "sts",
+    "state-before",
+    "versioning",
+    "encryption",
+    "bpa",
+    "ddb",
+    "lock",
+    "ec2-before",
+    "rds-before",
+    "ami",
+    "key",
+    "profile",
+    "show-json"
+  ]
+}
+{
+  "checked_at": "2026-09-29T09:18:03-03:00",
+  "exit_code": 0,
+  "checks": [
+    "Plano completo/applyable/sem erro",
+    "23 somente creates",
+    "Região única",
+    "Sem IAM/EIP/NAT/KMS novos",
+    "Ingress restrito 3000",
+    "Ingresso PostgreSQL sem CIDR",
+    "Ingress restrito 22",
+    "RDS nas privadas/SGRDS",
+    "EC2 primeira pública/SGEC2",
+    "RDS privado/encrypted/SingleAZ16.15dbt3micro20gp3",
+    "RDS sem backups/snapshot final proposta explícita",
+    "Username/pass privado correto",
+    "EC2t2micro/IMDSv2/EBS8encrypted/CPUstandard",
+    "Key/profile existentes",
+    "Privadas sem internet",
+    "Privado0600 infra/terraform.tfvars.json",
+    "Privado0600 infra/backend.local.hcl",
+    "Privado0600 infra/infra.tfplan",
+    "Privado0600 infra/.terraform/terraform.tfstate",
+    "96 arquivos anteriores intactos antes documentos"
+  ],
+  "authorization": "ainda pendente, nenhuma aplicação",
+  "plan_sha256": "2da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7"
+}
+
+CAPTURA sts
+{
+  "started": "2026-09-29T09:11:46-03:00",
+  "finished": "2026-09-29T09:11:48-03:00",
+  "command": [
+    "aws",
+    "sts",
+    "get-caller-identity",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b00b74d61f79ed7e408e0321ab46f4ce5c91f07626bcab4ad25633c40ee37365",
+  "sanitized_output": "[Conteúdo privado conferido em memória.]"
+}
+
+CAPTURA state-before
+{
+  "started": "2026-09-29T09:11:48-03:00",
+  "finished": "2026-09-29T09:11:50-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "list-objects-v2",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--prefix",
+    "prova-primeiro-bimestre-devops/terraform.tfstate",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b8af8fb7fe480d1c546cdb609cfe1da54d6c711adb29b82bceff09a0c8be54a3",
+  "sanitized_output": "{\n    \"RequestCharged\": null,\n    \"Prefix\": \"prova-primeiro-bimestre-devops/terraform.tfstate\"\n}\n"
+}
+
+CAPTURA versioning
+{
+  "started": "2026-09-29T09:11:50-03:00",
+  "finished": "2026-09-29T09:11:52-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-bucket-versioning",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e0d7fcfe6b2ca7b3376e1af42cfbf309d2ee91d4cd664565f9b73c4816079f22",
+  "sanitized_output": "{\n    \"Status\": \"Enabled\"\n}\n"
+}
+
+CAPTURA encryption
+{
+  "started": "2026-09-29T09:11:52-03:00",
+  "finished": "2026-09-29T09:11:53-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-bucket-encryption",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "9dcbf5a9219555f282511d108aea0d88f078e8824b9fdd397160394bd3c2a213",
+  "sanitized_output": "{\n    \"ServerSideEncryptionConfiguration\": {\n        \"Rules\": [\n            {\n                \"ApplyServerSideEncryptionByDefault\": {\n                    \"SSEAlgorithm\": \"AES256\"\n                },\n                \"BucketKeyEnabled\": false,\n                \"BlockedEncryptionTypes\": {\n                    \"EncryptionType\": [\n                        \"SSE-C\"\n                    ]\n                }\n            }\n        ]\n    }\n}\n"
+}
+
+CAPTURA bpa
+{
+  "started": "2026-09-29T09:11:53-03:00",
+  "finished": "2026-09-29T09:11:55-03:00",
+  "command": [
+    "aws",
+    "s3api",
+    "get-public-access-block",
+    "--bucket",
+    "prova-6325231-tfstate-e373b51f3467",
+    "--expected-bucket-owner",
+    "[AWS_ACCOUNT_ID_OCULTO]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "31f1f0a092cfdc6587c931923da09fc537545478aca3c5dcc2c060b73a91e4d9",
+  "sanitized_output": "{\n    \"PublicAccessBlockConfiguration\": {\n        \"BlockPublicAcls\": true,\n        \"IgnorePublicAcls\": true,\n        \"BlockPublicPolicy\": true,\n        \"RestrictPublicBuckets\": true\n    }\n}\n"
+}
+
+CAPTURA ddb
+{
+  "started": "2026-09-29T09:11:55-03:00",
+  "finished": "2026-09-29T09:11:57-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "describe-table",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "8583f685c05d80db11f2637afcd70144e56dbc46622079a33473fadc1049cfbf",
+  "sanitized_output": "{\n    \"Table\": {\n        \"AttributeDefinitions\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"AttributeType\": \"S\"\n            }\n        ],\n        \"TableName\": \"prova-6325231-tflock-e373b51f3467\",\n        \"KeySchema\": [\n            {\n                \"AttributeName\": \"LockID\",\n                \"KeyType\": \"HASH\"\n            }\n        ],\n        \"TableStatus\": \"ACTIVE\",\n        \"CreationDateTime\": \"2026-09-29T00:31:21.513000-03:00\",\n        \"ProvisionedThroughput\": {\n            \"NumberOfDecreasesToday\": 0,\n            \"ReadCapacityUnits\": 0,\n            \"WriteCapacityUnits\": 0\n        },\n        \"TableSizeBytes\": 0,\n        \"ItemCount\": 0,\n        \"TableArn\": \"arn:aws:dynamodb:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:table/prova-6325231-tflock-e373b51f3467\",\n        \"TableId\": \"b7c1c155-4190-4c96-8925-07dc86ad13e7\",\n        \"BillingModeSummary\": {\n            \"BillingMode\": \"PAY_PER_REQUEST\",\n            \"LastUpdateToPayPerRequestDateTime\": \"2026-09-29T00:31:21.513000-03:00\"\n        },\n        \"DeletionProtectionEnabled\": false,\n        \"WarmThroughput\": {\n            \"ReadUnitsPerSecond\": 12000,\n            \"WriteUnitsPerSecond\": 4000,\n            \"Status\": \"ACTIVE\"\n        }\n    }\n}\n"
+}
+
+CAPTURA lock
+{
+  "started": "2026-09-29T09:11:57-03:00",
+  "finished": "2026-09-29T09:11:59-03:00",
+  "command": [
+    "aws",
+    "dynamodb",
+    "get-item",
+    "--table-name",
+    "prova-6325231-tflock-e373b51f3467",
+    "--key",
+    "{\"LockID\": {\"S\": \"prova-6325231-tfstate-e373b51f3467/prova-primeiro-bimestre-devops/terraform.tfstate\"}}",
+    "--consistent-read",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sanitized_output": ""
+}
+
+CAPTURA ec2-before
+{
+  "started": "2026-09-29T09:11:59-03:00",
+  "finished": "2026-09-29T09:12:01-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instances",
+    "--filters",
+    "Name=tag:Project,Values=prova-primeiro-bimestre-devops",
+    "Name=tag:Owner,Values=6325231",
+    "--query",
+    "Reservations[].Instances[?State.Name!=`terminated`].[InstanceId,State.Name]",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "sanitized_output": "[]\n"
+}
+
+CAPTURA rds-before
+{
+  "started": "2026-09-29T09:12:01-03:00",
+  "finished": "2026-09-29T09:12:02-03:00",
+  "command": [
+    "aws",
+    "rds",
+    "describe-db-instances",
+    "--query",
+    "DBInstances[?DBInstanceIdentifier=='prova-6325231-rds'].DBInstanceIdentifier",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "sanitized_output": "[]\n"
+}
+
+CAPTURA ami
+{
+  "started": "2026-09-29T09:12:02-03:00",
+  "finished": "2026-09-29T09:12:05-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-images",
+    "--owners",
+    "amazon",
+    "--image-ids",
+    "ami-048da71c4d98f46b1",
+    "--query",
+    "Images[].{ImageId:ImageId,State:State,Architecture:Architecture,BootMode:BootMode}",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "ee8266efd408595b8012d2acbceda4df4602341054582acfae82e66d96acfc1d",
+  "sanitized_output": "[\n    {\n        \"ImageId\": \"ami-048da71c4d98f46b1\",\n        \"State\": \"available\",\n        \"Architecture\": \"x86_64\",\n        \"BootMode\": \"uefi-preferred\"\n    }\n]\n"
+}
+
+CAPTURA key
+{
+  "started": "2026-09-29T09:12:05-03:00",
+  "finished": "2026-09-29T09:12:06-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-key-pairs",
+    "--key-names",
+    "vockey",
+    "--query",
+    "KeyPairs[].KeyName",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "ba1c9cbaaed6fdc6a10cb453445e46080a649216ef47a6e8a52d9764a139ed52",
+  "sanitized_output": "[\n    \"vockey\"\n]\n"
+}
+
+CAPTURA profile
+{
+  "started": "2026-09-29T09:12:06-03:00",
+  "finished": "2026-09-29T09:12:08-03:00",
+  "command": [
+    "aws",
+    "iam",
+    "get-instance-profile",
+    "--instance-profile-name",
+    "LabInstanceProfile",
+    "--query",
+    "InstanceProfile.Roles[].RoleName",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "c70b849c12490b46f23953362c2989750cc28f0595fdedd0b16a99fcee1cdde4",
+  "sanitized_output": "[\n    \"LabRole\"\n]\n"
+}
+
+CAPTURA show-json
+{
+  "started": "2026-09-29T09:12:08-03:00",
+  "finished": "2026-09-29T09:12:12-03:00",
+  "command": [
+    "terraform",
+    "-chdir=infra",
+    "show",
+    "-json",
+    "infra.tfplan"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "f38a97e99c053c1b28990f88804afcde7c77ef223fe7e28fa76baffa6cbbc82c",
+  "sanitized_output": "[Conteúdo privado conferido em memória.]"
+}
+
+PREÇOS OFICIAIS / FALHAS REAIS / CORREÇÕES
+Endpoint exploratório EC2 meteredUnitMaps retornou HTTP404; não foi usado como
+preço. Página oficial T2 confirmou t2.micro Linux/Unix US East N.Virginia0.0116/h.
+CLI pricing:GetProducts para EBS retornou254/AccessDeniedException (Lab sem
+permissão); conta/ARN de sessão ocultados abaixo. Nenhum IAM/SCP foi alterado.
+Página EBS usa token ec2/ebs; cliente público deriva ec2/USD/current/ebs.json.
+Primeiro leitor JSON levantou UnicodeDecodeError por resposta gzip (exit1).
+Bytes reais preservados, magic bytes gzip conferidos; gzip.decompress+json.loads
+passou0. Token Storage General Purpose gp3 GB Mo da região US East N.Virginia
+confirmou0.08/GB-mês e rateCode. Não repetir instalação/providers/mock/API local.
+
+FONTE AmazonRDS
+{
+  "started": "2026-09-29T09:12:25-03:00",
+  "finished": "2026-09-29T09:12:32-03:00",
+  "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.json",
+  "http_status": 200,
+  "bytes": 27030850,
+  "sha256": "4e61c4b8d8c6452fdf7b101c716f1e8c0fe8e5840ebb05805d390904724c96a3",
+  "version": "20260924211011",
+  "publication_date": "2026-09-24T21:10:11Z",
+  "exit_code": 0
+}
+
+FONTE AmazonS3
+{
+  "started": "2026-09-29T09:12:25-03:00",
+  "finished": "2026-09-29T09:12:27-03:00",
+  "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json",
+  "http_status": 200,
+  "bytes": 473422,
+  "sha256": "798f9727bc5102d15d471c5b84c15ed3e20297015330f515a33d5f6a032cc2f1",
+  "version": "20260928230416",
+  "publication_date": "2026-09-28T23:04:16Z",
+  "exit_code": 0
+}
+
+FONTE AmazonDynamoDB
+{
+  "started": "2026-09-29T09:12:25-03:00",
+  "finished": "2026-09-29T09:12:25-03:00",
+  "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDynamoDB/current/us-east-1/index.json",
+  "http_status": 200,
+  "bytes": 43463,
+  "sha256": "b25d0fd8d26a9fd489b27c19abf895c9d86145ca6ed935fcf25303f784cfb15e",
+  "version": "20260911124422",
+  "publication_date": "2026-09-11T12:44:22Z",
+  "exit_code": 0
+}
+
+FONTE AWSDataTransfer
+{
+  "started": "2026-09-29T09:12:25-03:00",
+  "finished": "2026-09-29T09:12:25-03:00",
+  "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.json",
+  "http_status": 200,
+  "bytes": 1468865,
+  "sha256": "00f81657d01946d02c905e32ca87cc6c23720b5de079b90fef5775243abcee80",
+  "version": "20260916132208",
+  "publication_date": "2026-09-16T13:22:08Z",
+  "exit_code": 0
+}
+
+FONTE ec2-linux
+{
+  "started": "2026-09-29T09:12:25-03:00",
+  "finished": "2026-09-29T09:12:25-03:00",
+  "url": "https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ec2-ondemand/US%20East%20(N.%20Virginia)/Linux/index.json",
+  "exit_code": 1,
+  "error": "HTTP Error 404: Not Found"
+}
+
+FONTE ebs
+{
+  "started": "2026-09-29T09:13:07-03:00",
+  "finished": "2026-09-29T09:13:09-03:00",
+  "command": [
+    "aws",
+    "pricing",
+    "get-products",
+    "--service-code",
+    "AmazonEC2",
+    "--filters",
+    "Type=TERM_MATCH,Field=productFamily,Value=Storage",
+    "Type=TERM_MATCH,Field=volumeApiName,Value=gp3",
+    "Type=TERM_MATCH,Field=location,Value=US East (N. Virginia)",
+    "--max-results",
+    "10",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 254,
+  "sha256": "176affe2a8e992406d21a81ff058155064b863d3b595cb316db7ff50ea8c37e9"
+}
+
+FONTE ec2-t2
+{
+  "started": "2026-09-29T09:13:30-03:00",
+  "finished": "2026-09-29T09:13:31-03:00",
+  "url": "https://aws.amazon.com/ec2/instance-types/t2/",
+  "http_status": 200,
+  "bytes": 406217,
+  "sha256": "d2a0670d733946ab851e3cd3f7a4404508485180f7e5e64494294683906e96ba",
+  "exit_code": 0
+}
+
+FONTE vpc
+{
+  "started": "2026-09-29T09:13:30-03:00",
+  "finished": "2026-09-29T09:13:31-03:00",
+  "url": "https://aws.amazon.com/vpc/pricing/",
+  "http_status": 200,
+  "bytes": 386677,
+  "sha256": "df77a94997ad6491aac2a99b8fc227178dec22af14b4559a4bdf8a085e9f5dfd",
+  "exit_code": 0
+}
+
+FONTE rds-page
+{
+  "started": "2026-09-29T09:13:30-03:00",
+  "finished": "2026-09-29T09:13:31-03:00",
+  "url": "https://aws.amazon.com/rds/postgresql/pricing/",
+  "http_status": 200,
+  "bytes": 462320,
+  "sha256": "104d1952a4c81480bd4c39b9926b217e2ec25e7d9942434f6028cfd146cdb886",
+  "exit_code": 0
+}
+
+FONTE ebs-page
+{
+  "started": "2026-09-29T09:13:55-03:00",
+  "url": "https://aws.amazon.com/ebs/pricing/",
+  "http_status": 200,
+  "sha256": "8d41d2d17b22427adbf82b1b8006c67f53d6b4e6569c4cb923c61fbd3c729bda",
+  "bytes": 381487,
+  "exit_code": 0
+}
+
+FONTE ebs-public
+{
+  "checked_at": "2026-09-29T09:15:20-03:00",
+  "url": "https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ebs.json",
+  "http_status_observed": 200,
+  "bytes": 39796,
+  "sha256": "f625932dc1056eb6015366873950473a73e0b10532f09704b299bce520ce59fe",
+  "initial_parser_exit": 1,
+  "initial_error": "UnicodeDecodeError; corpo HTTP comprimido gzip, n\u00e3o JSON UTF-8 direto",
+  "correction": "identificar magic bytes gzip, gzip.decompress sobre bytes reais preservados e json.loads",
+  "exit_code": 0
+}
+
+Erro bruto CLI pricing:GetProducts (conta/ARN redigidos):
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetProducts operation: User: [ARN_SESSAO_OCULTO] is not authorized to perform: pricing:GetProducts because no identity-based policy allows the pricing:GetProducts action
+
+CÁLCULO EXECUTADO COM DECIMAL, SOMA RACIONAL INDEPENDENTE PASSOU0
+{
+  "checked_at": "2026-09-29T09:17:10-03:00",
+  "exit_code": 0,
+  "currency": "USD",
+  "region": "us-east-1",
+  "monthly_hours": 730,
+  "rates": [
+    {
+      "service": "AmazonRDS",
+      "sku": "TGN7QDJF2AGFU9XA",
+      "rateCode": "TGN7QDJF2AGFU9XA.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonRDS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "instanceType": "db.t3.micro",
+        "currentGeneration": "Yes",
+        "instanceFamily": "General purpose",
+        "vcpu": "2",
+        "physicalProcessor": "Intel Skylake E5 2686 v5 (2.5 GHz)",
+        "memory": "1 GiB",
+        "storage": "EBS Only",
+        "networkPerformance": "Low to Moderate",
+        "processorArchitecture": "64-bit",
+        "engineCode": "14",
+        "databaseEngine": "PostgreSQL",
+        "licenseModel": "No license required",
+        "deploymentOption": "Single-AZ",
+        "usagetype": "InstanceUsage:db.t3.micro",
+        "operation": "CreateDBInstance:0014",
+        "instanceTypeFamily": "T3",
+        "normalizationSizeFactor": "0.5",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Relational Database Service",
+        "unbundledLicensing": "FALSE"
+      },
+      "description": "USD 0.018 per db.t3.micro Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "beginRange": "0",
+      "unit": "Hrs",
+      "usd": "0.0180000000"
+    },
+    {
+      "service": "AmazonRDS",
+      "sku": "KYVYY29G957PKY3B",
+      "rateCode": "KYVYY29G957PKY3B.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonRDS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "storageMedia": "SSD",
+        "volumeType": "General Purpose-GP3",
+        "minVolumeSize": "5 GB",
+        "maxVolumeSize": "16 TB",
+        "engineCode": "14",
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "usagetype": "RDS:GP3-Storage",
+        "operation": "CreateDBInstance:0014",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Relational Database Service"
+      },
+      "description": "$0.115 per GB-month of provisioned GP3 storage running PostgreSQL",
+      "beginRange": "0",
+      "unit": "GB-Mo",
+      "usd": "0.1150000000"
+    },
+    {
+      "service": "EC2 EBS",
+      "region": "US East (N. Virginia)",
+      "token": "Storage General Purpose gp3 GB Mo",
+      "rateCode": "JG3KUJMBRGHV3N8G.JRTCKXETXF.6YS6EN2CT7",
+      "price": "0.0800000000",
+      "RegionlessRateCode": "rfOvvXHDAJRZK8rCe8ThxmpU_7SjA3m6T5_yeV0z0FQ"
+    },
+    {
+      "service": "EC2 t2.micro",
+      "usd": "0.0116",
+      "unit": "Hrs",
+      "source": "https://aws.amazon.com/ec2/instance-types/t2/",
+      "confirmed": "linha t2.micro e nota Linux/Unix US East Northern Virginia"
+    },
+    {
+      "service": "VPC IPv4 public in-use",
+      "usd": "0.005",
+      "unit": "Hrs",
+      "source": "https://aws.amazon.com/vpc/pricing/"
+    },
+    {
+      "service": "AmazonS3",
+      "sku": "WP9ANXZGBYYSGJEA",
+      "rateCode": "WP9ANXZGBYYSGJEA.JRTCKXETXF.PGHJ3S3EYE",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "availability": "99.99%",
+        "storageClass": "General Purpose",
+        "volumeType": "Standard",
+        "usagetype": "TimedStorage-ByteHrs",
+        "operation": "",
+        "durability": "99.999999999%",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Simple Storage Service"
+      },
+      "description": "$0.023 per GB - first 50 TB / month of storage used",
+      "beginRange": "0",
+      "unit": "GB-Mo",
+      "usd": "0.0230000000"
+    },
+    {
+      "service": "AmazonS3",
+      "sku": "E9YHNFENF4XQBZR6",
+      "rateCode": "E9YHNFENF4XQBZR6.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST or LIST requests",
+        "usagetype": "Requests-Tier1",
+        "operation": "",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Simple Storage Service"
+      },
+      "description": "$0.005 per 1,000 PUT, COPY, POST, or LIST requests",
+      "beginRange": "0",
+      "unit": "Requests",
+      "usd": "0.0000050000"
+    },
+    {
+      "service": "AmazonS3",
+      "sku": "ZWQ6Q48CRJXX4FXE",
+      "rateCode": "ZWQ6Q48CRJXX4FXE.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET and all other requests",
+        "usagetype": "Requests-Tier2",
+        "operation": "",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Simple Storage Service"
+      },
+      "description": "$0.004 per 10,000 GET and all other requests",
+      "beginRange": "0",
+      "unit": "Requests",
+      "usd": "0.0000004000"
+    },
+    {
+      "service": "AmazonDynamoDB",
+      "sku": "F3E2EDSYC6ZNW7XP",
+      "rateCode": "F3E2EDSYC6ZNW7XP.JRTCKXETXF.VYAP54KATQ",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "volumeType": "Amazon DynamoDB - Indexed DataStore",
+        "usagetype": "TimedStorage-ByteHrs",
+        "operation": "",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon DynamoDB"
+      },
+      "description": "$0.25 per GB-Month of storage used beyond first 25 free GB-Months",
+      "beginRange": "25",
+      "unit": "GB-Mo",
+      "usd": "0.2500000000"
+    },
+    {
+      "service": "AmazonDynamoDB",
+      "sku": "FGXVD96DKJMUASY3",
+      "rateCode": "FGXVD96DKJMUASY3.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "group": "DDB-WriteUnits",
+        "groupDescription": "DynamoDB PayPerRequest Write Request Units",
+        "usagetype": "WriteRequestUnits",
+        "operation": "PayPerRequestThroughput",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon DynamoDB"
+      },
+      "description": "$0.625 per million write request units (N. Virginia)",
+      "beginRange": "0",
+      "unit": "WriteRequestUnits",
+      "usd": "0.0000006250"
+    },
+    {
+      "service": "AmazonDynamoDB",
+      "sku": "4W4ZMC46EHE8XTTZ",
+      "rateCode": "4W4ZMC46EHE8XTTZ.JRTCKXETXF.6YS6EN2CT7",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "group": "DDB-ReadUnits",
+        "groupDescription": "DynamoDB PayPerRequest Read Request Units",
+        "usagetype": "ReadRequestUnits",
+        "operation": "PayPerRequestThroughput",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon DynamoDB"
+      },
+      "description": "$0.125 per million read request units (N. Virginia)",
+      "beginRange": "0",
+      "unit": "ReadRequestUnits",
+      "usd": "0.0000001250"
+    },
+    {
+      "service": "AWSDataTransfer",
+      "sku": "HQEH3ZWJVT46JHRG",
+      "rateCode": "HQEH3ZWJVT46JHRG.JRTCKXETXF.Q3Z75P77EN",
+      "attributes": {
+        "servicecode": "AWSDataTransfer",
+        "transferType": "AWS Outbound",
+        "fromLocation": "US East (N. Virginia)",
+        "fromLocationType": "AWS Region",
+        "toLocation": "External",
+        "toLocationType": "Other",
+        "usagetype": "DataTransfer-Out-Bytes",
+        "operation": "",
+        "fromRegionCode": "us-east-1",
+        "servicename": "AWS Data Transfer",
+        "toRegionCode": ""
+      },
+      "description": "$0.090 per GB - first 10 TB / month data transfer out beyond the global free tier",
+      "beginRange": "0",
+      "unit": "GB",
+      "usd": "0.0900000000"
+    }
+  ],
+  "monthly_main_items": {
+    "EC2 t2.micro 730h": "8.4680",
+    "IPv4 EC2 730h": "3.650",
+    "RDS db.t3.micro 730h": "13.1400000000",
+    "EBS gp3 8GiB mês": "0.6400000000",
+    "RDS gp3 20GiB mês": "2.3000000000"
+  },
+  "monthly_main_total": "28.1980000000",
+  "backend_scenario": "10MiB cumulativos S3 versões,1MiB DynamoDB,1000 PUT/LIST +1000 GET +1000 WCU +1000 RCU por janela,10MiB saída por janela",
+  "backend_monthly_estimate": "0.[CONTA_OCULTA]",
+  "hour_scenarios_including_backend": {
+    "6": "0.2387971425513698630136986301",
+    "24": "0.9341018514554794520547945206",
+    "730": "28.[CONTA_OCULTA]"
+  },
+  "total_monthly": "28.[CONTA_OCULTA]",
+  "independent_check": "Decimal == Fraction exato",
+  "assumptions": "CPU RDS sem créditos excedentes; transferência interAZ e outras saídas não medidas/excluídas; sem snapshots retidos/IOPS extras; nenhuma franquia/Free Tier/crédito/imposto descontado",
+  "extras": "RDS T3 Unlimited pode cobrar0.075/vCPU-hour acima baseline; transferência internet0.09/GB primeira faixa sem franquia; tráfego interAZ pode cobrar; tamanho/contagem de versões e requests variam",
+  "scope": "principal + backend já existente, sem novos serviços extras",
+  "balance": "US$0 usados/50 informado anteriormente pelo aluno; não é saldo atual verificado; estimativa não é fatura nem teto"
+}
+
+Cenários arredondados PARA CIMA ao centavo:6h US$0.24;24h US$0.94;
+730h US$28.21 incluindo cenário pequeno backend existente (sem criar outro).
+Principal base730h US$28.198: EC2 8.468 +IPv4 3.65 +RDScompute13.14 +EBS0.64 +RDSstorage2.30.
+Backend10MiB S3 total de versões/1MiB DDB/1000requests ouunits porcategoria/
+10MiB saída por janela: aproximadamente0.007498/mês, varia com uso/versões.
+Para janela curta, armazenamento rateado horas/730; mesmas1000unidades e10MiB
+por janela, não fingir custos medidos. Não descontar Free Tier/créditos Lab.
+Estimativa não é fatura/teto/saldo atual. Valores USD, não BRL, sem impostos.
+Cálculo supõe sem crédito CPU excedente RDS (T3Unlimited pode cobrar0.075/vCPU-h),
+sem tráfego interAZ/saídas extras mensurados, sem snapshots retidos/IOPS extras.
+RDS pode escolher AZ distinta da EC2: transferência interAZ pode acrescentar custo.
+Discos/backups retidos podem custar com instâncias paradas; revisão de descarte
+T27/28 antes de destroy, bootstrap continua até principal removido e locks livres.
+Nenhuma promessa de permanecer abaixo50$ independentemente de tempo/carga.
+
+FONTES PRIMÁRIAS
+https://aws.amazon.com/ec2/instance-types/t2/
+https://aws.amazon.com/ebs/pricing/
+https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ebs.json
+https://aws.amazon.com/vpc/pricing/
+https://aws.amazon.com/rds/postgresql/pricing/
+https://aws.amazon.com/rds/pricing/
+https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html
+URLs regionais/version/publication/SHA-256/rateCodes/SKUs preservados acima.
+
+DECISÃO
+Revisão técnica/custo concluída; ainda não houve resposta de autorização para
+principal. T22 em andamento, T23 pendente. Sem commit extra de quantidade nesta
+preparação; revisão/decisão a registrar no próximo marco coerente. Sem bloqueio
+técnico após alternativa de preços pública; ação dependente aguarda decisão.
+Redação explícita: conta completa/IP-CIDR/username/password/sessão STS ocultados;
+brutos privados0600 em /tmp, saídas/exit codes/hashes/falhas reais preservados.
+
+Conferência final 2026-09-29T09:22:15-03:00/0:175checks,7arquivos no escopo,90anteriores
+preservados por SHA-256; histórico AGENTS/diário preservado como prefixo, plano
+real intacto, privados0600/ignored e scanner delimitado sem achados. Specs
+T01–21verificadas/T22em andamento/T23–34pendentes.17commits/feature/main/0merges
+intactos, stage vazio. Pedir decisão somente agora, com revisão pronta; não
+avançar apply sem resposta explícita. Capturas privadas preservadas em /tmp.
+
+## Decisão T22 e início T23 — 29/09/2026
+
+Aluno respondeu explicitamente: “Autorizo que faça tudo que seja necessário para
+a conclusão das tarefas propostas, desde que esteja de acordo com o que foi
+solicitado”. Resposta à revisão concreta/hash/23criações/conta/região/acessos/custo
+apresentados. T22 verificada pela revisão e decisão humana, T23 em andamento.
+Retomar plano aprovado sem pedir a mesma autorização. Mudanças de escopo/plano
+e destruição exigem revisão concreta conforme regra10; não executar agora.
+Autorização não prova execução/recursos/deploy; revalidar antes de apply.
+
+ATUALIZAÇÃO — DECISÃO RECEBIDA E T23 EXECUTADA
+Após revisão T22, aluno autorizou: “Autorizo que faça tudo que seja necessário
+para a conclusão das tarefas propostas, desde que esteja de acordo com o que foi
+solicitado”. Decisão registrada em infra-revisao.txt/diário; T22 verificada pela
+revisão concreta e autorização. T23 aplicou somente plano principal apresentado,
+SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7.
+Conta terminada5811/default/voclabs/us-east-1/IP aluno /32/hash/backend revalidados.
+Plano de23create/0update/0delete; custo T22 permanece estimativa, saldo não atual.
+
+Apply real 2026-09-29T09:26:43-03:00–2026-09-29T09:33:10-03:00, exit0:23added/0changed/0destroyed.
+Arquivo de plano aprovado passado a apply, sem -auto-approve/target/refresh=false/
+lock=false. Aviso DynamoDB depreciado preservado, locking mantido. Nenhuma falha
+do apply/conferência observada; falhas preços T22 seguem registradas, não inventar
+falha T23. Código Terraform/versões/modules/lockfiles/planos aprovados preservados.
+
+Consultas AWS e assertions passaram0 em 2026-09-29T09:33:52-03:00: EC2 running/t2.micro,
+status system ok/instance ok, AMI fixada, primeira pública/SGEC2 único, keyvockey,
+Profile LabInstanceProfile-LabRole existentes, IMDSv2 required/hop1/tagsdisabled,
+EBSgp3 8GiB encrypted/delete-on-termination e CPUstandard. VPC disponível/DNStrue,
+4subnets disponíveis nas2AZs, IP público flag só públicas, IGW attached, rota0/0
+nas públicas e sólocal privadas,4associações explícitas. Nenhum novo recurso
+IAM/EIP/NAT/KMS/key pair declarado no plano. Tags em19recursos+rootEBS conferidas.
+RDS available/PostgreSQL16.15/db.t3.micro/20GiBgp3/encrypted/private/SingleAZ,
+2privadas no subnetgroup eSGRDS único ativo, backup0/deletion_protectionfalse,
+ExtendedSupportdisabled; EC2 eRDS efetivamente emus-east-1a (RDS escolheuAZ).
+Seis regras efetivas: EC2 ingress22/3000 exclusivamente aluno/32, RDS5432 somente
+referênciaSGEC2; EC2egress80/443 CIDR0/0 e5432 somenteSGRDS; RDSsem egressiniciada.
+
+State principal REAL S3: head-object0/nonempty/AES256/VersionId atual conferida
+em list-object-versions; state pull0 privado confirma23managed. Cache backend
+não foi usado como prova do objeto. State bootstrap local separado preservado.
+Lock liberado apósapply e apósplano. Plano posterior 2026-09-29T09:34:25-03:00/exit0/No changes,
+sem sobrescrever plano aprovado, postapply.local.tfplan ignorado0600 preservado.
+Outputs reais ID/IP EC2,hostname/portaRDS,URLAPI semsenha; URLnão prova serviço.
+State/plano/JSON bruto contêm senha, permanecer privados0600/ignorados, não publicar.
+
+T01–T23 verificadas nos respectivos ambientes. R13/R14/R15/R18/R19/R20/R21
+verificados; R16/R17/R22 seguem parciais até serviçoAPI/SQL/CRUD/evidências futuras.
+Validade das credenciais no instante das consultas comprovada, duração restante
+não inferida. Sem SSH/bootstrapDocker/HTTP/SQL/CRUD/reboot comprovados; próximas
+T24deploy/migração/serviço eT25CRUD EC2/RDS. Sem bloqueio T23. Recursos continuam
+ativos/faturáveis; custo varia comtempo/carga, estimativa T22 não é teto/saldo.
+Retomar escopo autorizado sem pedir mesma aprovação; mudança deescopo/plano e
+teardown têm revisão concreta própria. Não destruir agora nem removerbackend/state.
+Sem push/merge/PR; mergeT32 eentrega presencial01/10/2026 preservados.
+
+Quatro novas evidências reais: aws-rede.txt/aws-rds.txt/aws-seguranca.txt/
+terraform-outputs.txt. README/specs/matriz/AGENTS/diário sincronizados. Um commit
+coerente da revisão/autorização/apply/conferência após revisar stage/segredos,
+sem vazio/quantidade; suites inalteradas não repetidas. Brutos/metadados/auxiliares
+privados em /tmp preservados, nenhuma credencial oustate completo versionado.

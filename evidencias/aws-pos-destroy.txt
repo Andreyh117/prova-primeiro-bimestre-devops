@@ -1,0 +1,38 @@
+T28 — auditoria AWS após destroy principal
+Conferência registrada: 2026-09-29T22:14:06-03:00
+Consultas read-only com perfil default/us-east-1/voclabs, conta sufixo5811.
+Não imprimir credenciais, state bruto, plano JSON ou IP /32 do aluno.
+
+terraform -chdir=infra state list: exit0, zero endereços.
+terraform -chdir=infra state pull: exit0, zero recursos e zero outputs.
+aws ec2 describe-instances --instance-ids i-0f4b59a8181537b78:
+exit0, State.Name=terminated. A instância ainda pode aparecer como
+terminated por algum tempo; não é recurso em execução.
+aws ec2 describe-vpcs --vpc-ids vpc-02f929ba0204c6c07:
+InvalidVpcID.NotFound.
+aws ec2 describe-subnets (quatro IDs do plano): InvalidSubnetID.NotFound.
+aws ec2 describe-security-groups (dois IDs): InvalidGroup.NotFound.
+aws ec2 describe-internet-gateways (ID do plano):
+InvalidInternetGatewayID.NotFound.
+aws ec2 describe-route-tables (dois IDs): InvalidRouteTableID.NotFound.
+aws rds describe-db-instances --db-instance-identifier
+prova-6325231-rds: DBInstanceNotFound.
+aws rds describe-db-subnet-groups --db-subnet-group-name
+prova-6325231-rds-private: DBSubnetGroupNotFoundFault.
+aws rds describe-db-snapshots --db-instance-identifier
+prova-6325231-rds: exit0, zero snapshots associados.
+aws rds describe-db-instance-automated-backups:
+DBInstanceAutomatedBackupNotFound.
+aws ec2 describe-volumes --volume-ids (disco raiz do plano):
+InvalidVolume.NotFound.
+aws ec2 describe-volumes --filters tag:Project do projeto:
+exit0, zero volumes.
+aws ec2 describe-network-interfaces --filters vpc-id da VPC antiga:
+exit0, zero interfaces.
+
+Backend PRESERVADO, não incluído no destroy: S3 versioning Enabled; objeto
+de state principal com VersionId e AES256. DynamoDB ACTIVE; scan read-only
+viu apenas um item checksum -md5/Digest e nenhum Info/lock ativo naquele
+instante. State bootstrap local e cópias protegidas foram mantidos.
+Esses recursos e versões ainda podem consumir créditos do Lab; T29/T30
+farão plano/autorização/limpeza separados. Nenhum push/PR nesta etapa.

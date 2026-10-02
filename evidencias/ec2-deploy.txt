@@ -1,0 +1,618 @@
+T24 — deploy efetivo por SSH/SCP, imagem imutável, migração TLS/RDS, systemd e reboot.
+Data: 29/09/2026. Codex, ferramentas reais: Python3 stdlib, AWS CLI, OpenSSH,
+Docker/BuildKit, curl, systemd-analyze, Git e navegador/documentações oficiais.
+Escopo: EC2/RDS próprios já provisionados T23, conta terminada5811/default/voclabs,
+us-east-1; SSH/API permanecem limitados ao /32 aprovado. Sem apply/destroy/IAM novo/
+push/merge/PR. Infraestrutura continua ativa/faturável; saldo atual não inferido.
+Redação declarada: conta/ARN/sessão/username/password/IP de origem ocultados.
+Brutos e metadados exclusivos em /tmp/0600; hashes referem-se aos brutos reais,
+não ao texto sanitizado. Normalização declarada: um espaço final de linha
+BuildKit foi removido apenas do texto versionado; bruto e hash preservados. Imagem/CA/manifesto são públicos; ambiente/SSH privados.
+Não armazenar hash de api.env no manifesto público.
+
+A chave vockey privada não foi localizada por busca de nomes. Consulta SSM retornou
+1 instância gerenciada, mas SSM não foi usado no deploy. EC2 Instance Connect já
+permitido autorizou chave pública ed25519 temporária por conexão. Nenhuma key pair
+AWS/role/policy/SG nova e nenhuma edição permanente de authorized_keys.
+Fingerprint ed25519 obtida por ssh-keyscan foi comparada com console AWS confiável;
+StrictHostKeyChecking=yes permaneceu habilitado. Keyscan sozinho não seria prova.
+Docker remoto já ativo, versão25.0.16; UID ec2-user1000. Não houve instalação
+manual de Docker nem modificação do bootstrap Terraform nesta tarefa.
+
+Falhas reais/correções:
+- Console --latest falhou254/UnsupportedOperation em t2.micro. Diagnóstico auxiliar
+  tentou parsear o erro como JSON e falhou JSONDecodeError; sem ação na AWS.
+- Console sem --latest passou0, mas auxiliar tentou base64decode do texto já
+  decodificado pela CLI e falhouValueError. Leitor corrigido; retry2 CLI0 e
+  fingerprint validada. Capturas privadas preservadas, sem alegar causa IAM.
+- Teste CRLF falhou1: read_text normalizava CRLF antes da checagem. Corrigido
+  para read_bytes().decode('utf-8'); nove testes passaram0. A primeira cadeia
+  shell terminou0 por systemd-analyze posterior apesar do unittest1; reexecução
+  isolada confirmou a falha antes da correção (abaixo). Não usar esse shell0
+  como sucesso da suíte. Testes finais11 passaram, incluindo digest OCI/arquitetura.
+- Primeiro deploy falhou1 antes de instalar ambiente/serviço. Diagnóstico real
+  mostrou LoadState=not-found e imagem carregada com ID bd97f88ba15a. Docker29 local
+  expunha digest do índice OCI1ea63..., Docker25 remoto usa digest da configuração
+  bd97f88.... O script agora deriva SHA256 dos bytes da configuração no tar e
+  confere commit/arquitetura/usuário. Arquivo81632256bytes/checksum/commit preservados.
+  Não trocar imagem/provider nem esconder falha. Retry e repetição reais abaixo.
+
+Identidade da imagem final (sem inferir commit futuro):
+{
+  "checked_at": "2026-09-29T10:02:26-03:00",
+  "root": "/tmp/devops-t24-image-p3jluc25",
+  "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456",
+  "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88",
+  "image_tag": "prova-reservas:4895f98590a4",
+  "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518",
+  "image_size_bytes": 81632256,
+  "ca_sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "environment": "privado0600 em /tmp, PGSSLtrue/CA, sem conteúdo em logs",
+  "exit_code": 0,
+  "local_index_id": "sha256:1ea63c335d1df12905fcd7ed842d14b7e371c7ba2b303c307c35189728462622",
+  "correction": "OCI config digest derivado dos bytes do tar, preservando arquivo/checksum e índice originais"
+}
+
+### console
+Captura real: devops-t24-console.json
+started: "2026-09-29T09:46:23-03:00"
+finished: "2026-09-29T09:46:25-03:00"
+command: ["aws", "ec2", "get-console-output", "--instance-id", "i-0f4b59a8181537b78", "--latest", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 254
+sha256: "18c9575885b785da37bbfbe97214b7e69fad4eb6ba639ee2e89caab770b2eb07"
+stdout + stderr capturados:
+[Conteúdo privado conferido em memória.]
+[Exibição parcial declarada; captura completa privada, hash acima.]
+
+### console-retry2
+Captura real: devops-t24-console-retry2.json
+started: "2026-09-29T09:48:49-03:00"
+finished: "2026-09-29T09:48:52-03:00"
+command: ["aws", "ec2", "get-console-output", "--instance-id", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "b6a2dcbe4ab4e72c243ef45d2c5d7e1fbcc5a6709819d1f27ffb2f9cf19b7c06"
+stdout + stderr capturados:
+[Resposta privada conferida.]
+[Exibição parcial declarada; captura completa privada, hash acima.]
+
+### host-keyscan
+Captura real: devops-t24-host-keyscan.json
+started: "2026-09-29T09:48:52-03:00"
+finished: "2026-09-29T09:48:53-03:00"
+command: ["ssh-keyscan", "-T", "10", "-t", "ed25519", "13.220.113.41"]
+exit_code: 0
+sha256: "c76fe325e43ae9a71f4ccb3f0851ff87a8df43ba41b8f54c872656b6e3c01730"
+stdout + stderr capturados:
+[Resposta privada conferida.]
+[Exibição parcial declarada; captura completa privada, hash acima.]
+
+### eic
+Captura real: devops-t24-eic.json
+started: "2026-09-29T09:48:53-03:00"
+finished: "2026-09-29T09:48:55-03:00"
+command: ["aws", "ec2-instance-connect", "send-ssh-public-key", "--instance-id", "i-0f4b59a8181537b78", "--instance-os-user", "ec2-user", "--availability-zone", "us-east-1a", "--ssh-public-key", "file:///tmp/devops-t24-access.key.pub", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "0a8a9c897ef16d3876056cbd095210c5fe57595c9f374f306afb02467e13b966"
+stdout + stderr capturados:
+{
+    "RequestId": "82111ef0-a44b-469a-9efd-ce2103bbd998",
+    "Success": true
+}
+
+
+### ssh-probe
+Captura real: devops-t24-ssh-probe.json
+started: "2026-09-29T09:48:55-03:00"
+finished: "2026-09-29T09:48:58-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "id -u; sudo -n systemctl is-active docker; sudo -n docker version --format \"{{.Server.Version}}\""]
+exit_code: 0
+sha256: "45d4460e51df3f3a335207bca84db272238bbfd1d21944ff09189ddfe05714c6"
+stdout + stderr capturados:
+1000
+active
+25.0.16
+
+
+### tests-initial
+Captura real: devops-t24-tests-initial.json
+started: "2026-09-29T09:54:11-03:00"
+finished: "2026-09-29T09:54:11-03:00"
+command: ["python3", "-B", "-m", "unittest", "discover", "-s", "scripts/tests", "-v"]
+exit_code: 1
+sha256: "a4b639523c8608e1f34880d324d146cb983f83adddd0b635af941f6be777959e"
+stdout + stderr capturados:
+test_crlf_rejected (test_deploy.DeployGuards.test_crlf_rejected) ... FAIL
+test_disabled_tls_rejected (test_deploy.DeployGuards.test_disabled_tls_rejected) ... ok
+test_duplicate_key_rejected_without_secret (test_deploy.DeployGuards.test_duplicate_key_rejected_without_secret) ... ok
+test_failed_command_does_not_expose_stderr (test_deploy.DeployGuards.test_failed_command_does_not_expose_stderr) ... ok
+test_hash_reads_real_bytes (test_deploy.DeployGuards.test_hash_reads_real_bytes) ... ok
+test_private_config_accepts_tls (test_deploy.DeployGuards.test_private_config_accepts_tls) ... ok
+test_public_permissions_rejected_before_read (test_deploy.DeployGuards.test_public_permissions_rejected_before_read) ... ok
+test_symlink_rejected (test_deploy.DeployGuards.test_symlink_rejected) ... ok
+test_unknown_config_rejected (test_deploy.DeployGuards.test_unknown_config_rejected) ... ok
+
+======================================================================
+FAIL: test_crlf_rejected (test_deploy.DeployGuards.test_crlf_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/tests/test_deploy.py", line 56, in test_crlf_rejected
+    with self.assertRaises(deploy.DeploymentError):
+AssertionError: DeploymentError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.027s
+
+FAILED (failures=1)
+
+
+### tests-retry
+Captura real: devops-t24-tests-retry.json
+started: "2026-09-29T09:54:12-03:00"
+finished: "2026-09-29T09:54:12-03:00"
+command: ["python3", "-B", "-m", "unittest", "discover", "-s", "scripts/tests", "-v"]
+exit_code: 0
+sha256: "1998e8cc6e41d94848f66f5ff4014192d562b64f8f4b6dfb4d9aa159f632a4e6"
+stdout + stderr capturados:
+test_crlf_rejected (test_deploy.DeployGuards.test_crlf_rejected) ... ok
+test_disabled_tls_rejected (test_deploy.DeployGuards.test_disabled_tls_rejected) ... ok
+test_duplicate_key_rejected_without_secret (test_deploy.DeployGuards.test_duplicate_key_rejected_without_secret) ... ok
+test_failed_command_does_not_expose_stderr (test_deploy.DeployGuards.test_failed_command_does_not_expose_stderr) ... ok
+test_hash_reads_real_bytes (test_deploy.DeployGuards.test_hash_reads_real_bytes) ... ok
+test_private_config_accepts_tls (test_deploy.DeployGuards.test_private_config_accepts_tls) ... ok
+test_public_permissions_rejected_before_read (test_deploy.DeployGuards.test_public_permissions_rejected_before_read) ... ok
+test_symlink_rejected (test_deploy.DeployGuards.test_symlink_rejected) ... ok
+test_unknown_config_rejected (test_deploy.DeployGuards.test_unknown_config_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.029s
+
+OK
+
+
+### tests-portable
+Captura real: devops-t24-tests-portable.json
+started: "2026-09-29T10:02:26-03:00"
+finished: "2026-09-29T10:02:26-03:00"
+command: ["python3", "-B", "scripts/tests/test_deploy.py"]
+exit_code: 0
+sha256: "eb415a59e21c0a977f3222b774d2913fad2c6faacf6b862e57bf55b374dd5f74"
+stdout + stderr capturados:
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 0.035s
+
+OK
+
+
+### bash-syntax
+Captura real: devops-t24-bash-syntax.json
+started: "2026-09-29T09:54:12-03:00"
+finished: "2026-09-29T09:54:12-03:00"
+command: ["bash", "-n", "deploy/install-remote.sh"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### unit-verify
+Captura real: devops-t24-unit-verify.json
+started: "2026-09-29T09:54:12-03:00"
+finished: "2026-09-29T09:54:12-03:00"
+command: ["systemd-analyze", "verify", "deploy/prova-reservas-api.service"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### git-archive
+Captura real: devops-t24-git-archive.json
+started: "2026-09-29T09:55:03-03:00"
+finished: "2026-09-29T09:55:03-03:00"
+command: ["git", "archive", "--format=tar", "-o", "/tmp/devops-t24-image-p3jluc25/context.tar", "4895f98590a44d20917c872ddf9b77135ccf4456", "app"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### extract-context
+Captura real: devops-t24-extract-context.json
+started: "2026-09-29T09:55:03-03:00"
+finished: "2026-09-29T09:55:03-03:00"
+command: ["tar", "-xf", "/tmp/devops-t24-image-p3jluc25/context.tar", "-C", "/tmp/devops-t24-image-p3jluc25"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### image-build
+Captura real: devops-t24-image-build.json
+started: "2026-09-29T09:55:03-03:00"
+finished: "2026-09-29T09:55:07-03:00"
+command: ["docker", "build", "--platform", "linux/amd64", "--label", "org.opencontainers.image.revision=4895f98590a44d20917c872ddf9b77135ccf4456", "-t", "prova-reservas:4895f98590a4", "/tmp/devops-t24-image-p3jluc25/app"]
+exit_code: 0
+sha256: "abddf096d3cf0b503eace366546306b8b09ef20173dc9d5bfb0852199e94a144"
+stdout + stderr capturados:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 688B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#2 DONE 1.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 406B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 49.17kB done
+#4 DONE 0.0s
+
+#5 [dependencies 1/4] FROM docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#5 resolve docker.io/library/node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#5 DONE 0.0s
+
+#6 [dependencies 2/4] WORKDIR /app
+#6 CACHED
+
+#7 [dependencies 3/4] COPY package.json package-lock.json ./
+#7 DONE 0.0s
+
+#8 [dependencies 4/4] RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+#8 2.361
+#8 2.361 added 82 packages in 2s
+#8 2.364 npm notice
+#8 2.364 npm notice New major version of npm available! 11.19.0 -> 12.1.0
+#8 2.364 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0
+#8 2.364 npm notice To update run: npm install -g npm@12.1.0
+#8 2.364 npm notice
+#8 DONE 2.5s
+
+#9 [runtime 3/6] COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+#9 CACHED
+
+#10 [runtime 4/6] COPY --chown=node:node package.json package-lock.json ./
+#10 DONE 0.0s
+
+#11 [runtime 5/6] COPY --chown=node:node src ./src
+#11 DONE 0.0s
+
+#12 [runtime 6/6] COPY --chown=node:node sql ./sql
+#12 DONE 0.0s
+
+#13 exporting to image
+#13 exporting layers 0.1s done
+#13 exporting manifest sha256:6ee64d7f7681d9582534c66957d338d02b5b165bae8d39ceb3f3d18b5eedaeb6 done
+#13 exporting config sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88 done
+#13 exporting attestation manifest sha256:e5eba86dee41f2093162f228047162645e720862a3ced796ae40798b809379ec done
+#13 exporting manifest list sha256:1ea63c335d1df12905fcd7ed842d14b7e371c7ba2b303c307c35189728462622 done
+#13 naming to docker.io/library/prova-reservas:4895f98590a4 done
+#13 unpacking to docker.io/library/prova-reservas:4895f98590a4 0.1s done
+#13 DONE 0.2s
+
+
+### image-save
+Captura real: devops-t24-image-save.json
+started: "2026-09-29T09:55:07-03:00"
+finished: "2026-09-29T09:55:10-03:00"
+command: ["docker", "save", "-o", "/tmp/devops-t24-image-p3jluc25/image.tar", "prova-reservas:4895f98590a4"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### ca
+Captura real: devops-t24-ca.json
+started: "2026-09-29T09:55:10-03:00"
+finished: "2026-09-29T09:55:11-03:00"
+exit_code: 0
+sha256: "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77"
+url: "https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem"
+http_status: 200
+{
+  "started": "2026-09-29T09:55:10-03:00",
+  "finished": "2026-09-29T09:55:11-03:00",
+  "url": "https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem",
+  "http_status": 200,
+  "sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "bytes": 4576,
+  "exit_code": 0
+}
+
+### negative-checksum
+Captura real: devops-t24-negative-checksum.json
+started: "2026-09-29T10:11:29-03:00"
+finished: "2026-09-29T10:11:30-03:00"
+command: ["python3", "-B", "scripts/deploy-api.py", "--instance-id", "i-0f4b59a8181537b78", "--identity-file", "/tmp/devops-t24-access.key", "--known-hosts", "/tmp/devops-t24-known-hosts", "--aws-context", "infra/terraform.tfvars.json", "--env-file", "/tmp/devops-t24-image-p3jluc25/api.env", "--ca-file", "/tmp/devops-t24-image-p3jluc25/rds-ca.pem", "--image-archive", "/tmp/devops-t24-image-p3jluc25/image.tar", "--image-id", "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "--image-sha256", "0000000000000000000000000000000000000000000000000000000000000000", "--source-commit", "4895f98590a44d20917c872ddf9b77135ccf4456", "--instance-connect"]
+exit_code: 1
+sha256: "77cdaf4073990505d2b4d4c1cf14b60bf7aedbf824578407874f772eba0dd062"
+stdout + stderr capturados:
+Checksum local da imagem diferente do esperado.
+
+
+### deploy-first
+Captura real: devops-t24-deploy-first.json
+started: "2026-09-29T09:58:53-03:00"
+finished: "2026-09-29T10:00:32-03:00"
+command: ["python3", "-B", "scripts/deploy-api.py", "--instance-id", "i-0f4b59a8181537b78", "--identity-file", "/tmp/devops-t24-access.key", "--known-hosts", "/tmp/devops-t24-known-hosts", "--aws-context", "infra/terraform.tfvars.json", "--env-file", "/tmp/devops-t24-image-p3jluc25/api.env", "--ca-file", "/tmp/devops-t24-image-p3jluc25/rds-ca.pem", "--image-archive", "/tmp/devops-t24-image-p3jluc25/image.tar", "--image-id", "sha256:1ea63c335d1df12905fcd7ed842d14b7e371c7ba2b303c307c35189728462622", "--image-sha256", "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518", "--source-commit", "4895f98590a44d20917c872ddf9b77135ccf4456", "--instance-connect"]
+exit_code: 1
+sha256: "5bf71f8e138e273f96147435b8880cc5f0e435b78795edd0c33aeaa345f17c8c"
+stdout + stderr capturados:
+Instalação remota falhou (exit 1); operação interrompida.
+
+
+### deploy-diagnostic
+Captura real: devops-t24-deploy-diagnostic.json
+started: "2026-09-29T10:00:49-03:00"
+finished: "2026-09-29T10:00:53-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "sudo -n systemctl show prova-reservas-api.service --property=LoadState,ActiveState,SubState,Result; sudo -n docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}'; sudo -n journalctl -u prova-reservas-api.service -n 30 --no-pager"]
+exit_code: 0
+sha256: "1f8df7548c8b6043591e993683e6b79dd08d8d9d7cde8a700b4ae3310ec818ff"
+stdout + stderr capturados:
+Result=success
+LoadState=not-found
+ActiveState=inactive
+SubState=dead
+-- No entries --
+
+
+### deploy-diagnostic-files
+Captura real: devops-t24-deploy-diagnostic-files.json
+started: "2026-09-29T10:01:09-03:00"
+finished: "2026-09-29T10:01:13-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "sudo -n docker image ls --format '{{.Repository}} {{.Tag}} {{.ID}}'; sudo -n ls -ld /opt/prova-reservas /etc/prova-reservas; sudo -n find /opt/prova-reservas /etc/prova-reservas -maxdepth 1 -type f -printf '%m %u %g %f\\n'"]
+exit_code: 0
+sha256: "3680f9b76e8804457af0710738df5559a847966e6ba7dda0ab8607663e8ab1d7"
+stdout + stderr capturados:
+prova-reservas 4895f98590a4 bd97f88ba15a
+drwx------. 2 root root 6 Sep 29 12:28 /etc/prova-reservas
+drwxr-xr-x. 2 root root 6 Sep 29 12:28 /opt/prova-reservas
+
+
+### deploy-retry
+Captura real: devops-t24-deploy-retry.json
+started: "2026-09-29T10:02:26-03:00"
+finished: "2026-09-29T10:04:20-03:00"
+command: ["python3", "-B", "scripts/deploy-api.py", "--instance-id", "i-0f4b59a8181537b78", "--identity-file", "/tmp/devops-t24-access.key", "--known-hosts", "/tmp/devops-t24-known-hosts", "--aws-context", "infra/terraform.tfvars.json", "--env-file", "/tmp/devops-t24-image-p3jluc25/api.env", "--ca-file", "/tmp/devops-t24-image-p3jluc25/rds-ca.pem", "--image-archive", "/tmp/devops-t24-image-p3jluc25/image.tar", "--image-id", "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "--image-sha256", "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518", "--source-commit", "4895f98590a44d20917c872ddf9b77135ccf4456", "--instance-connect"]
+exit_code: 0
+sha256: "eb7f88d075c0ca30e69e83b1d90d33f3a4601604c74cbaf8aebf982f0a4ae2a2"
+stdout + stderr capturados:
+image.tar: OK
+rds-ca.pem: OK
+prova-reservas-api.service: OK
+install-remote.sh: OK
+image-id: OK
+source-commit: OK
+manifest.json: OK
+Loaded image: prova-reservas:4895f98590a4
+Schema de reservas aplicado com sucesso.
+{"status":"ok","database":"ok"}
+active
+{"deploy": "conclu\u00eddo", "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518", "instance_id": "i-0f4b59a8181537b78", "tls": "PGSSL=true/CA/rejectUnauthorized=true"}
+
+
+### runtime-first
+Captura real: devops-t24-runtime-first.json
+started: "2026-09-29T10:04:55-03:00"
+finished: "2026-09-29T10:04:59-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "set -e\nprintf 'boot_id=';cat /proc/sys/kernel/random/boot_id\nsystemctl is-enabled prova-reservas-api.service\nsystemctl is-active prova-reservas-api.service\nsystemctl is-enabled docker.service\nsystemctl is-active docker.service\nsudo -n stat -c '%a %U %G %n' /etc/prova-reservas /etc/prova-reservas/api.env /etc/prova-reservas/image.env /opt/prova-reservas/rds-ca.pem\nsudo -n docker ps -a --format '{{.Names}} {{.Image}}'\nsudo -n docker inspect --format '{{.Image}} {{.Config.User}} {{index .Config.Labels \"prova.owner\"}} {{index .Config.Labels \"org.opencontainers.image.revision\"}}' prova-reservas-api\nsudo -n docker exec prova-reservas-api id -u\nsudo -n cat /opt/prova-reservas/deployment.json\n"]
+exit_code: 0
+sha256: "d134f43b95094de4d7fa8d94ef95f67f181aee2f07bb159c840f5e0c62b6d8f6"
+stdout + stderr capturados:
+boot_id=379db464-16e9-4d75-add5-24eddd8a978e
+enabled
+active
+enabled
+active
+700 root root /etc/prova-reservas
+600 root root /etc/prova-reservas/api.env
+600 root root /etc/prova-reservas/image.env
+644 root root /opt/prova-reservas/rds-ca.pem
+prova-reservas-api bd97f88ba15a
+sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88 node 6325231 4895f98590a44d20917c872ddf9b77135ccf4456
+1000
+{
+  "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456",
+  "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88",
+  "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518",
+  "ca_sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "unit_sha256": "ba2ee2c48115f73e3fd4247142b4f09e7c1e09d7bee360db9024e842f38ae85f"
+}
+
+
+### sql-first
+Captura real: devops-t24-sql-first.json
+started: "2026-09-29T10:05:01-03:00"
+finished: "2026-09-29T10:05:04-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "sudo -n docker exec -i prova-reservas-api node --input-type=module"]
+exit_code: 0
+sha256: "c75799639fc65361b2a05e29ce7568c5c3665d88b7eb1846e9bb53fe86232865"
+stdout + stderr capturados:
+{"tls":{"ssl":true,"version":"TLSv1.3","cipher":"TLS_AES_256_GCM_SHA384"},"db":{"database":"reservas","server_address":"10.20.11.14/32","version":"PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by x86_64-pc-linux-gnu-gcc (GCC) 12.4.0, 64-bit"},"configured_host":"prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com","rejectUnauthorized":true,"columns":[{"column_name":"id","data_type":"integer","is_nullable":"NO","is_identity":"YES"},{"column_name":"cliente","data_type":"character varying","is_nullable":"NO","is_identity":"NO"},{"column_name":"data","data_type":"date","is_nullable":"NO","is_identity":"NO"},{"column_name":"status","data_type":"character varying","is_nullable":"NO","is_identity":"NO"}],"structure":{"oid":16451,"rows":0},"constraints":[{"conname":"reservas_cliente_nao_vazio","definition":"CHECK ((length(btrim((cliente)::text)) > 0))"},{"conname":"reservas_pkey","definition":"PRIMARY KEY (id)"},{"conname":"reservas_status_valido","definition":"CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'confirmada'::character varying, 'cancelada'::character varying])::text[])))"}]}
+
+
+### deploy-repeat
+Captura real: devops-t24-deploy-repeat.json
+started: "2026-09-29T10:05:12-03:00"
+finished: "2026-09-29T10:07:09-03:00"
+command: ["python3", "-B", "scripts/deploy-api.py", "--instance-id", "i-0f4b59a8181537b78", "--identity-file", "/tmp/devops-t24-access.key", "--known-hosts", "/tmp/devops-t24-known-hosts", "--aws-context", "infra/terraform.tfvars.json", "--env-file", "/tmp/devops-t24-image-p3jluc25/api.env", "--ca-file", "/tmp/devops-t24-image-p3jluc25/rds-ca.pem", "--image-archive", "/tmp/devops-t24-image-p3jluc25/image.tar", "--image-id", "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "--image-sha256", "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518", "--source-commit", "4895f98590a44d20917c872ddf9b77135ccf4456", "--instance-connect"]
+exit_code: 0
+sha256: "eb7f88d075c0ca30e69e83b1d90d33f3a4601604c74cbaf8aebf982f0a4ae2a2"
+stdout + stderr capturados:
+image.tar: OK
+rds-ca.pem: OK
+prova-reservas-api.service: OK
+install-remote.sh: OK
+image-id: OK
+source-commit: OK
+manifest.json: OK
+Loaded image: prova-reservas:4895f98590a4
+Schema de reservas aplicado com sucesso.
+{"status":"ok","database":"ok"}
+active
+{"deploy": "conclu\u00eddo", "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456", "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88", "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518", "instance_id": "i-0f4b59a8181537b78", "tls": "PGSSL=true/CA/rejectUnauthorized=true"}
+
+
+### sql-after-repeat
+Captura real: devops-t24-sql-after-repeat.json
+started: "2026-09-29T10:07:23-03:00"
+finished: "2026-09-29T10:07:26-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "sudo -n docker exec -i prova-reservas-api node --input-type=module"]
+exit_code: 0
+sha256: "c75799639fc65361b2a05e29ce7568c5c3665d88b7eb1846e9bb53fe86232865"
+stdout + stderr capturados:
+{"tls":{"ssl":true,"version":"TLSv1.3","cipher":"TLS_AES_256_GCM_SHA384"},"db":{"database":"reservas","server_address":"10.20.11.14/32","version":"PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by x86_64-pc-linux-gnu-gcc (GCC) 12.4.0, 64-bit"},"configured_host":"prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com","rejectUnauthorized":true,"columns":[{"column_name":"id","data_type":"integer","is_nullable":"NO","is_identity":"YES"},{"column_name":"cliente","data_type":"character varying","is_nullable":"NO","is_identity":"NO"},{"column_name":"data","data_type":"date","is_nullable":"NO","is_identity":"NO"},{"column_name":"status","data_type":"character varying","is_nullable":"NO","is_identity":"NO"}],"structure":{"oid":16451,"rows":0},"constraints":[{"conname":"reservas_cliente_nao_vazio","definition":"CHECK ((length(btrim((cliente)::text)) > 0))"},{"conname":"reservas_pkey","definition":"PRIMARY KEY (id)"},{"conname":"reservas_status_valido","definition":"CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'confirmada'::character varying, 'cancelada'::character varying])::text[])))"}]}
+
+
+### runtime-before-reboot
+Captura real: devops-t24-runtime-before-reboot.json
+started: "2026-09-29T10:07:28-03:00"
+finished: "2026-09-29T10:07:32-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "set -e\nprintf 'boot_id=';cat /proc/sys/kernel/random/boot_id\nsystemctl is-enabled prova-reservas-api.service\nsystemctl is-active prova-reservas-api.service\nsystemctl is-enabled docker.service\nsystemctl is-active docker.service\nsudo -n stat -c '%a %U %G %n' /etc/prova-reservas /etc/prova-reservas/api.env /etc/prova-reservas/image.env /opt/prova-reservas/rds-ca.pem\nsudo -n docker ps -a --format '{{.Names}} {{.Image}}'\nsudo -n docker inspect --format '{{.Image}} {{.Config.User}} {{index .Config.Labels \"prova.owner\"}} {{index .Config.Labels \"org.opencontainers.image.revision\"}}' prova-reservas-api\nsudo -n docker exec prova-reservas-api id -u\nsudo -n cat /opt/prova-reservas/deployment.json\n"]
+exit_code: 0
+sha256: "d134f43b95094de4d7fa8d94ef95f67f181aee2f07bb159c840f5e0c62b6d8f6"
+stdout + stderr capturados:
+boot_id=379db464-16e9-4d75-add5-24eddd8a978e
+enabled
+active
+enabled
+active
+700 root root /etc/prova-reservas
+600 root root /etc/prova-reservas/api.env
+600 root root /etc/prova-reservas/image.env
+644 root root /opt/prova-reservas/rds-ca.pem
+prova-reservas-api bd97f88ba15a
+sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88 node 6325231 4895f98590a44d20917c872ddf9b77135ccf4456
+1000
+{
+  "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456",
+  "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88",
+  "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518",
+  "ca_sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "unit_sha256": "ba2ee2c48115f73e3fd4247142b4f09e7c1e09d7bee360db9024e842f38ae85f"
+}
+
+
+### reboot
+Captura real: devops-t24-reboot.json
+started: "2026-09-29T10:07:51-03:00"
+finished: "2026-09-29T10:07:54-03:00"
+command: ["aws", "ec2", "reboot-instances", "--instance-ids", "i-0f4b59a8181537b78", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+stdout + stderr capturados:
+
+
+### runtime-after-reboot
+Captura real: devops-t24-runtime-after-reboot.json
+started: "2026-09-29T10:08:23-03:00"
+finished: "2026-09-29T10:08:26-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "set -e\nprintf 'boot_id=';cat /proc/sys/kernel/random/boot_id\nsystemctl is-enabled prova-reservas-api.service\nsystemctl is-active prova-reservas-api.service\nsystemctl is-enabled docker.service\nsystemctl is-active docker.service\nsudo -n stat -c '%a %U %G %n' /etc/prova-reservas /etc/prova-reservas/api.env /etc/prova-reservas/image.env /opt/prova-reservas/rds-ca.pem\nsudo -n docker ps -a --format '{{.Names}} {{.Image}}'\nsudo -n docker inspect --format '{{.Image}} {{.Config.User}} {{index .Config.Labels \"prova.owner\"}} {{index .Config.Labels \"org.opencontainers.image.revision\"}}' prova-reservas-api\nsudo -n docker exec prova-reservas-api id -u\nsudo -n cat /opt/prova-reservas/deployment.json\n"]
+exit_code: 0
+sha256: "2e5ae9c3b4a7781e9797214eebd3b3322869d79bf07713e210cb541f7388d05d"
+stdout + stderr capturados:
+boot_id=ce93d520-d251-4f1b-b02d-aeae8d5f0681
+enabled
+active
+enabled
+active
+700 root root /etc/prova-reservas
+600 root root /etc/prova-reservas/api.env
+600 root root /etc/prova-reservas/image.env
+644 root root /opt/prova-reservas/rds-ca.pem
+prova-reservas-api bd97f88ba15a
+sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88 node 6325231 4895f98590a44d20917c872ddf9b77135ccf4456
+1000
+{
+  "source_commit": "4895f98590a44d20917c872ddf9b77135ccf4456",
+  "image_id": "sha256:bd97f88ba15ab6f198b2322ee7259214dea5c8237f8aca95d1d5f843efbfcb88",
+  "image_archive_sha256": "59f81d9f0817f4a9a0c291504cebf6f5951965181cb05535d4964d1a7cb6b518",
+  "ca_sha256": "b1711d12bae51838581281e23b6cb97b1074016873b4dafc80ed14002462dd77",
+  "unit_sha256": "ba2ee2c48115f73e3fd4247142b4f09e7c1e09d7bee360db9024e842f38ae85f"
+}
+
+
+### sql-after-reboot
+Captura real: devops-t24-sql-after-reboot.json
+started: "2026-09-29T10:08:28-03:00"
+finished: "2026-09-29T10:08:31-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "sudo -n docker exec -i prova-reservas-api node --input-type=module"]
+exit_code: 0
+sha256: "c75799639fc65361b2a05e29ce7568c5c3665d88b7eb1846e9bb53fe86232865"
+stdout + stderr capturados:
+{"tls":{"ssl":true,"version":"TLSv1.3","cipher":"TLS_AES_256_GCM_SHA384"},"db":{"database":"reservas","server_address":"10.20.11.14/32","version":"PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by x86_64-pc-linux-gnu-gcc (GCC) 12.4.0, 64-bit"},"configured_host":"prova-6325231-rds.cn2tjjbiwom3.us-east-1.rds.amazonaws.com","rejectUnauthorized":true,"columns":[{"column_name":"id","data_type":"integer","is_nullable":"NO","is_identity":"YES"},{"column_name":"cliente","data_type":"character varying","is_nullable":"NO","is_identity":"NO"},{"column_name":"data","data_type":"date","is_nullable":"NO","is_identity":"NO"},{"column_name":"status","data_type":"character varying","is_nullable":"NO","is_identity":"NO"}],"structure":{"oid":16451,"rows":0},"constraints":[{"conname":"reservas_cliente_nao_vazio","definition":"CHECK ((length(btrim((cliente)::text)) > 0))"},{"conname":"reservas_pkey","definition":"PRIMARY KEY (id)"},{"conname":"reservas_status_valido","definition":"CHECK (((status)::text = ANY ((ARRAY['pendente'::character varying, 'confirmada'::character varying, 'cancelada'::character varying])::text[])))"}]}
+
+
+### boot-poll-1-auth
+Captura real: devops-t24-boot-poll-1-auth.json
+started: "2026-09-29T10:08:09-03:00"
+finished: "2026-09-29T10:08:11-03:00"
+command: ["aws", "ec2-instance-connect", "send-ssh-public-key", "--instance-id", "i-0f4b59a8181537b78", "--instance-os-user", "ec2-user", "--availability-zone", "us-east-1a", "--ssh-public-key", "file:///tmp/devops-t24-access.key.pub", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "98a8dc6c47c7ea2651aad9116712d4f498977585d9463aa865bac92510f130dc"
+stdout + stderr capturados:
+{
+    "RequestId": "4f2e89d2-24f9-41d5-8fed-1d10f3fa05a9",
+    "Success": true
+}
+
+
+### boot-poll-1
+Captura real: devops-t24-boot-poll-1.json
+started: "2026-09-29T10:08:11-03:00"
+finished: "2026-09-29T10:08:11-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "cat /proc/sys/kernel/random/boot_id; systemctl is-active prova-reservas-api.service"]
+exit_code: 255
+sha256: "6ac939771611a527b980d2e195950d848949c487a98d4aabd25777c0092e7538"
+stdout + stderr capturados:
+ssh: connect to host 13.220.113.41 port 22: Connection refused
+
+
+### boot-poll-2-auth
+Captura real: devops-t24-boot-poll-2-auth.json
+started: "2026-09-29T10:08:16-03:00"
+finished: "2026-09-29T10:08:18-03:00"
+command: ["aws", "ec2-instance-connect", "send-ssh-public-key", "--instance-id", "i-0f4b59a8181537b78", "--instance-os-user", "ec2-user", "--availability-zone", "us-east-1a", "--ssh-public-key", "file:///tmp/devops-t24-access.key.pub", "--profile", "default", "--region", "us-east-1", "--output", "json"]
+exit_code: 0
+sha256: "8d16795398de2427878d73becee2bace7c70d69c81ccdd28263b5b75255dbf05"
+stdout + stderr capturados:
+{
+    "RequestId": "53b1449a-620a-411f-94fb-3474adf06f6b",
+    "Success": true
+}
+
+
+### boot-poll-2
+Captura real: devops-t24-boot-poll-2.json
+started: "2026-09-29T10:08:18-03:00"
+finished: "2026-09-29T10:08:21-03:00"
+command: ["ssh", "-i", "/tmp/devops-t24-access.key", "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=/tmp/devops-t24-known-hosts", "-o", "ConnectTimeout=15", "ec2-user@13.220.113.41", "cat /proc/sys/kernel/random/boot_id; systemctl is-active prova-reservas-api.service"]
+exit_code: 0
+sha256: "36ec730a122f12115ad1701c88ab3fd7c31fb6b242318e7a60dc093be3898a85"
+stdout + stderr capturados:
+ce93d520-d251-4f1b-b02d-aeae8d5f0681
+active
+
+
+Aceite T24: checksum/commit e configuração OCI conferidos em destino; deploy
+repetido sem mudar imagem. Migração repetida preservou OID16451/4colunas/3constraints/
+contagem0; nenhum dado foi inserido/apagado nesta etapa. A tabela usa DATE e
+identity; contrato JSON DD-MM-YYYY existente preservado. Conexão efetiva TLSv1.3,
+TLS_AES_256_GCM_SHA384, rejectUnauthorized=true e hostname RDS configurado.
+API systemd enabled/active, Docker enabled/active, UID1000, ambiente root0600/
+diretório0700/CA0644. Inventário docker ps -a: apenas prova-reservas-api, nenhum
+PostgreSQL container. Reboot real solicitado à própria EC2, boot_id mudou e
+serviço retornou automaticamente com mesma imagem/schema. /health externo200
+antes/depois em health-aws.txt. Staging exclusivo limpo pelo deploy.
+Não é prova de CRUD/persistência de reserva AWS: tabela estava vazia. Essas
+verificações e script verify-aws.py pertencem a T25, ainda pendente.
+Sem bloqueio remanescente T24; não repetir suites API/Compose/Docker anteriores
+inalteradas. Nenhum estado/backend/plano aprovado foi removido ou alterado aqui.
+Fontes primárias:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html
+https://docs.docker.com/reference/cli/docker/container/run/
+https://docs.docker.com/engine/storage/containerd/
+https://github.com/opencontainers/image-spec/blob/main/config.md

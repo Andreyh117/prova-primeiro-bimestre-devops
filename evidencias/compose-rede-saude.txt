@@ -1,0 +1,146 @@
+
+T11 — execução real em 2026-09-28T22:41:48-03:00
+Ambiente: Docker Compose local, projeto UUID e env privado em /tmp; sem AWS.
+Comando: npm --prefix app run test:compose
+Transcrição real com espaços finais removidos para git diff --check.
+SHA-256 da captura integral original: 7f2652d41787f8481d9fa93568de83d92f806d112d049c3ce0b7d24d0e453806.
+stdout desta fase:
+=== T11 rede/saúde/CRUD/SQL ===
+Healthcheck real db: exit 0, início 2026-09-28T22:41:56.72508501-03:00, fim 2026-09-28T22:41:56.797409913-03:00.
+API iniciou em 2026-09-29T01:41:57.175198203Z, depois do healthcheck db; estados atuais db/api: healthy/healthy.
+Comando: docker 'network' 'inspect' '--format' '{{.Driver}}' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net'
+stdout:
+bridge
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'network' 'inspect' '--format' '{{json .Containers}}' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net'
+stdout:
+{"1e6bbc7e040d37475e887017e45a468463b03217d826d16f351957b7bbb21d79":{"Name":"prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1","EndpointID":"3517d787c082ae0a2917bc5f1035b691fe158c4cb75877a918db794f2ced268c","MacAddress":"ca:10:71:04:63:7c","IPv4Address":"172.26.0.3/16","IPv6Address":""},"f7afe8894ec10145d64aa5afa04846973dbd36fcf05fe9f89ae05e07fcbdf1d0":{"Name":"prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1","EndpointID":"70d6162dae01ef6f5ebc5c38fdb21651aee68eca3fd050b29de2f2805f017825","MacAddress":"ea:54:3f:b5:80:22","IPv4Address":"172.26.0.2/16","IPv6Address":""}}
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'inspect' '--format' '{{json .HostConfig.PortBindings}}' 'f7afe8894ec10145d64aa5afa04846973dbd36fcf05fe9f89ae05e07fcbdf1d0'
+stdout:
+{}
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net bridge contém somente api/db; banco sem porta publicada; API loopback 32775; volume prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data e bootstrap read-only confirmados.
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'db' 'postgres' '--version'
+stdout:
+postgres (PostgreSQL) 16.15
+
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'api' 'id' '-u'
+stdout:
+1000
+
+stderr:
+(vazio)
+Exit code real: 0
+GET /health -> HTTP 200; corpo real: {"status":"ok","database":"ok"}
+Comando: python3 '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/scripts/verify-api.py' '--base-url' 'http://127.0.0.1:32775'
+stdout:
+Marcador exclusivo para conferência/limpeza: Verificacao API 74f8bd18-bc11-4600-b073-b088872d5abf
+PASSOU: GET /health -> 200
+PASSOU: POST /reservas -> 201
+PASSOU: GET /reservas -> 200
+PASSOU: GET /reservas/1 -> 200
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: POST /reservas -> 400
+PASSOU: PUT /reservas/1 -> 200
+PASSOU: PUT /reservas/1 -> 400
+PASSOU: GET /reservas/1 -> 200
+PASSOU: DELETE /reservas/1 -> 204
+PASSOU: GET /reservas/1 -> 404
+PASSOU: DELETE /reservas/1 -> 404
+Limpeza confirmada: nenhuma reserva com ID próprio remanescente.
+PASSOU: CRUD, entradas inválidas, 404 e limpeza verificados.
+
+stderr:
+(vazio)
+Exit code real: 0
+POST /reservas -> HTTP 201; corpo real: {"id":2,"cliente":"Compose T11 prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa","data":"01-10-2026","status":"pendente"}
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT json_build_object('"'"'id'"'"',id,'"'"'cliente'"'"',cliente,'"'"'data_iso'"'"',to_char(data,'"'"'YYYY-MM-DD'"'"'),'"'"'tipo'"'"',pg_typeof(data)::text,'"'"'status'"'"',status)::text FROM public.reservas WHERE id = 2'
+stdout:
+{"id" : 2, "cliente" : "Compose T11 prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa", "data_iso" : "2026-10-01", "tipo" : "date", "status" : "pendente"}
+
+stderr:
+(vazio)
+Exit code real: 0
+DELETE /reservas/2 -> HTTP 204; corpo real: (vazio)
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'exec' '-T' 'db' 'psql' '-U' 'reservas_test' '-d' 'reservas_test' '-At' '-v' 'ON_ERROR_STOP=1' '-c' 'SELECT count(*) FROM public.reservas'
+stdout:
+0
+
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: bootstrap do volume novo, seis rotas, CRUD/SQL reais e zero linhas de teste. Persistência após recriar será T12.
+Comando: docker 'compose' '--project-name' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa' '--file' '/home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/docker-compose.yml' '--env-file' '/tmp/prova-reservas-compose-XI0COb/.env' 'down' '--timeout' '5'
+stdout:
+(vazio)
+stderr:
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Stopping
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Stopped
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Removing
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-api-1 Removed
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Stopping
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Stopped
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Removing
+ Container prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa-db-1 Removed
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Removing
+ Network prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-net Removed
+
+Exit code real: 0
+Comando: docker 'volume' 'rm' 'prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data'
+stdout:
+prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa_reservas-data
+
+stderr:
+(vazio)
+Exit code real: 0
+Limpeza confirmada: zero containers/redes/volumes do projeto UUID; volumes de outros projetos preservados.
+Arquivo de ambiente temporário removido; .env do usuário preservado.
+PASSOU: T11 config/up/ps/rede/health/ordem/CRUD/SQL/limpeza.
+stderr geral:
+(vazio)
+Exit code real da execução completa: 0
+
+R12 — conferência real do exemplo em 2026-09-28T22:43:42-03:00
+Comando: docker compose --env-file .env.example config --quiet
+stdout:
+(vazio)
+stderr:
+(vazio)
+Exit code real: 0
+PASSOU: quatro variáveis previstas, senha placeholder, mapeamento POSTGRES_* -> PG* coerente, API padrão 127.0.0.1:3000; JSON expandido conferido só em memória.
+PASSOU: .env ignorado e ausente na raiz; .env.example versionável.
+
+Conferência posterior por labels do fixture prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa
+Comando: docker ps -aq --filter label=com.docker.compose.project=prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa
+stdout:
+(vazio; zero recursos)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker network ls -q --filter label=com.docker.compose.project=prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa
+stdout:
+(vazio; zero recursos)
+stderr:
+(vazio)
+Exit code real: 0
+Comando: docker volume ls -q --filter label=com.docker.compose.project=prova-reservas-t11-6fb89e53-5dcd-4a02-9a43-054a1b3875aa
+stdout:
+(vazio; zero recursos)
+stderr:
+(vazio)
+Exit code real: 0

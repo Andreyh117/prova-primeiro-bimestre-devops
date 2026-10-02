@@ -1,0 +1,196 @@
+T23 — apply principal AUTORIZADO e conferência AWS real,29/09/2026 (-03:00).
+Terraform1.16.2/hashicorp-aws6.65.0, default/voclabs/us-east-1/conta terminada5811.
+Aluno autorizou explicitamente após revisão concretaT22; decisão em infra-revisao.txt.
+Plano aprovado SHA-2562da1b079af97065f49614c924848219599b1fdf24777f00e61f46cb6cbc411d7,
+23create/0update/0delete, preservado. Identidade/IP/hash/backend revalidados antes.
+Native apply usou arquivo aprovado, sem -auto-approve/lock=false/refresh=false/target.
+Capturas REAIS com comando/horários/exit code/hash do bruto privado. Redação
+explícita: conta completa/CIDR-IP aluno/username/password/ARNsession ocultados,
+state pull privado não publicado; espaços finais normalizados. IP público EC2,
+endpoint RDS eIDs próprios são outputs reais sem credenciais, não provam API.
+Nenhum recurso IAM/EIP/NAT/KMS/key novo no plano; vockey/LabInstanceProfile-LabRole existentes.
+Não houve SSH/deploy/HTTP/SQL/CRUD nem destroy/push/merge/PR nesta tarefa.
+Suítes API/Docker/Compose/módulos inalterados não repetidas.
+
+CAPTURA instance
+{
+  "started": "2026-09-29T09:33:29-03:00",
+  "finished": "2026-09-29T09:33:31-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instances",
+    "--instance-ids",
+    "i-0f4b59a8181537b78",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "ec4b683a5d4ba50762a70dee175c600621269512812c00021acd2ee42d5bedb2",
+  "sanitized_output": "{\n    \"Reservations\": [\n        {\n            \"ReservationId\": \"r-08154b5e1f810e04c\",\n            \"OwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"Groups\": [],\n            \"Instances\": [\n                {\n                    \"Architecture\": \"x86_64\",\n                    \"BlockDeviceMappings\": [\n                        {\n                            \"DeviceName\": \"/dev/xvda\",\n                            \"Ebs\": {\n                                \"AttachTime\": \"2026-09-29T12:27:17+00:00\",\n                                \"DeleteOnTermination\": true,\n                                \"Status\": \"attached\",\n                                \"VolumeId\": \"vol-0f6c2d50bfc53d380\",\n                                \"EbsCardIndex\": 0\n                            }\n                        }\n                    ],\n                    \"ClientToken\": \"terraform-ooG5LzZIYoIrmdh7q8ZH8kjHPQ\",\n                    \"EbsOptimized\": false,\n                    \"EnaSupport\": true,\n                    \"Hypervisor\": \"xen\",\n                    \"IamInstanceProfile\": {\n                        \"Arn\": \"arn:aws:iam::[AWS_ACCOUNT_ID_OCULTO]:instance-profile/LabInstanceProfile\",\n                        \"Id\": \"AIPAYLMR6XKJQRHG5XH5K\"\n                    },\n                    \"NetworkInterfaces\": [\n                        {\n                            \"Association\": {\n                                \"IpOwnerId\": \"amazon\",\n                                \"PublicDnsName\": \"ec2-13-220-113-41.compute-1.amazonaws.com\",\n                                \"PublicIp\": \"13.220.113.41\"\n                            },\n                            \"Attachment\": {\n                                \"AttachTime\": \"2026-09-29T12:27:16+00:00\",\n                                \"AttachmentId\": \"eni-attach-0a5478634ac964e54\",\n                                \"DeleteOnTermination\": true,\n                                \"DeviceIndex\": 0,\n                                \"Status\": \"attached\",\n                                \"NetworkCardIndex\": 0\n                            },\n                            \"Description\": \"\",\n                            \"Groups\": [\n                                {\n                                    \"GroupId\": \"sg-04c0129a3f542812b\",\n                                    \"GroupName\": \"prova-6325231-ec2-f2ac64e1b7abb033ccc3bdd70c\"\n                                }\n                            ],\n                            \"Ipv6Addresses\": [],\n                            \"MacAddress\": \"0a:ff:ce:07:7b:af\",\n                            \"NetworkInterfaceId\": \"eni-04677c8256d9b7240\",\n                            \"OwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n                            \"PrivateDnsName\": \"ip-10-20-1-86.ec2.internal\",\n                            \"PrivateIpAddress\": \"10.20.1.86\",\n                            \"PrivateIpAddresses\": [\n                                {\n                                    \"Association\": {\n                                        \"IpOwnerId\": \"amazon\",\n                                        \"PublicDnsName\": \"ec2-13-220-113-41.compute-1.amazonaws.com\",\n                                        \"PublicIp\": \"13.220.113.41\"\n                                    },\n                                    \"Primary\": true,\n                                    \"PrivateDnsName\": \"ip-10-20-1-86.ec2.internal\",\n                                    \"PrivateIpAddress\": \"10.20.1.86\"\n                                }\n                            ],\n                            \"SourceDestCheck\": true,\n                            \"Status\": \"in-use\",\n                            \"SubnetId\": \"subnet-04fd3c6ae447925bf\",\n                            \"VpcId\": \"vpc-02f929ba0204c6c07\",\n                            \"InterfaceType\": \"interface\",\n                            \"Operator\": {\n                                \"Managed\": false\n                            }\n                        }\n                    ],\n                    \"RootDeviceName\": \"/dev/xvda\",\n                    \"RootDeviceType\": \"ebs\",\n                    \"SecurityGroups\": [\n                        {\n                            \"GroupId\": \"sg-04c0129a3f542812b\",\n                            \"GroupName\": \"prova-6325231-ec2-f2ac64e1b7abb033ccc3bdd70c\"\n                        }\n                    ],\n                    \"SourceDestCheck\": true,\n                    \"Tags\": [\n                        {\n                            \"Key\": \"Environment\",\n                            \"Value\": \"learner-lab\"\n                        },\n                        {\n                            \"Key\": \"Name\",\n                            \"Value\": \"prova-6325231-api\"\n                        },\n                        {\n                            \"Key\": \"Project\",\n                            \"Value\": \"prova-primeiro-bimestre-devops\"\n                        },\n                        {\n                            \"Key\": \"Owner\",\n                            \"Value\": \"6325231\"\n                        }\n                    ],\n                    \"VirtualizationType\": \"hvm\",\n                    \"CpuOptions\": {\n                        \"CoreCount\": 1,\n                        \"ThreadsPerCore\": 1\n                    },\n                    \"CapacityReservationSpecification\": {\n                        \"CapacityReservationPreference\": \"open\"\n                    },\n                    \"HibernationOptions\": {\n                        \"Configured\": false\n                    },\n                    \"MetadataOptions\": {\n                        \"State\": \"applied\",\n                        \"HttpTokens\": \"required\",\n                        \"HttpPutResponseHopLimit\": 1,\n                        \"HttpEndpoint\": \"enabled\",\n                        \"HttpProtocolIpv6\": \"disabled\",\n                        \"InstanceMetadataTags\": \"disabled\"\n                    },\n                    \"EnclaveOptions\": {\n                        \"Enabled\": false\n                    },\n                    \"BootMode\": \"uefi-preferred\",\n                    \"PlatformDetails\": \"Linux/UNIX\",\n                    \"UsageOperation\": \"RunInstances\",\n                    \"UsageOperationUpdateTime\": \"2026-09-29T12:27:16+00:00\",\n                    \"PrivateDnsNameOptions\": {\n                        \"HostnameType\": \"ip-name\",\n                        \"EnableResourceNameDnsARecord\": false,\n                        \"EnableResourceNameDnsAAAARecord\": false\n                    },\n                    \"MaintenanceOptions\": {\n                        \"AutoRecovery\": \"default\",\n                        \"RebootMigration\": \"default\"\n                    },\n                    \"CurrentInstanceBootMode\": \"legacy-bios\",\n                    \"NetworkPerformanceOptions\": {\n                        \"BandwidthWeighting\": \"default\"\n                    },\n                    \"Operator\": {\n                        \"Managed\": false,\n                        \"HiddenByDefault\": false\n                    },\n                    \"SecondaryInterfaces\": [],\n                    \"InstanceId\": \"i-0f4b59a8181537b78\",\n                    \"ImageId\": \"ami-048da71c4d98f46b1\",\n                    \"State\": {\n                        \"Code\": 16,\n                        \"Name\": \"running\"\n                    },\n                    \"PrivateDnsName\": \"ip-10-20-1-86.ec2.internal\",\n                    \"PublicDnsName\": \"ec2-13-220-113-41.compute-1.amazonaws.com\",\n                    \"StateTransitionReason\": \"\",\n                    \"KeyName\": \"vockey\",\n                    \"AmiLaunchIndex\": 0,\n                    \"ProductCodes\": [],\n                    \"InstanceType\": \"t2.micro\",\n                    \"LaunchTime\": \"2026-09-29T12:27:16+00:00\",\n                    \"Placement\": {\n                        \"AvailabilityZoneId\": \"use1-az4\",\n                        \"GroupName\": \"\",\n                        \"Tenancy\": \"default\",\n                        \"AvailabilityZone\": \"us-east-1a\"\n                    },\n                    \"Monitoring\": {\n                        \"State\": \"disabled\"\n                    },\n                    \"SubnetId\": \"subnet-04fd3c6ae447925bf\",\n                    \"VpcId\": \"vpc-02f929ba0204c6c07\",\n                    \"PrivateIpAddress\": \"10.20.1.86\",\n                    \"PublicIpAddress\": \"13.220.113.41\"\n                }\n            ]\n        }\n    ]\n}\n"
+}
+
+CAPTURA status
+{
+  "started": "2026-09-29T09:33:29-03:00",
+  "finished": "2026-09-29T09:33:31-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instance-status",
+    "--instance-ids",
+    "i-0f4b59a8181537b78",
+    "--include-all-instances",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "924350814116ccabc12e2d8ff8767e670395aae64adb29b88d5e225dc9141a92",
+  "sanitized_output": "{\n    \"InstanceStatuses\": [\n        {\n            \"AvailabilityZone\": \"us-east-1a\",\n            \"AvailabilityZoneId\": \"use1-az4\",\n            \"Operator\": {\n                \"Managed\": false,\n                \"HiddenByDefault\": false\n            },\n            \"InstanceId\": \"i-0f4b59a8181537b78\",\n            \"InstanceState\": {\n                \"Code\": 16,\n                \"Name\": \"running\"\n            },\n            \"InstanceStatus\": {\n                \"Details\": [\n                    {\n                        \"Name\": \"reachability\",\n                        \"Status\": \"passed\"\n                    }\n                ],\n                \"Status\": \"ok\"\n            },\n            \"SystemStatus\": {\n                \"Details\": [\n                    {\n                        \"Name\": \"reachability\",\n                        \"Status\": \"passed\"\n                    }\n                ],\n                \"Status\": \"ok\"\n            }\n        }\n    ]\n}\n"
+}
+
+CAPTURA security-groups
+{
+  "started": "2026-09-29T09:33:39-03:00",
+  "finished": "2026-09-29T09:33:41-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-security-groups",
+    "--group-ids",
+    "sg-04c0129a3f542812b",
+    "sg-0622ad42cefbb6b38",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "bdb319a7ea53f709c2abea63e0385b928e63519d1dba88075dfd98c335af820a",
+  "sanitized_output": "{\n    \"SecurityGroups\": [\n        {\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"IpPermissionsEgress\": [\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 80,\n                    \"ToPort\": 80,\n                    \"UserIdGroupPairs\": [],\n                    \"IpRanges\": [\n                        {\n                            \"Description\": \"HTTP or HTTPS for installation and artifacts\",\n                            \"CidrIp\": \"0.0.0.0/0\"\n                        }\n                    ],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                },\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 5432,\n                    \"ToPort\": 5432,\n                    \"UserIdGroupPairs\": [\n                        {\n                            \"Description\": \"PostgreSQL only to the private RDS security group\",\n                            \"UserId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n                            \"GroupId\": \"sg-0622ad42cefbb6b38\"\n                        }\n                    ],\n                    \"IpRanges\": [],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                },\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 443,\n                    \"ToPort\": 443,\n                    \"UserIdGroupPairs\": [],\n                    \"IpRanges\": [\n                        {\n                            \"Description\": \"HTTP or HTTPS for installation and artifacts\",\n                            \"CidrIp\": \"0.0.0.0/0\"\n                        }\n                    ],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                }\n            ],\n            \"Tags\": [\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-ec2\"\n                }\n            ],\n            \"VpcId\": \"vpc-02f929ba0204c6c07\",\n            \"SecurityGroupArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group/sg-04c0129a3f542812b\",\n            \"OwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"GroupName\": \"prova-6325231-ec2-f2ac64e1b7abb033ccc3bdd70c\",\n            \"Description\": \"API EC2: restricted SSH and application access\",\n            \"IpPermissions\": [\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 22,\n                    \"ToPort\": 22,\n                    \"UserIdGroupPairs\": [],\n                    \"IpRanges\": [\n                        {\n                            \"Description\": \"SSH from the approved student IPv4 host\",\n                            \"CidrIp\": \"[SSH_CIDR_OCULTO]\"\n                        }\n                    ],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                },\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 3000,\n                    \"ToPort\": 3000,\n                    \"UserIdGroupPairs\": [],\n                    \"IpRanges\": [\n                        {\n                            \"Description\": \"API from an approved IPv4 host\",\n                            \"CidrIp\": \"[SSH_CIDR_OCULTO]\"\n                        }\n                    ],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                }\n            ]\n        },\n        {\n            \"GroupId\": \"sg-0622ad42cefbb6b38\",\n            \"IpPermissionsEgress\": [],\n            \"Tags\": [\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-rds\"\n                },\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                }\n            ],\n            \"VpcId\": \"vpc-02f929ba0204c6c07\",\n            \"SecurityGroupArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group/sg-0622ad42cefbb6b38\",\n            \"OwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"GroupName\": \"prova-6325231-rds-719631031c990c8d0957ab0b02\",\n            \"Description\": \"Private PostgreSQL: only from the API EC2 security group\",\n            \"IpPermissions\": [\n                {\n                    \"IpProtocol\": \"tcp\",\n                    \"FromPort\": 5432,\n                    \"ToPort\": 5432,\n                    \"UserIdGroupPairs\": [\n                        {\n                            \"Description\": \"PostgreSQL only from the API EC2 security group\",\n                            \"UserId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n                            \"GroupId\": \"sg-04c0129a3f542812b\"\n                        }\n                    ],\n                    \"IpRanges\": [],\n                    \"Ipv6Ranges\": [],\n                    \"PrefixListIds\": []\n                }\n            ]\n        }\n    ]\n}\n"
+}
+
+CAPTURA security-rules
+{
+  "started": "2026-09-29T09:33:39-03:00",
+  "finished": "2026-09-29T09:33:41-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-security-group-rules",
+    "--filters",
+    "Name=group-id,Values=sg-04c0129a3f542812b,sg-0622ad42cefbb6b38",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "1cd024025eda976eebf6b2c2ea5c9dd0608e060f8aadd9ea8e724bae638f34ea",
+  "sanitized_output": "{\n    \"SecurityGroupRules\": [\n        {\n            \"SecurityGroupRuleId\": \"sgr-04a8b2a7f3339361f\",\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": true,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 443,\n            \"ToPort\": 443,\n            \"CidrIpv4\": \"0.0.0.0/0\",\n            \"Description\": \"HTTP or HTTPS for installation and artifacts\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-web-443\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-04a8b2a7f3339361f\"\n        },\n        {\n            \"SecurityGroupRuleId\": \"sgr-09a3c976a6a925952\",\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": true,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 80,\n            \"ToPort\": 80,\n            \"CidrIpv4\": \"0.0.0.0/0\",\n            \"Description\": \"HTTP or HTTPS for installation and artifacts\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-web-80\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-09a3c976a6a925952\"\n        },\n        {\n            \"SecurityGroupRuleId\": \"sgr-0c0f6fdf5ee43d180\",\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": true,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 5432,\n            \"ToPort\": 5432,\n            \"ReferencedGroupInfo\": {\n                \"GroupId\": \"sg-0622ad42cefbb6b38\",\n                \"UserId\": \"[AWS_ACCOUNT_ID_OCULTO]\"\n            },\n            \"Description\": \"PostgreSQL only to the private RDS security group\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-ec2-postgres\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-0c0f6fdf5ee43d180\"\n        },\n        {\n            \"SecurityGroupRuleId\": \"sgr-0902c70576fa9e6fc\",\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": false,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 3000,\n            \"ToPort\": 3000,\n            \"CidrIpv4\": \"[SSH_CIDR_OCULTO]\",\n            \"Description\": \"API from an approved IPv4 host\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-api-[IP_ALUNO_OCULTO]-32\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-0902c70576fa9e6fc\"\n        },\n        {\n            \"SecurityGroupRuleId\": \"sgr-093ef5bfd93c88a78\",\n            \"GroupId\": \"sg-04c0129a3f542812b\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": false,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 22,\n            \"ToPort\": 22,\n            \"CidrIpv4\": \"[SSH_CIDR_OCULTO]\",\n            \"Description\": \"SSH from the approved student IPv4 host\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-ssh\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-093ef5bfd93c88a78\"\n        },\n        {\n            \"SecurityGroupRuleId\": \"sgr-0d1aae7a6704f7969\",\n            \"GroupId\": \"sg-0622ad42cefbb6b38\",\n            \"GroupOwnerId\": \"[AWS_ACCOUNT_ID_OCULTO]\",\n            \"IsEgress\": false,\n            \"IpProtocol\": \"tcp\",\n            \"FromPort\": 5432,\n            \"ToPort\": 5432,\n            \"ReferencedGroupInfo\": {\n                \"GroupId\": \"sg-04c0129a3f542812b\",\n                \"UserId\": \"[AWS_ACCOUNT_ID_OCULTO]\"\n            },\n            \"Description\": \"PostgreSQL only from the API EC2 security group\",\n            \"Tags\": [\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                },\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-rds-postgres\"\n                }\n            ],\n            \"SecurityGroupRuleArn\": \"arn:aws:ec2:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:security-group-rule/sgr-0d1aae7a6704f7969\"\n        }\n    ]\n}\n"
+}
+
+CAPTURA profile-effective
+{
+  "started": "2026-09-29T09:33:42-03:00",
+  "finished": "2026-09-29T09:33:44-03:00",
+  "command": [
+    "aws",
+    "iam",
+    "get-instance-profile",
+    "--instance-profile-name",
+    "LabInstanceProfile",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "b0c10785142780d112fed8912cd437e35fcdf542bd440281ea631615fbce7436",
+  "sanitized_output": "{\n    \"InstanceProfile\": {\n        \"Path\": \"/\",\n        \"InstanceProfileName\": \"LabInstanceProfile\",\n        \"InstanceProfileId\": \"AIPAYLMR6XKJQRHG5XH5K\",\n        \"Arn\": \"arn:aws:iam::[AWS_ACCOUNT_ID_OCULTO]:instance-profile/LabInstanceProfile\",\n        \"CreateDate\": \"2026-09-29T01:55:38+00:00\",\n        \"Roles\": [\n            {\n                \"Path\": \"/\",\n                \"RoleName\": \"LabRole\",\n                \"RoleId\": \"AROAYLMR6XKJ7BMHEW5OB\",\n                \"Arn\": \"arn:aws:iam::[AWS_ACCOUNT_ID_OCULTO]:role/LabRole\",\n                \"CreateDate\": \"2026-09-29T01:55:19+00:00\",\n                \"AssumeRolePolicyDocument\": {\n                    \"Version\": \"2012-10-17\",\n                    \"Statement\": [\n                        {\n                            \"Effect\": \"Allow\",\n                            \"Principal\": {\n                                \"AWS\": \"arn:aws:iam::[AWS_ACCOUNT_ID_OCULTO]:role/LabRole\",\n                                \"Service\": [\n                                    \"cloudformation.amazonaws.com\",\n                                    \"kms.amazonaws.com\",\n                                    \"elasticmapreduce.amazonaws.com\",\n                                    \"resource-groups.amazonaws.com\",\n                                    \"ec2.application-autoscaling.amazonaws.com\",\n                                    \"elasticbeanstalk.amazonaws.com\",\n                                    \"redshift.amazonaws.com\",\n                                    \"s3.amazonaws.com\",\n                                    \"eks-fargate-pods.amazonaws.com\",\n                                    \"states.amazonaws.com\",\n                                    \"ecs.amazonaws.com\",\n                                    \"sagemaker.amazonaws.com\",\n                                    \"ssm.amazonaws.com\",\n                                    \"batch.amazonaws.com\",\n                                    \"autoscaling.amazonaws.com\",\n                                    \"secretsmanager.amazonaws.com\",\n                                    \"scheduler.amazonaws.com\",\n                                    \"kinesisanalytics.amazonaws.com\",\n                                    \"cognito-idp.amazonaws.com\",\n                                    \"deepracer.amazonaws.com\",\n                                    \"cloudtrail.amazonaws.com\",\n                                    \"events.amazonaws.com\",\n                                    \"glue.amazonaws.com\",\n                                    \"logs.amazonaws.com\",\n                                    \"firehose.amazonaws.com\",\n                                    \"iotevents.amazonaws.com\",\n                                    \"sns.amazonaws.com\",\n                                    \"ecs-tasks.amazonaws.com\",\n                                    \"elasticfilesystem.amazonaws.com\",\n                                    \"iotanalytics.amazonaws.com\",\n                                    \"iot.amazonaws.com\",\n                                    \"codecommit.amazonaws.com\",\n                                    \"rekognition.amazonaws.com\",\n                                    \"elasticloadbalancing.amazonaws.com\",\n                                    \"lambda.amazonaws.com\",\n                                    \"application-autoscaling.amazonaws.com\",\n                                    \"dynamodb.amazonaws.com\",\n                                    \"databrew.amazonaws.com\",\n                                    \"credentials.iot.amazonaws.com\",\n                                    \"pipes.amazonaws.com\",\n                                    \"kinesis.amazonaws.com\",\n                                    \"backup.amazonaws.com\",\n                                    \"forecast.amazonaws.com\",\n                                    \"codewhisperer.amazonaws.com\",\n                                    \"sqs.amazonaws.com\",\n                                    \"servicecatalog.amazonaws.com\",\n                                    \"eks.amazonaws.com\",\n                                    \"rds.amazonaws.com\",\n                                    \"codedeploy.amazonaws.com\",\n                                    \"athena.amazonaws.com\",\n                                    \"apigateway.amazonaws.com\",\n                                    \"ec2.amazonaws.com\"\n                                ]\n                            },\n                            \"Action\": \"sts:AssumeRole\"\n                        }\n                    ]\n                }\n            }\n        ],\n        \"Tags\": []\n    }\n}\n"
+}
+
+CAPTURA root-volume
+{
+  "started": "2026-09-29T09:33:44-03:00",
+  "finished": "2026-09-29T09:33:46-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-volumes",
+    "--volume-ids",
+    "vol-0f6c2d50bfc53d380",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "c4ddc69409b16e2f8ea298c8f8f1e4630077631c2fe7f6d53600f95c84d00a29",
+  "sanitized_output": "{\n    \"Volumes\": [\n        {\n            \"AvailabilityZoneId\": \"use1-az4\",\n            \"Iops\": 3000,\n            \"Tags\": [\n                {\n                    \"Key\": \"Owner\",\n                    \"Value\": \"6325231\"\n                },\n                {\n                    \"Key\": \"Name\",\n                    \"Value\": \"prova-6325231-api-root\"\n                },\n                {\n                    \"Key\": \"Project\",\n                    \"Value\": \"prova-primeiro-bimestre-devops\"\n                },\n                {\n                    \"Key\": \"Environment\",\n                    \"Value\": \"learner-lab\"\n                }\n            ],\n            \"VolumeType\": \"gp3\",\n            \"MultiAttachEnabled\": false,\n            \"Throughput\": 125,\n            \"Operator\": {\n                \"Managed\": false,\n                \"HiddenByDefault\": false\n            },\n            \"VolumeId\": \"vol-0f6c2d50bfc53d380\",\n            \"Size\": 8,\n            \"SnapshotId\": \"snap-04f5891ea58eca09c\",\n            \"AvailabilityZone\": \"us-east-1a\",\n            \"State\": \"in-use\",\n            \"CreateTime\": \"2026-09-29T12:27:17.515000+00:00\",\n            \"Attachments\": [\n                {\n                    \"DeleteOnTermination\": true,\n                    \"EbsCardIndex\": 0,\n                    \"VolumeId\": \"vol-0f6c2d50bfc53d380\",\n                    \"InstanceId\": \"i-0f4b59a8181537b78\",\n                    \"Device\": \"/dev/xvda\",\n                    \"State\": \"attached\",\n                    \"AttachTime\": \"2026-09-29T12:27:17+00:00\"\n                }\n            ],\n            \"Encrypted\": true,\n            \"KmsKeyId\": \"arn:aws:kms:us-east-1:[AWS_ACCOUNT_ID_OCULTO]:key/426bd43b-5138-4a6e-9c4e-bde7172bcd26\"\n        }\n    ]\n}\n"
+}
+
+CAPTURA cpu-credits
+{
+  "started": "2026-09-29T09:33:46-03:00",
+  "finished": "2026-09-29T09:33:48-03:00",
+  "command": [
+    "aws",
+    "ec2",
+    "describe-instance-credit-specifications",
+    "--instance-ids",
+    "i-0f4b59a8181537b78",
+    "--profile",
+    "default",
+    "--region",
+    "us-east-1",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0,
+  "raw_sha256": "2b0f635de4b357a930100b3febefffcffba869399e91a520fa89426b1319391a",
+  "sanitized_output": "{\n    \"InstanceCreditSpecifications\": [\n        {\n            \"InstanceId\": \"i-0f4b59a8181537b78\",\n            \"CpuCredits\": \"standard\"\n        }\n    ]\n}\n"
+}
+
+Conferidos6rulesexatas:EC2 ingress22/3000IPaluno/32, RDS5432refSGEC2;EC2egress
+80/443CIDR0/0e5432refSGRDS;RDSsemegressiniciada. SemruleALLOUT/IPv6 extra.
+EC2running/t2micro/AMIfixada/public0/IPoutput/SGEC2único;IMDSv2required/hop1;
+root8GiBgp3/encrypted/deleteOnTermination,in-use;CPUstandard/keyvockey/Profile
+LabInstanceProfile comLabRole existentes.Tagsem19recursos+rootvolume conferidas.
+StatuschecksEC2capturados;estadoinstance/runningnão provaDocker/serviçoAPI.
+
+### T25 — revalidação bloqueada, 29/09/2026
+
+Consulta STS0: mesma conta aprovada/default/voclabs/us-east-1. ConsultaEC2
+exit254: UnauthorizedOperation/explicit deny/voc-cancel-cred. Não foi possível
+revalidar SG/RDS na tentativa atual; consultas T23 acima são históricas.
+Verificador exit1 antes de HTTP/SQL/restart/mutação. Capturas em api-aws.txt.
+Renovar perfil local default; sem alterar IAM/SCP/roles/SG para contornar.
+
+### T25 — bloqueio resolvido e segurança revalidada, 29/09/2026
+
+Credenciais atualizadas/default/voclabs/mesma conta/us-east-1. EC2parada foi
+iniciada sem recriar, agora running/okok/novoIP54.234.84.228. RDS available/
+PG16.15/dbt3micro/private/encrypted, mesmaVPC/duasprivadas/duasAZs. SGEC2
+22/3000 sóIPaluno32/egress80e4430/0 e5432sóSGRDS; SGRDS5432sóSGEC2/sem egress.
+Guardas exactas passaram antes de HTTP/SQL/restart. UID1000/sóAPIcontainer,
+CA/rejectUnauthorizedtrue/TLSv1.3/endpointRDSreal. Auditoria/state23managed/
+DDBlockliberado e recuperação em aws-retomada-t25.txt. Positivo0/negativo1
+esperado/limpeza e sentinela preservadas em api-aws.txt/rds-crud.txt. SemnovoIAM/
+SG/keypair/provisionamento/destroy; IPorigem/segredos ocultados, perfilLabpreservado.

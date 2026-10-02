@@ -1,0 +1,25 @@
+T06 — dependências reais
+Data: 2026-09-28T16:16:28-03:00
+Node: v24.21.0
+npm: 11.19.0
+PostgreSQL de teste: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+$ npm --prefix app install --ignore-scripts --no-fund
+
+added 82 packages, and audited 83 packages in 2s
+
+found 0 vulnerabilities
+
+EXIT CODE: 0
+$ npm --prefix app ci --ignore-scripts --no-fund
+
+added 82 packages, and audited 83 packages in 1s
+
+found 0 vulnerabilities
+
+EXIT CODE: 0
+$ npm --prefix app ls --depth=0
+prova-primeiro-bimestre-devops@0.1.0 /home/andreyh/Área de trabalho/PROVA ALE/prova-primeiro-bimestre-devops/app
+├── express@5.2.1
+└── pg@8.23.0
+
+EXIT CODE: 0
