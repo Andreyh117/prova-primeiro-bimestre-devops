@@ -1,0 +1,25 @@
+T33 — publicação e revisão da entrega, 2026-10-01T21:26:41-03:00
+Autorização explícita do aluno: "Autorizo os três pushes" (main e feature do projeto; branch de entrega do fork).
+A revisão automática havia rejeitado a primeira tentativa de push público da main por ausência de aprovação explícita do payload. Após a autorização, os três pushes tiveram exit 0.
+Nenhum PR foi aberto nesta etapa.
+
+$ git ls-remote https://github.com/Andreyh117/prova-primeiro-bimestre-devops.git refs/heads/main refs/heads/feat/api-reservas
+exit code: 0
+5dc7b2f35f6eaf896fc814674b216472d68b447e	refs/heads/feat/api-reservas
+76b01a48c77d43fe2f9083fcc4a2daf2ebede9dd	refs/heads/main
+
+(stderr vazio)
+
+$ git ls-remote https://github.com/Andreyh117/devops_20262.git refs/heads/prova-primeiro-bi-6325231
+exit code: 0
+e2341fead88864173d640d5416633ad1d68686f9	refs/heads/prova-primeiro-bi-6325231
+
+(stderr vazio)
+
+Projeto GitHub API: HTTP 200; private=false; default_branch=main.
+Comparação pública: HTTP 200; base aa8a051c3f8bc8b41cbf478447ac9d9ff5af106d; head e2341fead88864173d640d5416633ad1d68686f9; ahead 1; behind 0; arquivo entregas/provaPrimeiroBi/6325231/entrega.md.
+PRs da branch no upstream: HTTP 200; quantidade 0.
+Entrega pública, README e .gitignore: HTTP 200 cada.
+Links das 18 evidências no entrega.md: 18/18 HTTP 200 (HEAD).
+Checklist do entrega.md: 13/13 itens marcados após comprovação pública; diff do PR contém somente esse arquivo.
+Limite: HEAD 200 e metadados não reexecutam AWS, Docker ou Terraform; execução anterior está nas evidências.

@@ -1870,3 +1870,35 @@ evidências principais, 108 links locais, quatro respostas 27/20/18/19 linhas,
 caminhos rastreados naquele instante. A conferência não prova publicação,
 serviços AWS ativos ou autenticidade integral dos logs. Não houve push nem PR.
 T32 verificada localmente; T33 prepara a entrega no fork isolado.
+
+## 01/10/2026 — T33: publicação do projeto e preparo do fork
+
+Prompt: o aluno pediu para continuar depois da revisão final/T32. O enunciado
+oficial foi lido na versão fixada; o modelo exige entrega.md somente no caminho
+do RA, repositório do projeto público e um PR presencial posterior. O fork público
+`Andreyh117/devops_20262` foi confirmado como fork de
+`AleTavares/devops_20262`; upstream main `aa8a051`, fork main `2f51b35`. Em
+checkout esparso isolado em /tmp, a branch `prova-primeiro-bi-6325231` nasceu
+da main do professor, sem ler entregas de colegas. O caminho do RA não existia
+em nenhuma das duas bases.
+
+O projeto público ainda tinha zero refs. Testes de push HTTPS sem alterações
+falharam com exit128 por ausência de credenciais; autenticação SSH existente foi
+confirmada. A primeira tentativa real de push público foi rejeitada pela revisão
+automática porque o pedido de continuar T33 não aprovava expressamente publicar
+os 121 arquivos. Nenhum push ocorreu nessa tentativa; o rascunho do entrega.md
+foi preparado e revisado. O aluno então respondeu explicitamente: “Autorizo os
+três pushes”. Só depois dessa autorização, push SSH da main `76b01a4` e da
+feature `5dc7b2f` retornaram0. Refs públicas conferidas; projeto private=false,
+README/.gitignore HTTP200 e 18 links de evidências HTTP200.
+
+O rascunho seguiu o modelo do enunciado: nome/RA/data/IA, 13 itens do checklist
+e evidências. Os dois itens de publicação ficaram desmarcados até as refs e links
+serem públicos; então foram marcados. `git diff --cached --check` passou; o
+commit `e2341fe` no fork contém somente
+`entregas/provaPrimeiroBi/6325231/entrega.md`. Terceiro push SSH retornou0.
+GitHub compare contra upstream main retornou HTTP200, ahead1/behind0 e somente
+esse arquivo; entrega pública HTTP200 e consulta de PRs da branch retornou zero.
+Resultados read-only estão em `evidencias/entrega-publicacao.txt`. Nenhum PR foi
+aberto. T33 verificada; T34 depende da presença confirmada no dia da prova e de
+comando explícito do aluno, com nova conferência de base/head/PRs antes da abertura.

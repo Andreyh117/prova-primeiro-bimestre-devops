@@ -682,3 +682,20 @@ que deve ser conferido no grafo e com worktree limpa após versionar estas notas
 Próxima T33: preparar entrega.md no fork da disciplina em checkout isolado e
 conferir publicação/links/base/head/diff; abertura do único PR é T34, presencial.
 Nenhum push/PR ocorreu na T32. Não executar T33/T34 junto com esta etapa.
+
+## Estado mais recente — T33 preparada e publicada em 01/10/2026
+
+Aluno autorizou explicitamente os três pushes depois de rejeição da revisão
+automática à publicação pública sem aprovação específica. Projeto publicou
+`main` em `76b01a4` e `feat/api-reservas` em `5dc7b2f`; API GitHub confirmou
+private=false/README/.gitignore 200, 18 links da entrega HTTP200. Checkout
+esparso isolado do fork gerou `prova-primeiro-bi-6325231` a partir de upstream
+main `aa8a051`; commit `e2341fe` contém só
+`entregas/provaPrimeiroBi/6325231/entrega.md`. Branch pública conferida e
+comparação GitHub: ahead1/behind0, um arquivo. Consulta de PRs da branch: zero.
+`evidencias/entrega-publicacao.txt` guarda consultas/limites. T33 e R01
+verificados; R26/R27 aguardam o PR presencial T34. A data informada é
+01/10/2026, mas a presença no dia da prova não foi confirmada nesta etapa.
+Não abrir PR automaticamente; antes, revalidar base/head/diff/único PR e obter
+comando explícito do aluno presencialmente. Não adicionar commits à branch do
+PR depois de aberto.
