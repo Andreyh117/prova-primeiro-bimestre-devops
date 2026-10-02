@@ -7,17 +7,31 @@
 **Data de entrega:** 01/10/2026
 
 Projeto individual de uma API Node.js/Express para criar, listar, consultar,
-atualizar e excluir reservas, persistindo em PostgreSQL. A entrega final terá
-Docker/Compose local e EC2/RDS no AWS Academy Learner Lab, usando Terraform
-modularizado com state S3 e locking DynamoDB, evidências reais e relatório.
+atualizar e excluir reservas, persistindo em PostgreSQL. Docker/Compose local,
+EC2/RDS no AWS Academy Learner Lab, Terraform modularizado com state S3 e
+locking DynamoDB foram executados e registrados nas evidências abaixo.
 
-A URL configurada no origin local é
-`https://github.com/Andreyh117/prova-primeiro-bimestre-devops.git`.
-Existência, acesso público e identidade do proprietário do remote ainda não
-foram verificados. Nome completo, RA e data de entrega acima foram informados
-pelo aluno em 28/09/2026.
+O [repositório público do projeto](https://github.com/Andreyh117/prova-primeiro-bimestre-devops)
+foi consultado sem autenticação em 01/10/2026 (HTTP 200). O `origin` local aponta
+para esse endereço, mas `git ls-remote origin` retornou zero refs: os commits
+locais ainda não foram publicados. Nome completo, RA e data de entrega acima
+foram informados pelo aluno em 28/09/2026.
 
-## Estado real
+## Situação atual para a entrega
+
+T01–T30A foram verificadas em seus ambientes. O aluno revisou e aprovou as
+quatro respostas de [relatorio.md](relatorio.md) em 01/10/2026. O CRUD foi
+comprovado localmente e na EC2/RDS; depois, a infraestrutura principal e o
+backend foram removidos mediante autorizações separadas. A T31 verificou a
+entrega local, links, evidências e Git; o resultado está no checklist abaixo.
+Merge, publicação do projeto e PR da disciplina continuam em T32–T34, sem
+execução antecipada.
+
+## Histórico de execução
+
+Os registros a seguir preservam o estado observado em cada etapa. Indicações
+de próxima tarefa ou recurso pendente referem-se à data do registro, não ao
+estado atual resumido acima.
 
 Em 29/09/2026, T01–T17 foram verificadas (T17 somente local). O commit inicial `21cb5f0` está em
 `main` e o desenvolvimento segue em `feat/api-reservas`. CRUD completo, /health
@@ -142,7 +156,24 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [RDS AWS T23](evidencias/aws-rds.txt): available/PostgreSQL16.15/db.t3.micro, privado/encriptado e grupo nas duas privadas; SQL pendente.
 - [Segurança AWS T23](evidencias/aws-seguranca.txt): EC2 running/ok/ok, IMDSv2/disco/profile e seis regras efetivas aprovadas.
 - [Outputs/state T23](evidencias/terraform-outputs.txt): outputs sem credenciais, objeto S3 real/versionado/AES256, lock liberado e plano posterior0/No changes.
+- [Deploy T24](evidencias/ec2-deploy.txt): imagem, migração no RDS, TLS, serviço, reboot e falhas/correções reais.
+- [Saúde AWS T24](evidencias/health-aws.txt): respostas HTTP 200 na EC2.
+- [Retomada T25](evidencias/aws-retomada-t25.txt): credenciais renovadas, EC2 iniciada e outputs atualizados.
+- [CRUD AWS T25](evidencias/api-aws.txt): seis rotas, teste positivo e negativo com limpeza própria.
+- [SQL e persistência RDS T25](evidencias/rds-crud.txt): SQL por TLS e reserva preservada após reinício da API.
+- [Revisão de destruição T27](evidencias/teardown-revisao.txt): plano, política de snapshot e autorização específica.
+- [Destroy principal T28](evidencias/terraform-destroy.txt): aplicação do plano autorizado, 23 recursos destruídos.
+- [Auditoria após destroy T28](evidencias/aws-pos-destroy.txt): state vazio e ausência dos recursos em consultas AWS.
+- [Limpeza backend T29/T30](evidencias/backend-teardown.txt): seis versões S3, quatro recursos bootstrap e bucket removidos e conferidos.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
+- [Relatório aprovado](relatorio.md): quatro respostas dissertativas e IA identificada no início.
+- [Checklist local T31](evidencias/entrega-checklist.txt): estrutura, links, Git, segredos e limites da verificação.
+
+A verificação local de T31 usa `python3 scripts/verify-delivery.py --pre-merge`.
+Depois do merge T32, executar `python3 scripts/verify-delivery.py` sem essa opção:
+o modo final deve falhar enquanto o merge não estiver comprovado. O script lê
+arquivos e Git; não executa AWS, Docker, `apply`, `destroy`, merge, push ou PR.
+A publicação e os links externos serão conferidos separadamente antes do PR.
 
 ## Executar os testes disponíveis
 

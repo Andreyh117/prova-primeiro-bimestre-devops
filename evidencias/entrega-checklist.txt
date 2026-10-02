@@ -1,0 +1,78 @@
+T31 — checklist de entrega local, 01/10/2026
+Escopo: somente leitura de arquivos, Git e URLs públicas; sem AWS, Docker, merge, push ou PR.
+T30A: aluno revisou e aprovou o relatório em 01/10/2026.
+Primeira execução de verify-delivery.py --pre-merge: exit 1 por falso positivo do parser de links em código Python dentro de cerca Markdown.
+Correção: ignorar cercas e código inline; nova execução abaixo é a captura efetiva.
+Início da captura: 2026-10-01T21:05:39-03:00
+
+VERIFICADOR ANTES DO MERGE
+Comando: python3 scripts/verify-delivery.py --pre-merge
+Exit code real: 0
+stdout:
+OK — Arquivos e evidências: 27 arquivos e 21 evidências presentes (conteúdo exige revisão humana)
+OK — Identidade: nome, RA e data conferidos nos documentos locais
+OK — Relatório: quatro respostas com 27/20/18/19 linhas; revisão pessoal aprovada em T30A
+OK — Links locais: 108 links locais existentes; links externos exigem conferência separada
+OK — Histórico Git: 25 commits convencionais; 24 exclusivos da feature; merge reservado a T32
+OK — Proteção de segredos: 117 caminhos rastreados; nomes proibidos e assinaturas de chave não encontrados
+Pré-merge T31 aprovado localmente. Merge, push, links públicos e PR continuam em etapas posteriores.
+stderr:
+(vazio)
+
+NEGATIVO CONTROLADO: MERGE AINDA AUSENTE
+Comando: python3 scripts/verify-delivery.py
+Exit code real: 1
+stdout:
+OK — Arquivos e evidências: 27 arquivos e 21 evidências presentes (conteúdo exige revisão humana)
+OK — Identidade: nome, RA e data conferidos nos documentos locais
+OK — Relatório: quatro respostas com 27/20/18/19 linhas; revisão pessoal aprovada em T30A
+OK — Links locais: 108 links locais existentes; links externos exigem conferência separada
+FALHOU — Histórico Git: feature ainda não integrada à main; merge T32 pendente
+OK — Proteção de segredos: 117 caminhos rastreados; nomes proibidos e assinaturas de chave não encontrados
+Verificação reprovada: 1 item(ns). Nenhum recurso foi alterado.
+stderr:
+(vazio)
+
+FORMATAÇÃO DO DIFF
+Comando: git diff --check
+Exit code real: 0
+stdout:
+(vazio)
+stderr:
+(vazio)
+
+REFS DO REPOSITÓRIO DO PROJETO
+Comando: git ls-remote origin
+Exit code real: 0
+stdout:
+(vazio)
+stderr:
+(vazio)
+
+CONSULTA PÚBLICA GITHUB API
+HTTP status real: 200
+Campos não sensíveis: {"full_name": "Andreyh117/prova-primeiro-bimestre-devops", "private": false, "default_branch": "main", "size": 0, "html_url": "https://github.com/Andreyh117/prova-primeiro-bimestre-devops"}
+
+LINKS EXTERNOS DO README (HEAD, sem autenticação)
+15/15 URLs únicas retornaram HTTP 200.
+200 https://aws.amazon.com/dynamodb/pricing/
+200 https://aws.amazon.com/s3/pricing/
+200 https://developer.hashicorp.com/terraform/language/backend/s3
+200 https://developer.hashicorp.com/terraform/language/block/removed
+200 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html
+200 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html
+200 https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html
+200 https://docs.aws.amazon.com/cli/latest/reference/s3api/create-bucket.html
+200 https://docs.aws.amazon.com/linux/al2023/ug/ec2.html
+200 https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html
+200 https://docs.docker.com/engine/storage/volumes/
+200 https://github.com/Andreyh117/prova-primeiro-bimestre-devops
+200 https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/db_instance.html.markdown
+200 https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/instance.html.markdown
+200 https://raw.githubusercontent.com/hashicorp/terraform-provider-aws/v6.65.0/website/docs/r/security_group.html.markdown
+
+Revisão de evidências existentes: api-aws.txt e rds-crud.txt contêm tentativa bloqueada e atualização AWS positiva; terraform-destroy.txt e backend-teardown.txt registram exclusões autorizadas; docker-run.txt e compose-persistencia.txt guardam execução local real.
+O verificador confere presença/metadata, links locais, histórico e assinaturas conhecidas de segredo; não reexecuta os testes anteriores nem prova por si só a autenticidade das evidências.
+Publicação do conteúdo, links para arquivos no GitHub, merge T32 e PR T34 continuam pendentes. git ls-remote sem refs não é push.
+Fim da captura: 2026-10-01T21:05:41-03:00
+Resultado da auditoria T31: PASSOU para o estágio pré-merge; verificador final ainda falha somente pelo merge pendente.

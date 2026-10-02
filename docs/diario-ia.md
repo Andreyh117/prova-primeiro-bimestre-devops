@@ -1823,3 +1823,32 @@ nome. Cópias privadas dos states T28 preservadas/hash conferido. Evidência
 sanitizada, comandos/resultados e limites em backend-teardown.txt. T29/T30
 verificadas; R23/R31 fechados. Relatório factual atualizado com resultado
 real, mas experiência pessoal continua pendente T30A. Sem push/merge/PR.
+
+## 01/10/2026 — revisão pessoal do relatório e início T31
+
+O aluno informou: “revisei o relatório e está do meu agrado, vamos ao próximo
+tópico”. Antes do aceite, as quatro respostas foram conferidas com o enunciado
+e as evidências: 27/20/18/19 linhas de conteúdo, IA identificada no início e
+`git diff --check` sem erros. T30A foi encerrada pela revisão pessoal; T31
+iniciou para verificar a entrega. Nenhum merge, push ou PR foi executado nesta
+revisão.
+
+## 01/10/2026 — T31: checklist local antes do merge
+
+Prompt: após aprovar o relatório, o aluno pediu o próximo tópico da preparação
+do PR. T31 criou `scripts/verify-delivery.py` (Python stdlib, somente leitura) e
+atualizou o resumo e índice do README. Primeira execução `--pre-merge` retornou
+1: o parser de links interpretou código Python em cerca Markdown como link. Foi
+corrigido para ignorar cercas e código inline; nova execução retornou 0. O modo
+final retornou 1 esperado porque `feat/api-reservas` ainda não foi integrada à
+`main`, sem simular conclusão do merge. Git diff --check retornou 0.
+
+Foram conferidos 27 arquivos exigidos, 21 evidências principais, quatro respostas
+com 27/20/18/19 linhas, 25 mensagens convencionais (24 commits exclusivos da
+feature), links locais existentes e 15 URLs externas únicas com HTTP 200.
+GitHub API pública confirmou `Andreyh117/prova-primeiro-bimestre-devops`,
+`private=false`, branch padrão main e size 0; `git ls-remote origin` retornou 0
+com zero refs. Repo público existe, conteúdo ainda não foi publicado.
+Revisão por leitura das evidências de Docker/Compose, CRUD RDS e teardown não
+reexecutou serviços nem chamadas AWS. Saídas, exit codes, limites e a falha inicial
+foram preservados em `evidencias/entrega-checklist.txt`. Sem merge/push/PR.

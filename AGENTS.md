@@ -652,3 +652,20 @@ States privados T28 mantidos fora do Git; logs privados0600, hashes e resumo
 sanitizado em backend-teardown.txt; R23/R31 verificados. Relatório factual
 atualizado. Próxima T30A: obter relato pessoal do aluno e sua revisão antes
 de T31; não inventar vivências. T31/T32/T33/PR ainda não feitos.
+
+## Estado mais recente — T30A/T31 verificadas em 01/10/2026
+
+O aluno revisou e aprovou as quatro respostas do relatório. T30A verificada;
+R24/R25 verificados. T31 criou `scripts/verify-delivery.py` e completou o resumo
+atual/índice de evidências do README. O script é apenas leitura: verifica
+estrutura, identidade, 4×10 linhas, links locais, commits convencionais, merge
+no modo final, caminhos rastreados e assinaturas conhecidas de chave. A primeira
+execução pré-merge falhou por falso link em bloco de código; parser corrigido.
+Pré-merge exit0; modo final exit1 esperado por merge T32 ausente. Consultas
+públicas: projeto GitHub `Andreyh117/prova-primeiro-bimestre-devops` visível,
+`private=false`, size0, `git ls-remote origin` zero refs; 15 links externos do
+README HTTP200. Evidência `evidencias/entrega-checklist.txt` com saídas reais,
+limites e auditoria de segredos. Nenhum teste API/Docker/Compose/AWS repetido,
+nenhum merge/push/PR. T31 verificada no escopo local; próxima T32 é merge
+`--no-ff` após commit/revisão do diff. Publicação/links GitHub T33 e abertura
+presencial única T34 continuam pendentes. R01/R02 seguem parciais até essas etapas.
