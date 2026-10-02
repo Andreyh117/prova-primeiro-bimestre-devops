@@ -699,3 +699,18 @@ verificados; R26/R27 aguardam o PR presencial T34. A data informada é
 Não abrir PR automaticamente; antes, revalidar base/head/diff/único PR e obter
 comando explícito do aluno presencialmente. Não adicionar commits à branch do
 PR depois de aberto.
+
+## Estado mais recente — T34 PR único aberto em 01/10/2026
+
+Aluno confirmou estar presencialmente e autorizou abrir o único PR da prova.
+Preflight: upstream main `aa8a051`, head do fork `e2341fe`, ahead1/behind0,
+apenas `entregas/provaPrimeiroBi/6325231/entrega.md`; nenhum PR anterior do
+autor com esse arquivo. CLI gh temporária em /tmp usou sessão pré-existente no
+chaveiro; nenhum token exposto. PR
+https://github.com/AleTavares/devops_20262/pull/267 criado em 01/10/2026
+-03 (UTC 02/10 00:40:43), aberto/não draft, um commit/um arquivo. Head ref
+conferido após abertura em `e2341fe`; não acrescentar commits ao PR.
+`evidencias/pr-entrega.txt` registra checagens reais; T34, R26/R27/R30
+verificados no instante da submissão. Revisão/CI/merge não afirmados. Nenhuma
+atividade adicional na branch do PR; qualquer atualização documental deste
+repositório do projeto é separada do fork e não deve mudar o head do PR.

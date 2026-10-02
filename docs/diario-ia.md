@@ -1902,3 +1902,30 @@ esse arquivo; entrega pública HTTP200 e consulta de PRs da branch retornou zero
 Resultados read-only estão em `evidencias/entrega-publicacao.txt`. Nenhum PR foi
 aberto. T33 verificada; T34 depende da presença confirmada no dia da prova e de
 comando explícito do aluno, com nova conferência de base/head/PRs antes da abertura.
+
+## 01/10/2026 — T34: abertura presencial do único PR
+
+Prompt: depois de confirmar o projeto alinhado ao enunciado, o aluno pediu para
+continuar. Em 01/10/2026 (-03), o aluno respondeu expressamente “Sim, estou
+presencialmente; abrir” à revisão de base/head/diff do único PR. Antes da
+abertura, GitHub compare confirmou upstream main `aa8a051`, head `e2341fe`,
+ahead1/behind0/somente entrega.md. A busca dos PRs anteriores do próprio autor
+mostrou sete PRs de aulas, nenhum com o arquivo desta prova; não havia PR da
+branch da prova.
+
+A integração GitHub sugerida não estava instalada; `gh` não estava no PATH.
+O pacote CLI do Ubuntu foi extraído somente em /tmp, sem instalação global, e
+`gh auth status` confirmou sessão já existente no chaveiro para Andreyh117, com
+escopos adequados; token não foi impresso. Título e corpo do PR foram preparados
+fora dos repositórios. `gh pr create` com repo/base/head/título/body-file
+explícitos retornou0 e URL https://github.com/AleTavares/devops_20262/pull/267.
+
+A consulta pública pós-abertura confirmou PR aberto/não rascunho, base
+AleTavares/devops_20262:main `aa8a051`, head
+Andreyh117/devops_20262:prova-primeiro-bi-6325231 `e2341fe`, um commit e só
+`entregas/provaPrimeiroBi/6325231/entrega.md`. O PR foi criado em
+2026-10-02T00:40:43Z, equivalente a 01/10/2026 às 21:40:43 -03. A única
+consulta de PRs da branch retornou #267; ref da branch permaneceu no mesmo SHA.
+Evidência sanitizada em `evidencias/pr-entrega.txt`. Nenhum commit novo foi
+feito na branch do PR depois da abertura. Revisão, CI e merge ainda dependem do
+fluxo do professor; não são alegados como concluídos.

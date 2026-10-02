@@ -1,0 +1,18 @@
+T34 — PR único da prova, auditoria após abertura em 2026-10-01T21:42:04-03:00
+O aluno confirmou presencialmente em 01/10/2026 e autorizou abrir agora o único PR.
+Preflight anterior: base aa8a051, head e2341fe, ahead1/behind0, só entrega.md; PRs da branch0; nenhum PR anterior do autor com o arquivo desta prova.
+Comando executado em /tmp/prova-t33.8b6us4: gh-extracted/usr/bin/gh pr create --repo AleTavares/devops_20262 --base main --head Andreyh117:prova-primeiro-bi-6325231 --title '[Prova Primeiro Bimestre] RA: 6325231 - Andreyh Rodrigues de Souza' --body-file /tmp/prova-t33.8b6us4/pr-body.md
+Exit code observado: 0; URL retornada: https://github.com/AleTavares/devops_20262/pull/267
+
+GET /repos/AleTavares/devops_20262/pulls/267: HTTP 200
+URL: https://github.com/AleTavares/devops_20262/pull/267
+created_at UTC: 2026-10-02T00:40:43Z (01/10/2026 no horário local -03:00)
+state: open; draft: False; commits: 1; changed_files: 1
+title: [Prova Primeiro Bimestre] RA: 6325231 - Andreyh Rodrigues de Souza
+base: AleTavares/devops_20262:main aa8a051c3f8bc8b41cbf478447ac9d9ff5af106d
+head: Andreyh117/devops_20262:prova-primeiro-bi-6325231 e2341fead88864173d640d5416633ad1d68686f9
+GET /pulls/267/files: HTTP 200; arquivos: entregas/provaPrimeiroBi/6325231/entrega.md
+GET /pulls?state=all&head=Andreyh117:prova-primeiro-bi-6325231: HTTP 200; PRs: [267]
+git ls-remote head após abertura: e2341fead88864173d640d5416633ad1d68686f9	refs/heads/prova-primeiro-bi-6325231
+Corpo contém URL do projeto e caminho de entrega. Branch do PR não recebeu commit posterior.
+Status de revisão/CI/merge não é afirmado por esta auditoria.

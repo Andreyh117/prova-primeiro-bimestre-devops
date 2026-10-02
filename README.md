@@ -19,16 +19,16 @@ foram informados pelo aluno em 28/09/2026.
 
 ## Situação atual para a entrega
 
-T01–T33 foram verificadas em seus respectivos ambientes. O aluno revisou e
+T01–T34 foram verificadas em seus respectivos ambientes. O aluno revisou e
 aprovou as quatro respostas de [relatorio.md](relatorio.md) em 01/10/2026. O
 CRUD foi comprovado localmente e na EC2/RDS; depois, a infraestrutura principal
-e o backend foram removidos mediante autorizações separadas. A T31 verificou a
-entrega local; a T32 integrou a feature por merge `--no-ff` `bef4342`. Na T33,
-`main` e `feat/api-reservas` foram publicadas no repositório público do projeto,
-e o fork recebeu uma branch baseada na `main` atual do professor com somente o
-arquivo `entregas/provaPrimeiroBi/6325231/entrega.md`. Os 18 links de evidências
-responderam HTTP 200 e a comparação pública mostra 1 commit à frente, 0 atrás,
-um arquivo. O único PR permanece reservado à T34 presencial.
+e o backend foram removidos mediante autorizações separadas. A T32 integrou a
+feature por merge `--no-ff` `bef4342`; a T33 publicou o projeto e preparou a
+entrega no fork. Após confirmação presencial do aluno, o único
+[PR #267 da prova](https://github.com/AleTavares/devops_20262/pull/267) foi
+aberto em 01/10/2026 (-03:00), com 1 commit e somente
+`entregas/provaPrimeiroBi/6325231/entrega.md`. A branch do PR foi congelada em
+`e2341fe`; revisão, CI e merge são posteriores à submissão.
 
 ## Histórico de execução
 
@@ -173,7 +173,8 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Checklist local T31](evidencias/entrega-checklist.txt): estrutura, links, Git, segredos e limites da verificação antes do merge.
 - [Grafo e verificador Git T32](evidencias/git-log.txt): histórico real do merge e saída do verificador final.
 - [Branches e pais do merge T32](evidencias/git-branches.txt): refs, dois pais, ancestralidade e exit codes reais.
-- [Publicação e diff T33](evidencias/entrega-publicacao.txt): refs públicas, 18 links HTTP 200, comparação de um arquivo e nenhum PR aberto.
+- [Publicação e diff T33](evidencias/entrega-publicacao.txt): refs públicas, 18 links HTTP 200 e comparação anterior ao PR.
+- [PR único T34](evidencias/pr-entrega.txt): confirmação presencial, URL #267, base/head, único arquivo, commit congelado e consulta após abertura.
 
 A verificação local final usa `python3 scripts/verify-delivery.py`; após o merge
 T32, passou com 26 mensagens convencionais, branch preservada e dois pais no
