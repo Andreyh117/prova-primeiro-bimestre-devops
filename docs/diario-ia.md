@@ -1852,3 +1852,21 @@ com zero refs. Repo público existe, conteúdo ainda não foi publicado.
 Revisão por leitura das evidências de Docker/Compose, CRUD RDS e teardown não
 reexecutou serviços nem chamadas AWS. Saídas, exit codes, limites e a falha inicial
 foram preservados em `evidencias/entrega-checklist.txt`. Sem merge/push/PR.
+
+## 01/10/2026 — T32: merge local da feature na main
+
+Prompt: após revisar o relatório e concluir o checklist final, o aluno pediu o
+próximo passo. A feature `feat/api-reservas` estava limpa em `5dc7b2f` e
+`main` em `21cb5f0`; a ancestralidade foi conferida antes da integração.
+`git switch main` e `git merge --no-ff feat/api-reservas -m
+"chore(merge): integra API e infraestrutura em main"` retornaram 0. O merge
+real `bef4342` tem dois pais, `21cb5f0` e `5dc7b2f`; a ref da feature ficou
+no segundo pai. Grafo, branches, pais, ancestralidade e exit codes foram
+capturados em `evidencias/git-log.txt` e `evidencias/git-branches.txt`.
+
+`python3 scripts/verify-delivery.py` no modo final passou: 27 arquivos, 21
+evidências principais, 108 links locais, quatro respostas 27/20/18/19 linhas,
+26 mensagens convencionais e nenhuma assinatura conhecida de chave nos 119
+caminhos rastreados naquele instante. A conferência não prova publicação,
+serviços AWS ativos ou autenticidade integral dos logs. Não houve push nem PR.
+T32 verificada localmente; T33 prepara a entrega no fork isolado.

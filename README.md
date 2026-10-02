@@ -19,13 +19,14 @@ foram informados pelo aluno em 28/09/2026.
 
 ## Situação atual para a entrega
 
-T01–T30A foram verificadas em seus ambientes. O aluno revisou e aprovou as
-quatro respostas de [relatorio.md](relatorio.md) em 01/10/2026. O CRUD foi
-comprovado localmente e na EC2/RDS; depois, a infraestrutura principal e o
-backend foram removidos mediante autorizações separadas. A T31 verificou a
-entrega local, links, evidências e Git; o resultado está no checklist abaixo.
-Merge, publicação do projeto e PR da disciplina continuam em T32–T34, sem
-execução antecipada.
+T01–T32 foram verificadas em seus respectivos ambientes. O aluno revisou e
+aprovou as quatro respostas de [relatorio.md](relatorio.md) em 01/10/2026. O
+CRUD foi comprovado localmente e na EC2/RDS; depois, a infraestrutura principal
+e o backend foram removidos mediante autorizações separadas. A T31 verificou a
+entrega local. Na T32, a feature foi integrada à `main` por merge `--no-ff`
+`bef4342`, preservando a branch e o histórico; o verificador final passou.
+Publicação do projeto e preparação do PR seguem em T33, e a abertura presencial
+única do PR permanece em T34.
 
 ## Histórico de execução
 
@@ -167,13 +168,15 @@ Contrato completo em [specs/design.md](specs/design.md).
 - [Limpeza backend T29/T30](evidencias/backend-teardown.txt): seis versões S3, quatro recursos bootstrap e bucket removidos e conferidos.
 - [Auditoria Git](evidencias/git-auditoria.txt): snapshot anterior a T08 em dbcd6a1, com 4 commits reais/convencionais, feature comprovada e merge pendente; próximos marcos em specs/tasks.md.
 - [Relatório aprovado](relatorio.md): quatro respostas dissertativas e IA identificada no início.
-- [Checklist local T31](evidencias/entrega-checklist.txt): estrutura, links, Git, segredos e limites da verificação.
+- [Checklist local T31](evidencias/entrega-checklist.txt): estrutura, links, Git, segredos e limites da verificação antes do merge.
+- [Grafo e verificador Git T32](evidencias/git-log.txt): histórico real do merge e saída do verificador final.
+- [Branches e pais do merge T32](evidencias/git-branches.txt): refs, dois pais, ancestralidade e exit codes reais.
 
-A verificação local de T31 usa `python3 scripts/verify-delivery.py --pre-merge`.
-Depois do merge T32, executar `python3 scripts/verify-delivery.py` sem essa opção:
-o modo final deve falhar enquanto o merge não estiver comprovado. O script lê
-arquivos e Git; não executa AWS, Docker, `apply`, `destroy`, merge, push ou PR.
-A publicação e os links externos serão conferidos separadamente antes do PR.
+A verificação local final usa `python3 scripts/verify-delivery.py`; após o merge
+T32, passou com 26 mensagens convencionais, branch preservada e dois pais no
+commit de integração. O script lê arquivos e Git; não executa AWS, Docker,
+`apply`, `destroy`, merge, push ou PR. A publicação e os links externos serão
+conferidos separadamente antes do PR.
 
 ## Executar os testes disponíveis
 

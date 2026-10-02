@@ -669,3 +669,16 @@ limites e auditoria de segredos. Nenhum teste API/Docker/Compose/AWS repetido,
 nenhum merge/push/PR. T31 verificada no escopo local; próxima T32 é merge
 `--no-ff` após commit/revisão do diff. Publicação/links GitHub T33 e abertura
 presencial única T34 continuam pendentes. R01/R02 seguem parciais até essas etapas.
+
+## Estado mais recente — T32 merge local verificado em 01/10/2026
+
+Após T31 e revisão do aluno, `feat/api-reservas` limpa em `5dc7b2f` foi
+integrada à `main` por `git merge --no-ff` real, commit `bef4342`, pais
+`21cb5f0`/`5dc7b2f`. A feature permaneceu apontando para o segundo pai;
+ancestralidade exit0, verificador final exit0 com 26 mensagens convencionais.
+Evidências `git-log.txt`/`git-branches.txt` preservam comandos e saídas. R02 e
+T32 verificadas no Git local. A captura antecede o commit de documentação final,
+que deve ser conferido no grafo e com worktree limpa após versionar estas notas.
+Próxima T33: preparar entrega.md no fork da disciplina em checkout isolado e
+conferir publicação/links/base/head/diff; abertura do único PR é T34, presencial.
+Nenhum push/PR ocorreu na T32. Não executar T33/T34 junto com esta etapa.

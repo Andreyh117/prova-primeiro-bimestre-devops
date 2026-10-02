@@ -26,15 +26,17 @@ consultas de leitura e sonda local. T14 implementou bootstrap e validou plano
 real de cinco criações, sem apply/recurso criado; backend/locking ainda parciais.
 Nome, RA e entrega foram informados pelo aluno; T05 foi verificada com commit
 inicial e feature branch reais. Seis commits reais foram confirmados em T09;
-R02 permanece em andamento pelo merge pendente em T32. A captura T05 é histórica. Caminhos de evidência são
-planejados, exceto arquivos efetivamente criados e registrados em tasks/diário.
+A T32 integrou a feature na `main` por merge `--no-ff` `bef4342`, com dois
+pais e branch preservada. O verificador final contou 26 commits convencionais;
+R02 foi verificado localmente. A captura T05 é histórica. Caminhos de evidência
+posteriores estão registrados em tasks/diário.
 
 ## Matriz requisito → verificação → evidência → estado
 
 | ID / origem | Requisito e aceite observável | Verificação | Evidência esperada | Estado |
 |---|---|---|---|---|
 | R01 / P | Repositório próprio público `prova-primeiro-bimestre-devops`, README na raiz com nome completo, RA e descrição; estrutura `app/`, `infra/`, `evidencias/` e `relatorio.md` conforme enunciado. | Conferir arquivos e acesso público ao GitHub sem login; placeholders resolvidos antes da entrega. | README, URL pública e `evidencias/entrega-checklist.txt`. | em andamento |
-| R02 / P | Pelo menos seis commits reais usando Conventional Commits; feature branch e merge demonstráveis. | Contar commits, revisar mensagens e grafo; localizar commits exclusivos da feature e merge. | `evidencias/git-workflow-inicial.txt` (T05); `evidencias/git-auditoria.txt` (auditoria parcial); `evidencias/git-log.txt` e `evidencias/git-branches.txt` (final). | em andamento |
+| R02 / P | Pelo menos seis commits reais usando Conventional Commits; feature branch e merge demonstráveis. | Contar commits, revisar mensagens e grafo; localizar commits exclusivos da feature e merge. | `evidencias/git-workflow-inicial.txt` (T05); `evidencias/git-auditoria.txt` (auditoria parcial); `evidencias/git-log.txt` e `evidencias/git-branches.txt` (T32 real, merge `bef4342`, 26 commits convencionais). | verificado |
 | R03 / P+U | `.gitignore` protege node_modules, .env, .terraform, state/backups, PEM, planos binários e variáveis locais sensíveis; nenhum segredo rastreado. | `git check-ignore` em caminhos representativos e revisão de arquivos staged/rastreados, incluindo evidências. | `.gitignore` e `evidencias/segredos-checklist.txt`, sem segredos. | verificado |
 | R04 / P | API Node.js/Express com `id`, `cliente`, `data`, `status` e POST/GET `/reservas`, GET/PUT/DELETE `/reservas/:id`. | Criar, listar, buscar, atualizar e excluir a mesma reserva; verificar corpo e persistência. | `evidencias/api-local.txt`, `evidencias/api-aws.txt`. | verificado |
 | R05 / P | POST valida campos obrigatórios; GET por ID inexistente retorna 404. | Omitir cada obrigatório, enviar vazio/inválido e buscar ID ausente; não gravar entradas rejeitadas. As demais regras são decisões D01–D04. | Testes de integração e logs de CRUD. | verificado |

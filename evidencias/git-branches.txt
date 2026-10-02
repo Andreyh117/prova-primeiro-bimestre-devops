@@ -1,0 +1,39 @@
+T32 — merge Git local, captura real em 2026-10-01T21:11:37-03:00
+Sem push ou PR nesta captura.
+
+$ git status --short --branch
+exit code: 0
+stdout:
+## main...origin/main [gone]
+?? evidencias/git-log.txt
+
+$ git branch -vv
+exit code: 0
+stdout:
+  feat/api-reservas 5dc7b2f test(delivery): valida relatorio e checklist pre-merge
+* main              bef4342 [origin/main: gone] chore(merge): integra API e infraestrutura em main
+
+$ git rev-list --parents -n 1 main
+exit code: 0
+stdout:
+bef4342b2ff66bad31a83d53ee6257ad39544930 21cb5f0c19f2973c61c67f79543f22063853a04e 5dc7b2f35f6eaf896fc814674b216472d68b447e
+
+$ git rev-parse feat/api-reservas
+exit code: 0
+stdout:
+5dc7b2f35f6eaf896fc814674b216472d68b447e
+
+$ git show-ref --verify refs/heads/feat/api-reservas
+exit code: 0
+stdout:
+5dc7b2f35f6eaf896fc814674b216472d68b447e refs/heads/feat/api-reservas
+
+$ git merge-base --is-ancestor feat/api-reservas main
+exit code: 0
+stdout:
+(vazio)
+
+$ git diff --check
+exit code: 0
+stdout:
+(vazio)

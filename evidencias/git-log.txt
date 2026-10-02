@@ -1,0 +1,52 @@
+T32 — merge Git local, captura real em 2026-10-01T21:11:37-03:00
+Sem push ou PR nesta captura.
+Normalização editorial: removidos somente espaços finais de duas linhas ASCII do grafo Git.
+
+$ git log --graph --decorate --oneline --all
+exit code: 0
+stdout:
+*   bef4342 (HEAD -> main) chore(merge): integra API e infraestrutura em main
+|\
+| * 5dc7b2f (feat/api-reservas) test(delivery): valida relatorio e checklist pre-merge
+| * 2af1145 docs(teardown): registrar limpeza autorizada do backend
+| * 307d6f4 docs(teardown): registrar destroy principal e auditoria AWS
+| * 8c0979b docs(teardown): revisar plano e registrar autorização sem snapshot
+| * d0fe0e2 docs(teardown): registrar auditoria e bloqueio do plano
+| * 7b5c37e docs(relatorio): registrar base factual e adiar relato pessoal
+| * acb1f50 test(aws): comprova CRUD e persistência no RDS
+| * f3ec791 feat(deploy): implanta API na EC2 com TLS e systemd
+| * 4895f98 feat(infra): provisiona EC2 e RDS no Learner Lab
+| * 598e0d9 feat(infra): compoe root e valida backend remoto
+| * 76911e7 feat(ec2): implementa instancia e bootstrap sem segredos
+| * 14c2079 feat(rds): implementa banco privado e encriptado
+| * 7755f73 feat(security): restringe acessos da EC2 e do RDS
+| * 2645a5f feat(vpc): implementa rede publica e privada em duas AZs
+| * a9c3df8 fix(backend): recupera bootstrap bloqueado pelo SCP
+| * d6f4d25 feat(backend): adiciona bootstrap S3 e DynamoDB
+| * 4bd94d4 chore(aws): registra preflight do Learner Lab
+| * 30a2dac test(compose): verifica persistencia ao recriar containers
+| * 534f484 feat(compose): configura API e PostgreSQL com healthchecks
+| * 49dbd5e build(docker): adiciona imagem da API com usuario nao root
+| * 93d313c test(api): verifica persistencia apos reiniciar a API
+| * cbf2410 feat(api): completa CRUD e verificacao de saude
+| * dbcd6a1 feat: implementa criacao e consulta de reservas
+| * 99ffedd feat: adiciona schema e conexao PostgreSQL com testes reais
+| * bfa4241 docs: registra evidencias do inicio do workflow Git
+|/
+* 21cb5f0 docs: registra especificacao e preparacao da prova
+
+$ git rev-list --count --all
+exit code: 0
+stdout:
+27
+
+$ python3 scripts/verify-delivery.py
+exit code: 0
+stdout:
+OK — Arquivos e evidências: 27 arquivos e 21 evidências presentes (conteúdo exige revisão humana)
+OK — Identidade: nome, RA e data conferidos nos documentos locais
+OK — Relatório: quatro respostas com 27/20/18/19 linhas; revisão pessoal aprovada em T30A
+OK — Links locais: 108 links locais existentes; links externos exigem conferência separada
+OK — Histórico Git: 26 commits convencionais e merge --no-ff da feature comprovados
+OK — Proteção de segredos: 119 caminhos rastreados; nomes proibidos e assinaturas de chave não encontrados
+Estrutura local final aprovada. Publicação e PR exigem conferência separada.
